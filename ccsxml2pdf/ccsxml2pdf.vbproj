@@ -14,6 +14,9 @@
     <OptionInfer>On</OptionInfer>
     <NoWin32Manifest>False</NoWin32Manifest>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <SignAssembly>False</SignAssembly>
+    <DelaySign>False</DelaySign>
+    <ApplicationIcon>C:\paul\!icons\FatCow\FatCow-Hosting-ico\ICO\Page-White-Acrobat.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -33,15 +36,13 @@
     <DefineConstants>TRACE=1</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FastReport">
-      <HintPath>C:\Program Files\FastReports\FastReport.Net Demo\FastReport.dll</HintPath>
+    <Reference Include="FastReport, Version=1.6.19.0, Culture=neutral, PublicKeyToken=db7e5ce63278458c">
+      <Private>True</Private>
     </Reference>
     <Reference Include="FastReport.Bars">
-      <HintPath>C:\Program Files\FastReports\FastReport.Net Demo\FastReport.Bars.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FastReport.Editor">
-      <HintPath>C:\Program Files\FastReports\FastReport.Net Demo\FastReport.Editor.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -69,30 +70,38 @@
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ini.vb">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="MainForm.Designer.vb">
       <DependentUpon>MainForm.vb</DependentUpon>
     </Compile>
     <Compile Include="MainForm.vb" />
     <Compile Include="Program.vb" />
+    <Compile Include="Resource1.Designer.vb">
+      <DependentUpon>Resource1.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resource1.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource1.Designer.vb</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="STMT_email.frx">
+    <None Include="ccs_email.frx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="STMT_post.frx">
+    <None Include="ccs_post.frx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="STMT_salary.frx">
+    <None Include="ccs_salary.frx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.Targets" />
-  <PropertyGroup>
-    <PostBuildEvent>"$(SolutionDir)ILMerge\merge_all.bat" "$(SolutionDir)" "$(TargetPath)" $(ConfigurationName)</PostBuildEvent>
-  </PropertyGroup>
 </Project>

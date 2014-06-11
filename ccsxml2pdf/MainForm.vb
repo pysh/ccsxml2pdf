@@ -10,15 +10,30 @@
 Imports System.Drawing.Printing
 
 Public Partial Class MainForm
+	Public iniFile As New ini(IO.Path.ChangeExtension(Application.ExecutablePath, "ini"))
+	Public report1 As New FastReport.Report()
+	
+	Public Structure myPapperSource
+	    Public SourceID As Integer
+	    Public SourceName As String
+	    '	    SourceKind As PaperSourceKind
+	    
+	End Structure
+	
 	Public Sub New()
 		' The Me.InitializeComponent call is required for Windows Forms designer support.
 		Me.InitializeComponent()
-		
 		'
 		' TODO : Add constructor code after InitializeComponents
 		'
+		'Dim strLastPrinterRussianPost As String = iniFile.GetString("Printers", "Printer_RussianPost", "")
+		'Dim strLastPrinterEmail As String = iniFile.GetString("Printers", "Printer_Email", "")
+		'Dim strLastPrinterSalary As String = iniFile.GetString("Printers", "Printer_Salary", "")
 		FillPrinterList ()
+		
 	End Sub
+	
+	
 	
 	Sub FillPrinterList()
 		Dim PrinterName As String
@@ -26,6 +41,8 @@ Public Partial Class MainForm
 		For each PrinterName In System.Drawing.Printing.PrinterSettings.InstalledPrinters
 			cbPrinters.Items.Add(PrinterName)
 		Next PrinterName
+		PrinterName = iniFile.GetString("Settings", "Printer","")
+		cbPrinters.SelectedItem = PrinterName
 	End Sub
 	
 	Sub RegisterDataset()
@@ -42,11 +59,12 @@ Public Partial Class MainForm
 		report1.Load(strReportFileName)
 		report1.RegisterData(dataSet1)
 		WriteTrace ("XML загружен")
+		WriteLog("XML загружен", strXMLFileName)
 		Me.Refresh
 		report1.Design
 	End Sub
 	
-	
+
 	#Region "Drag'n'Drop"	
 	Sub ListView1DragDrop(sender As Object, e As DragEventArgs)
 		' Accept on files and folders.
@@ -92,12 +110,19 @@ Public Partial Class MainForm
 		listView1.Items.Add(lvi)
 	End Sub
 	
+	Public Sub WriteLog(strMessage As String, strXMLFileName As String)
+        Dim strLogFileName As String = IO.Path.Combine(IO.Path.GetDirectoryName(strXMLFileName),"xml2pdf.log")
+        Using writer As IO.StreamWriter = New IO.StreamWriter(strLogFileName, True)
+            writer.WriteLine(Join({Now, strXMLFileName, strMessage}, ";"))
+        End Using
+    End Sub
+
     Private Sub WriteTrace(ByVal strMsg As String)
         status1.Text = strMsg
         Me.Refresh()
-    End Sub	
-	
-	Private Sub FindFiles(ByVal Directory As String)
+    End Sub
+
+    Private Sub FindFiles(ByVal Directory As String)
         ' Find files in current folder.
         Try
             Dim Files As String() = System.IO.Directory.GetFiles(Directory, "*.xml")
@@ -145,7 +170,7 @@ Public Partial Class MainForm
 
 	Sub BtnConvertClick(sender As Object, e As EventArgs)
 		' Dim f As Long
-		Dim fle As String
+		Dim strXMLFileName As String
 		Dim ccsFile as String
         Dim dtFrom As DateTime = DateAndTime.Now
         Dim lvi As ListViewItem
@@ -155,20 +180,24 @@ Public Partial Class MainForm
         'report1.Clear
         'report1.Load(strReportFileName)
         'report1.PrintSettings.Printer = cbPrinters.Text
-
+        toolStripProgressBar1.Maximum = Me.listView1.Items.Count-1
         For Each lvi In Me.listView1.Items
-        	fle=lvi.SubItems(0).Text
-        	intType = GetGroupIndex(IO.Path.GetFileName(fle))
-        	ccsFile=io.Path.Combine(io.Path.GetDirectoryName(fle),"ccs.dtd")
-        	'msgbox(ccsFile)
-        	If not(System.IO.File.Exists(ccsFile)) Then io.File.Create(ccsFile).Close
+            strXMLFileName=lvi.SubItems(0).Text
+            intType = GetGroupIndex(IO.Path.GetFileName(strXMLFileName))
+            ccsFile=io.Path.Combine(io.Path.GetDirectoryName(strXMLFileName),"ccs.dtd")
+            'msgbox(ccsFile)
+            If not(System.IO.File.Exists(ccsFile)) Then io.File.Create(ccsFile).Close
             lvi.EnsureVisible
             lvi.StateImageIndex=1
-            WriteTrace(fle)
-            GenerateReport(fle, intType)
-            lvi.StateImageIndex=2
-            'DoEvent
-            me.Refresh
+            WriteTrace(strXMLFileName)
+            If GenerateReport(strXMLFileName, intType) then
+                lvi.StateImageIndex=2
+                WriteLog("Печать завершена", strXMLFileName)
+            Else
+                lvi.StateImageIndex=3
+            End If
+            toolStripProgressBar1.Value = Me.listView1.Items.IndexOf(lvi)
+            My.Application.DoEvents
             'convertXMLtoMDB(a.ToString)
         Next lvi
         ' report1.Design
@@ -178,7 +207,8 @@ Public Partial Class MainForm
 	#End Region
 	
 	Function GenerateReport(strXmlFileName As String, intType As Integer) As Boolean
-		If System.IO.File.Exists(strXmlFileName) Then
+	    Dim RetVal As Boolean = False
+	    If System.IO.File.Exists(strXmlFileName) Then
 '			Dim dtFrom As Date
 '			Dim dtTo As Date
 '			Dim strEmail As String
@@ -189,11 +219,11 @@ Public Partial Class MainForm
 			
 			Select Case intType
 				Case 0 ' e-mail
-					strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "stmt_email.frx")
+					strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_email.frx")
 				Case 1 ' Russian Post
-					strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "stmt_post.frx")
+					strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_post.frx")
 				Case 2 ' Salary
-					strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccsxml2pdf.frx")
+					strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_salary.frx")
 			End Select
 			
 			
@@ -206,14 +236,23 @@ Public Partial Class MainForm
 '			-------
 			dataSet1.Clear
 			dataSet1.ReadXml(strXMLFileName)
-			report1.RegisterData(dataSet1)
+			Try
+			    report1.RegisterData(dataSet1)
+			Catch ex As Exception
+			    
+			    ' Throw
+			End Try
+			
 '			-- OR --
 '			Dim conn As FastReport.Data.XmlDataConnection = report1.Dictionary.Connections.Item(0)
 '			conn.XmlFile = strXmlFileName
 '			--------
-			report1.PrintSettings.Printer = cbPrinters.Text
+            report1.PrintSettings.Printer = cbPrinters.Text
+'            If Not report1.Parameters.Contains("prm_DataSourceFileName") Then report1.Parameters.Add("prm_DataSourceFileName")
+            report1.SetParameterValue("prm_DataSourceFileName", strXmlFileName)
 			' report1.Design()
 			WriteTrace ("Prepare report...")
+			WriteLog("Подготовка отчета", strXMLFileName)
 			Try
 				report1.Prepare(False)
 			Catch ex As Exception
@@ -232,21 +271,26 @@ Public Partial Class MainForm
 '					strReportName = IO.Path.GetFileName(strXmlFileName)
 '				End If
 '				report1.Name = strReportName
-				report1.PrintSettings.ShowDialog = False
 				
-'				--------
-				report1.PrintPrepared()
-'				- OR --
-'				report1.ShowPrepared()
-'				--------
 
-				'report1.SavePrepared(IO.Path.ChangeExtension(strXmlFileName, "fpx"))
-				'ExportReportToPDF (report1, IO.Path.ChangeExtension(strXmlFileName, ".+.pdf"))
-				Return True
-			End If
-				Return False
-			'If ExportReportToPDF (report1,"C:\result.pdf") Then Return True Else Return False
-		End If
+                If Me.chkPreview.Checked Then
+                    report1.PrintSettings.ShowDialog = True
+                    WriteLog("Просмотр отчета", strXMLFileName)
+                    report1.ShowPrepared()
+                Else
+                    report1.PrintSettings.ShowDialog = False
+                    WriteLog("Печать отчета", strXMLFileName)
+                    report1.PrintPrepared()
+                End If
+'                report1.SavePrepared(IO.Path.ChangeExtension(strXmlFileName, "fpx"))
+'                ExportReportToPDF (report1, IO.Path.ChangeExtension(strXmlFileName, ".+.pdf"))
+                RetVal = True
+            Else
+                RetVal = False
+                WriteLog("Отчет пустой, пропускаем", strXMLFileName)
+            End If
+	    End If
+	    Return RetVal
 	End Function
 	
 	Function ExportReportToPDF(ByRef Rep As FastReport.Report, strPDFFileName As String) As Boolean
@@ -258,14 +302,44 @@ Public Partial Class MainForm
 			Return True
 		Catch
 			Return False
-		End Try		
+		End Try
 	End Function
 	
-	Sub CbPrintersSelectedIndexChanged(sender As Object, e As EventArgs)
-		
-	End Sub
-	
-	Sub BtnOpenReportDesignerClick(sender As Object, e As EventArgs)
+    Sub CbPrintersSelectedIndexChanged(sender As Object, e As EventArgs)
+        Dim ppi As New List(Of System.Collections.DictionaryEntry)
+        Dim strPrinterName As String = cbPrinters.Text ' CType(cbPrinters.SelectedItem, String)
+        iniFile.WriteString("Settings", "Printer", cbPrinters.Text)
+        If cbPrinters.Text <> "" Then
+            cbPaperPreprint.BeginUpdate
+            cbPaperPlain.BeginUpdate
+            cbPaperPreprint.DataSource = GetPaperSources(strPrinterName)
+            cbPaperPreprint.DisplayMember = "Value"
+            cbPaperPreprint.ValueMember = "Key"
+            cbPaperPlain.DataSource = GetPaperSources(strPrinterName)
+            cbPaperPlain.DisplayMember = "Value"
+            cbPaperPlain.ValueMember = "Key"
+            cbPaperPreprint.SelectedValue = iniFile.GetInteger(strPrinterName, "PaperPreprint", 15)
+            cbPaperPlain.SelectedValue = iniFile.GetInteger(strPrinterName, "PaperPlain", 15)
+            cbPaperPreprint.EndUpdate
+            cbPaperPlain.EndUpdate
+        End If
+    End Sub
+    
+    Sub CbPaperPreprint_SelectionChangeCommitted(sender As Object, e As EventArgs)
+        Dim strPrinterName As String = CType(cbPrinters.SelectedItem, String)
+        If strPrinterName <> "" Then
+            iniFile.WriteInteger(strPrinterName, "PaperPreprint", CType(Me.cbPaperPreprint.SelectedItem.Key, Integer))
+        End If
+    End Sub
+
+    Sub CbPaperPlain_SelectionChangeCommitted(sender As Object, e As EventArgs)
+        Dim strPrinterName As String = CType(cbPrinters.SelectedItem, String)
+        If strPrinterName <> "" Then
+            iniFile.WriteInteger(strPrinterName, "PaperPlain", CType(cbPaperPlain.SelectedItem.Key, Integer))
+        End If
+    End Sub
+    
+    Sub BtnOpenReportDesignerClick(sender As Object, e As EventArgs)
 		Try
 			report1.Design()
 		Catch ex As Exception
@@ -299,8 +373,8 @@ Public Partial Class MainForm
 '		report1.Design()
 '	End Sub
 
-	
-	
+
+
 	Sub ListView1SelectedIndexChanged(sender As Object, e As EventArgs)
 		If listView1.SelectedIndices.Count>0 Then
 			Dim idx As Integer = listView1.SelectedIndices.Item(0)
@@ -309,4 +383,18 @@ Public Partial Class MainForm
 			End If
 		End If
 	End Sub
+
+    Function GetPaperSources(strPrinterName As String) As List(Of System.Collections.DictionaryEntry)
+        Dim PaperSourceItems = New List(Of System.Collections.DictionaryEntry)
+        Dim d As New PrintDocument()
+        d.PrinterSettings.PrinterName=strPrinterName
+        For Each ps As PaperSource In d.PrinterSettings.PaperSources
+            PaperSourceItems.Add(New DictionaryEntry(ps.RawKind, String.Format("{0} ({1})", ps.SourceName, ps.RawKind)))
+        Next
+        If PaperSourceItems.Count = 0 Then
+            PaperSourceItems.Add(New DictionaryEntry(15, "Автовыбор (15)"))
+        End If
+        Return PaperSourceItems
+    End Function
+
 End Class
