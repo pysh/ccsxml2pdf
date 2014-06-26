@@ -55,8 +55,10 @@ Partial Class MainForm
 	    Me.toolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
 	    Me.toolStripMenuItem2 = New System.Windows.Forms.ToolStripMenuItem()
 	    Me.toolStripMenuItem3 = New System.Windows.Forms.ToolStripMenuItem()
+	    Me.cbProcessPriority = New System.Windows.Forms.ToolStripComboBox()
 	    Me.statusStrip1 = New System.Windows.Forms.StatusStrip()
 	    Me.status1 = New System.Windows.Forms.ToolStripStatusLabel()
+	    Me.toolStripProgressText = New System.Windows.Forms.ToolStripStatusLabel()
 	    Me.toolStripProgressBar1 = New System.Windows.Forms.ToolStripProgressBar()
 	    Me.panel1 = New System.Windows.Forms.Panel()
 	    Me.cbPaperPlain = New System.Windows.Forms.ComboBox()
@@ -85,7 +87,7 @@ Partial Class MainForm
 	    'toolStrip1
 	    '
 	    Me.toolStrip1.ImageScalingSize = New System.Drawing.Size(32, 32)
-	    Me.toolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.toolStripButton1, Me.toolStripButton2, Me.toolStripSeparator1, Me.toolStripButton3, Me.toolStripSeparator2, Me.btnOpenReportDesigner, Me.toolStripSeparator3, Me.toolStripSplitButton1})
+	    Me.toolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.toolStripButton1, Me.toolStripButton2, Me.toolStripSeparator1, Me.toolStripButton3, Me.toolStripSeparator2, Me.btnOpenReportDesigner, Me.toolStripSeparator3, Me.toolStripSplitButton1, Me.cbProcessPriority})
 	    Me.toolStrip1.Location = New System.Drawing.Point(0, 0)
 	    Me.toolStrip1.Name = "toolStrip1"
 	    Me.toolStrip1.Size = New System.Drawing.Size(849, 39)
@@ -158,6 +160,7 @@ Partial Class MainForm
 	    Me.toolStripMenuItem1.Name = "toolStripMenuItem1"
 	    Me.toolStripMenuItem1.Size = New System.Drawing.Size(158, 22)
 	    Me.toolStripMenuItem1.Text = "Печать"
+	    AddHandler Me.toolStripMenuItem1.Click, AddressOf Me.ToolStripMenuItem1_Click
 	    '
 	    'toolStripMenuItem2
 	    '
@@ -171,9 +174,16 @@ Partial Class MainForm
 	    Me.toolStripMenuItem3.Size = New System.Drawing.Size(158, 22)
 	    Me.toolStripMenuItem3.Text = "Экспорт"
 	    '
+	    'cbProcessPriority
+	    '
+	    Me.cbProcessPriority.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+	    Me.cbProcessPriority.Name = "cbProcessPriority"
+	    Me.cbProcessPriority.Size = New System.Drawing.Size(121, 39)
+	    AddHandler Me.cbProcessPriority.SelectedIndexChanged, AddressOf Me.CbProcessPriority_SelectedIndexChanged
+	    '
 	    'statusStrip1
 	    '
-	    Me.statusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.status1, Me.toolStripProgressBar1})
+	    Me.statusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.status1, Me.toolStripProgressText, Me.toolStripProgressBar1})
 	    Me.statusStrip1.Location = New System.Drawing.Point(0, 381)
 	    Me.statusStrip1.Name = "statusStrip1"
 	    Me.statusStrip1.Size = New System.Drawing.Size(849, 22)
@@ -183,10 +193,16 @@ Partial Class MainForm
 	    'status1
 	    '
 	    Me.status1.Name = "status1"
-	    Me.status1.Size = New System.Drawing.Size(632, 17)
+	    Me.status1.Size = New System.Drawing.Size(609, 17)
 	    Me.status1.Spring = true
 	    Me.status1.Text = "Ready."
 	    Me.status1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+	    '
+	    'toolStripProgressText
+	    '
+	    Me.toolStripProgressText.Name = "toolStripProgressText"
+	    Me.toolStripProgressText.Size = New System.Drawing.Size(23, 17)
+	    Me.toolStripProgressText.Text = "0/0"
 	    '
 	    'toolStripProgressBar1
 	    '
@@ -278,11 +294,12 @@ Partial Class MainForm
 	    '
 	    'btnConvert
 	    '
+	    Me.btnConvert.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left),System.Windows.Forms.AnchorStyles)
 	    Me.btnConvert.Image = Global.STMT_salary.Resource1.Accept
 	    Me.btnConvert.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-	    Me.btnConvert.Location = New System.Drawing.Point(229, 275)
+	    Me.btnConvert.Location = New System.Drawing.Point(229, 276)
 	    Me.btnConvert.Name = "btnConvert"
-	    Me.btnConvert.Size = New System.Drawing.Size(84, 56)
+	    Me.btnConvert.Size = New System.Drawing.Size(84, 55)
 	    Me.btnConvert.TabIndex = 2
 	    Me.btnConvert.Text = "Поехали!"
 	    Me.btnConvert.TextAlign = System.Drawing.ContentAlignment.BottomCenter
@@ -332,6 +349,7 @@ Partial Class MainForm
 	    listViewGroup3.Header = "Зарплатные"
 	    listViewGroup3.Name = "grpSalary"
 	    Me.listView1.Groups.AddRange(New System.Windows.Forms.ListViewGroup() {listViewGroup1, listViewGroup2, listViewGroup3})
+	    Me.listView1.HideSelection = false
 	    Me.listView1.Location = New System.Drawing.Point(331, 39)
 	    Me.listView1.MultiSelect = false
 	    Me.listView1.Name = "listView1"
@@ -413,6 +431,8 @@ Partial Class MainForm
 	    Me.ResumeLayout(false)
 	    Me.PerformLayout
 	End Sub
+	Private toolStripProgressText As System.Windows.Forms.ToolStripStatusLabel
+	Private cbProcessPriority As System.Windows.Forms.ToolStripComboBox
 	Private cbPaperPlain As System.Windows.Forms.ComboBox
 	Private cbPaperPreprint As System.Windows.Forms.ComboBox
 	Private label1 As System.Windows.Forms.Label
