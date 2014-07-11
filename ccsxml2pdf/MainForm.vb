@@ -18,8 +18,14 @@ Public Partial Class MainForm
         Public SourceID As Integer
         Public SourceName As String
         '        SourceKind As PaperSourceKind
-        
     End Structure
+    
+    Public Enum ReportGenerationResults
+        Ok = 0
+        IsEmpty = 1
+        InvalidXML = 2
+        [Error] = -1
+    End Enum
     
     Public Sub New()
         ' The Me.InitializeComponent call is required for Windows Forms designer support.
@@ -89,28 +95,28 @@ Public Partial Class MainForm
         cbPrinters.SelectedItem = PrinterName
     End Sub
     
-    Sub RegisterDataset()
-        Dim strReportFileName As String
-        Dim strXMLFileName As String
-        
-        strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "stmt.frx")
-        strXMLFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "test.xml")
-        WriteTrace ("...")
-        Me.Refresh
-        dataSet1.Clear
-        dataSet1.ReadXml(strXMLFileName)
-        If report1.FileName = strReportFileName Then
-            report1.Dictionary.ClearRegisteredData
-        Else
-        report1.Clear
-        report1.Load(strReportFileName)
-        End If
-        report1.RegisterData(dataSet1)
-        WriteTrace ("XML загружен")
-        WriteLog("XML загружен", strXMLFileName)
-        Me.Refresh
-        report1.Design
-   End Sub
+'    Sub RegisterDataset()
+'        Dim strReportFileName As String
+'        Dim strXMLFileName As String
+'        
+'        strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "stmt.frx")
+'        strXMLFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "test.xml")
+'        WriteTrace ("...")
+'        Me.Refresh
+'        dataSet1.Clear
+'        dataSet1.ReadXml(strXMLFileName)
+'        If report1.FileName = strReportFileName Then
+'            report1.Dictionary.ClearRegisteredData
+'        Else
+'        report1.Clear
+'        report1.Load(strReportFileName)
+'        End If
+'        report1.RegisterData(dataSet1)
+'        WriteTrace ("XML загружен")
+'        WriteLog("XML загружен", strXMLFileName)
+'        Me.Refresh
+'        report1.Design
+'   End Sub
 
 
     #Region "Drag'n'Drop"    
@@ -231,6 +237,7 @@ Public Partial Class MainForm
         Dim dtFrom As DateTime = DateAndTime.Now
         Dim lvi As ListViewItem
         Dim intType As Integer
+        Dim ReportGenerationResult As Integer
         'Dim strReportFileName As String = IO.Path.ChangeExtension(Application.ExecutablePath, "frx")        
 
         'report1.Clear
@@ -246,12 +253,19 @@ Public Partial Class MainForm
             lvi.EnsureVisible
             lvi.StateImageIndex=1
             WriteTrace(strXMLFileName)
-            If GenerateReport(strXMLFileName, intType) then
-                lvi.StateImageIndex=2
-                WriteLog("Печать завершена", strXMLFileName)
-            Else
-                lvi.StateImageIndex=3
-            End If
+            
+            ReportGenerationResult = GenerateReport(strXMLFileName, intType)
+            Select Case ReportGenerationResult
+                Case ReportGenerationResults.Ok
+                    lvi.StateImageIndex=2
+                    WriteLog("Печать завершена", strXMLFileName)
+                Case ReportGenerationResults.IsEmpty 
+                    lvi.StateImageIndex=3
+                Case ReportGenerationResults.InvalidXML
+                    lvi.StateImageIndex=4
+                Case ReportGenerationResults.Error
+                    lvi.StateImageIndex=5
+            End Select
             toolStripProgressBar1.Value = Me.listView1.Items.IndexOf(lvi)
             toolStripProgressText.Text = String.Format("{0}/{1}", Me.listView1.Items.IndexOf(lvi), Me.listView1.Items.Count)
             My.Application.DoEvents
@@ -263,8 +277,8 @@ Public Partial Class MainForm
     End Sub    
     #End Region
     
-    Function GenerateReport(strXmlFileName As String, intType As Integer) As Boolean
-        Dim RetVal As Boolean = False
+    Function GenerateReport(strXmlFileName As String, intType As Integer) As Integer
+        Dim RetVal As Boolean = -1
         If System.IO.File.Exists(strXmlFileName) Then
 '            Dim dtFrom As Date
 '            Dim dtTo As Date
@@ -281,6 +295,8 @@ Public Partial Class MainForm
                     strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_post.frx")
                 Case 2 ' Salary
                     strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_salary.frx")
+                Case 3 ' e-mail
+                    strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_email.frx")
             End Select
             
             If report1.FileName = strReportFileName Then
@@ -295,6 +311,14 @@ Public Partial Class MainForm
 '            -------
             dataSet1.Clear
             dataSet1.ReadXml(strXMLFileName)
+            If dataSet1.Tables.Contains("G_CLIENT") Then
+                
+            Else
+                RetVal = 2 'Неизвестный формат файла
+                Return RetVal
+                Exit Function
+            End If
+            
             Try
                 report1.RegisterData(dataSet1)
             Catch ex As Exception
@@ -331,11 +355,9 @@ Public Partial Class MainForm
                     WriteLog("Печать отчета", strXMLFileName)
                     report1.PrintPrepared()
                 End If
-'                report1.SavePrepared(IO.Path.ChangeExtension(strXmlFileName, "fpx"))
-'                ExportReportToPDF (report1, IO.Path.ChangeExtension(strXmlFileName, ".+.pdf"))
-                RetVal = True
+                RetVal = 0 ' Ок
             Else
-                RetVal = False
+                RetVal = 1 ' Пустой отчет
                 WriteLog("Отчет пустой, пропускаем", strXMLFileName)
             End If
         End If
@@ -406,6 +428,8 @@ Public Partial Class MainForm
             Return 1
         ElseIf strFileName Like "*_E_*" Then
             Return 0
+        ElseIf strFileName Like "*-P-*" Then
+            Return 3
         Else
             Return -1
         End If
@@ -462,11 +486,6 @@ Public Partial Class MainForm
         MsgBox(strInfo)
     End Sub
 
-    
-    Sub ToolStripMenuItem1_Click(sender As Object, e As EventArgs)
-        WriteProcessInfo()
-    End Sub
-
     Sub CbProcessPriority_SelectedIndexChanged(sender As Object, e As EventArgs)
         If cbProcessPriority.ComboBox.SelectedIndex > 0 Then
             Dim iPC As Integer = CType(cbProcessPriority.SelectedItem, DictionaryEntry).Key
@@ -475,5 +494,9 @@ Public Partial Class MainForm
                 SaveProcessPriority
             End If
         End If
+    End Sub
+
+    Sub ToolStripLabel1_DoubleClick(sender As Object, e As EventArgs)
+        WriteProcessInfo()
     End Sub
 End Class

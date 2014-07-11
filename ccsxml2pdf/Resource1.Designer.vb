@@ -84,6 +84,13 @@ Friend Class Resource1
         End Get
     End Property
     
+    Friend Shared ReadOnly Property Page_White_Acrobat_32x32() As System.Drawing.Bitmap
+        Get
+            Dim obj As Object = ResourceManager.GetObject("Page-White-Acrobat_32x32", resourceCulture)
+            Return CType(obj,System.Drawing.Bitmap)
+        End Get
+    End Property
+    
     Friend Shared ReadOnly Property Page_White_Edit() As System.Drawing.Bitmap
         Get
             Dim obj As Object = ResourceManager.GetObject("Page-White-Edit", resourceCulture)

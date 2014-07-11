@@ -38,6 +38,7 @@ Partial Class MainForm
 	    Dim listViewGroup1 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Электронные", System.Windows.Forms.HorizontalAlignment.Left)
 	    Dim listViewGroup2 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Почта России", System.Windows.Forms.HorizontalAlignment.Left)
 	    Dim listViewGroup3 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Зарплатные", System.Windows.Forms.HorizontalAlignment.Left)
+	    Dim listViewGroup4 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Стандартный Продукт", System.Windows.Forms.HorizontalAlignment.Left)
 	    Dim designerSettings1 As FastReport.Design.DesignerSettings = New FastReport.Design.DesignerSettings()
 	    Dim designerRestrictions1 As FastReport.Design.DesignerRestrictions = New FastReport.Design.DesignerRestrictions()
 	    Dim emailSettings1 As FastReport.Export.Email.EmailSettings = New FastReport.Export.Email.EmailSettings()
@@ -51,11 +52,9 @@ Partial Class MainForm
 	    Me.toolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
 	    Me.btnOpenReportDesigner = New System.Windows.Forms.ToolStripButton()
 	    Me.toolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
-	    Me.toolStripSplitButton1 = New System.Windows.Forms.ToolStripSplitButton()
-	    Me.toolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
-	    Me.toolStripMenuItem2 = New System.Windows.Forms.ToolStripMenuItem()
-	    Me.toolStripMenuItem3 = New System.Windows.Forms.ToolStripMenuItem()
 	    Me.cbProcessPriority = New System.Windows.Forms.ToolStripComboBox()
+	    Me.toolStripLabel1 = New System.Windows.Forms.ToolStripLabel()
+	    Me.toolStripSeparator4 = New System.Windows.Forms.ToolStripSeparator()
 	    Me.statusStrip1 = New System.Windows.Forms.StatusStrip()
 	    Me.status1 = New System.Windows.Forms.ToolStripStatusLabel()
 	    Me.toolStripProgressText = New System.Windows.Forms.ToolStripStatusLabel()
@@ -87,7 +86,7 @@ Partial Class MainForm
 	    'toolStrip1
 	    '
 	    Me.toolStrip1.ImageScalingSize = New System.Drawing.Size(32, 32)
-	    Me.toolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.toolStripButton1, Me.toolStripButton2, Me.toolStripSeparator1, Me.toolStripButton3, Me.toolStripSeparator2, Me.btnOpenReportDesigner, Me.toolStripSeparator3, Me.toolStripSplitButton1, Me.cbProcessPriority})
+	    Me.toolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.toolStripButton1, Me.toolStripButton2, Me.toolStripSeparator1, Me.toolStripButton3, Me.toolStripSeparator2, Me.btnOpenReportDesigner, Me.toolStripSeparator3, Me.cbProcessPriority, Me.toolStripLabel1, Me.toolStripSeparator4})
 	    Me.toolStrip1.Location = New System.Drawing.Point(0, 0)
 	    Me.toolStrip1.Name = "toolStrip1"
 	    Me.toolStrip1.Size = New System.Drawing.Size(849, 39)
@@ -119,7 +118,7 @@ Partial Class MainForm
 	    '
 	    'toolStripButton3
 	    '
-	    Me.toolStripButton3.Image = Global.STMT_salary.Resource1.Accept
+	    Me.toolStripButton3.Image = Global.STMT_salary.Resource1.Page_White_Acrobat_32x32
 	    Me.toolStripButton3.ImageTransparentColor = System.Drawing.Color.Transparent
 	    Me.toolStripButton3.Name = "toolStripButton3"
 	    Me.toolStripButton3.Size = New System.Drawing.Size(78, 36)
@@ -145,41 +144,27 @@ Partial Class MainForm
 	    Me.toolStripSeparator3.Name = "toolStripSeparator3"
 	    Me.toolStripSeparator3.Size = New System.Drawing.Size(6, 39)
 	    '
-	    'toolStripSplitButton1
-	    '
-	    Me.toolStripSplitButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
-	    Me.toolStripSplitButton1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.toolStripMenuItem1, Me.toolStripMenuItem2, Me.toolStripMenuItem3})
-	    Me.toolStripSplitButton1.Image = Global.STMT_salary.Resource1.Accept
-	    Me.toolStripSplitButton1.ImageTransparentColor = System.Drawing.Color.Magenta
-	    Me.toolStripSplitButton1.Name = "toolStripSplitButton1"
-	    Me.toolStripSplitButton1.Size = New System.Drawing.Size(48, 36)
-	    Me.toolStripSplitButton1.Text = "toolStripSplitButton1"
-	    '
-	    'toolStripMenuItem1
-	    '
-	    Me.toolStripMenuItem1.Name = "toolStripMenuItem1"
-	    Me.toolStripMenuItem1.Size = New System.Drawing.Size(158, 22)
-	    Me.toolStripMenuItem1.Text = "Печать"
-	    AddHandler Me.toolStripMenuItem1.Click, AddressOf Me.ToolStripMenuItem1_Click
-	    '
-	    'toolStripMenuItem2
-	    '
-	    Me.toolStripMenuItem2.Name = "toolStripMenuItem2"
-	    Me.toolStripMenuItem2.Size = New System.Drawing.Size(158, 22)
-	    Me.toolStripMenuItem2.Text = "Предпросмотр"
-	    '
-	    'toolStripMenuItem3
-	    '
-	    Me.toolStripMenuItem3.Name = "toolStripMenuItem3"
-	    Me.toolStripMenuItem3.Size = New System.Drawing.Size(158, 22)
-	    Me.toolStripMenuItem3.Text = "Экспорт"
-	    '
 	    'cbProcessPriority
 	    '
+	    Me.cbProcessPriority.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
 	    Me.cbProcessPriority.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
 	    Me.cbProcessPriority.Name = "cbProcessPriority"
 	    Me.cbProcessPriority.Size = New System.Drawing.Size(121, 39)
 	    AddHandler Me.cbProcessPriority.SelectedIndexChanged, AddressOf Me.CbProcessPriority_SelectedIndexChanged
+	    '
+	    'toolStripLabel1
+	    '
+	    Me.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
+	    Me.toolStripLabel1.Name = "toolStripLabel1"
+	    Me.toolStripLabel1.Size = New System.Drawing.Size(62, 36)
+	    Me.toolStripLabel1.Text = "Приоритет"
+	    AddHandler Me.toolStripLabel1.DoubleClick, AddressOf Me.ToolStripLabel1_DoubleClick
+	    '
+	    'toolStripSeparator4
+	    '
+	    Me.toolStripSeparator4.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
+	    Me.toolStripSeparator4.Name = "toolStripSeparator4"
+	    Me.toolStripSeparator4.Size = New System.Drawing.Size(6, 39)
 	    '
 	    'statusStrip1
 	    '
@@ -295,7 +280,7 @@ Partial Class MainForm
 	    'btnConvert
 	    '
 	    Me.btnConvert.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left),System.Windows.Forms.AnchorStyles)
-	    Me.btnConvert.Image = Global.STMT_salary.Resource1.Accept
+	    Me.btnConvert.Image = Global.STMT_salary.Resource1.Page_White_Acrobat_32x32
 	    Me.btnConvert.ImageAlign = System.Drawing.ContentAlignment.TopCenter
 	    Me.btnConvert.Location = New System.Drawing.Point(229, 276)
 	    Me.btnConvert.Name = "btnConvert"
@@ -342,13 +327,16 @@ Partial Class MainForm
 	    Me.listView1.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.СolumnHeader1})
 	    Me.listView1.Dock = System.Windows.Forms.DockStyle.Fill
 	    Me.listView1.FullRowSelect = true
+	    Me.listView1.GridLines = true
 	    listViewGroup1.Header = "Электронные"
 	    listViewGroup1.Name = "grpEmail"
 	    listViewGroup2.Header = "Почта России"
 	    listViewGroup2.Name = "grpRusPost"
 	    listViewGroup3.Header = "Зарплатные"
 	    listViewGroup3.Name = "grpSalary"
-	    Me.listView1.Groups.AddRange(New System.Windows.Forms.ListViewGroup() {listViewGroup1, listViewGroup2, listViewGroup3})
+	    listViewGroup4.Header = "Стандартный Продукт"
+	    listViewGroup4.Name = "grpStandardProduct"
+	    Me.listView1.Groups.AddRange(New System.Windows.Forms.ListViewGroup() {listViewGroup1, listViewGroup2, listViewGroup3, listViewGroup4})
 	    Me.listView1.HideSelection = false
 	    Me.listView1.Location = New System.Drawing.Point(331, 39)
 	    Me.listView1.MultiSelect = false
@@ -371,10 +359,12 @@ Partial Class MainForm
 	    '
 	    Me.imglstFileStates.ImageStream = CType(resources.GetObject("imglstFileStates.ImageStream"),System.Windows.Forms.ImageListStreamer)
 	    Me.imglstFileStates.TransparentColor = System.Drawing.Color.Transparent
-	    Me.imglstFileStates.Images.SetKeyName(0, "page_white.png")
-	    Me.imglstFileStates.Images.SetKeyName(1, "cog.png")
-	    Me.imglstFileStates.Images.SetKeyName(2, "accept.png")
-	    Me.imglstFileStates.Images.SetKeyName(3, "page_white_error.png")
+	    Me.imglstFileStates.Images.SetKeyName(0, "page_white")
+	    Me.imglstFileStates.Images.SetKeyName(1, "printer")
+	    Me.imglstFileStates.Images.SetKeyName(2, "accept")
+	    Me.imglstFileStates.Images.SetKeyName(3, "page_white_go")
+	    Me.imglstFileStates.Images.SetKeyName(4, "error")
+	    Me.imglstFileStates.Images.SetKeyName(5, "exclamation")
 	    '
 	    'dataSet1
 	    '
@@ -431,16 +421,14 @@ Partial Class MainForm
 	    Me.ResumeLayout(false)
 	    Me.PerformLayout
 	End Sub
+	Private toolStripSeparator4 As System.Windows.Forms.ToolStripSeparator
+	Private toolStripLabel1 As System.Windows.Forms.ToolStripLabel
 	Private toolStripProgressText As System.Windows.Forms.ToolStripStatusLabel
 	Private cbProcessPriority As System.Windows.Forms.ToolStripComboBox
 	Private cbPaperPlain As System.Windows.Forms.ComboBox
 	Private cbPaperPreprint As System.Windows.Forms.ComboBox
 	Private label1 As System.Windows.Forms.Label
 	Private label2 As System.Windows.Forms.Label
-	Private toolStripMenuItem3 As System.Windows.Forms.ToolStripMenuItem
-	Private toolStripMenuItem2 As System.Windows.Forms.ToolStripMenuItem
-	Private toolStripMenuItem1 As System.Windows.Forms.ToolStripMenuItem
-	Private toolStripSplitButton1 As System.Windows.Forms.ToolStripSplitButton
 	Private toolStripSeparator3 As System.Windows.Forms.ToolStripSeparator
 	Private toolStripProgressBar1 As System.Windows.Forms.ToolStripProgressBar
 	Private environmentSettings1 As FastReport.EnvironmentSettings
