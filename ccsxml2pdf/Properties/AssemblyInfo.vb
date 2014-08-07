@@ -9,11 +9,11 @@ Imports System.Runtime.InteropServices
 ' you compile.
 
 <assembly: AssemblyTitle("ccsxml2pdf")>
-<assembly: AssemblyDescription("")>
+<assembly: AssemblyDescription("Печать выписок по счету")>
 <assembly: AssemblyConfiguration("")>
-<assembly: AssemblyCompany("")>
+<assembly: AssemblyCompany("КБ «Ренессанс Кредит», ООО")>
 <assembly: AssemblyProduct("ccsxml2pdf")>
-<assembly: AssemblyCopyright("Copyright 2013")>
+<assembly: AssemblyCopyright("Ренессанс Кредит ® 2014")>
 <assembly: AssemblyTrademark("")>
 <assembly: AssemblyCulture("")>
 
@@ -28,4 +28,4 @@ Imports System.Runtime.InteropServices
 ' You can specify all values by your own or you can build default build and revision
 ' numbers with the '*' character (the default):
 
-<assembly: AssemblyVersion("1.0.*")>
+<assembly: AssemblyVersion("1.1.*")>

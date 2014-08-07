@@ -17,8 +17,15 @@ Public Partial Class MainForm
     Public Structure myPapperSource
         Public SourceID As Integer
         Public SourceName As String
-        '        SourceKind As PaperSourceKind
     End Structure
+
+'    Public Structure structProcessPriority
+'        Public PriorityID As Integer
+'        Public PriorityName As String
+'    End Structure
+'    
+'    Public ProcessPriorities As List(Of structProcessPriority) = New(
+    
     
     Public Enum ReportGenerationResults
         Ok = 0
@@ -30,6 +37,7 @@ Public Partial Class MainForm
     Public Sub New()
         ' The Me.InitializeComponent call is required for Windows Forms designer support.
         Me.InitializeComponent()
+        Me.Text = String.Format("STMT_2014  v.{0}", Application.ProductVersion)
         FillProcessPriority()
         LoadProcessPriority()
         '
@@ -39,19 +47,10 @@ Public Partial Class MainForm
         'Dim strLastPrinterEmail As String = iniFile.GetString("Printers", "Printer_Email", "")
         'Dim strLastPrinterSalary As String = iniFile.GetString("Printers", "Printer_Salary", "")
         FillPrinterList ()
-        
     End Sub
     
     Private Sub FillProcessPriority
         Dim PriorityList As New List(Of DictionaryEntry)
-'        cbProcessPriority.Items.Clear
-'        cbProcessPriority.Items.Add(New DictionaryEntry(256, "Реального времени"))
-'        cbProcessPriority.Items.Add(New DictionaryEntry(128, "Высокий"))
-'        cbProcessPriority.Items.Add(New DictionaryEntry(32768, "Выше среднего"))
-'        cbProcessPriority.Items.Add(New DictionaryEntry(32, "Средний"))
-'        cbProcessPriority.Items.Add(New DictionaryEntry(16384, "Ниже среднего"))
-'        cbProcessPriority.Items.Add(New DictionaryEntry(64, "Низкий"))
-
         PriorityList.Add(New DictionaryEntry(256, "Реального времени"))
         PriorityList.Add(New DictionaryEntry(128, "Высокий"))
         PriorityList.Add(New DictionaryEntry(32768, "Выше среднего"))
@@ -59,16 +58,14 @@ Public Partial Class MainForm
         PriorityList.Add(New DictionaryEntry(16384, "Ниже среднего"))
         PriorityList.Add(New DictionaryEntry(64, "Низкий"))
 
-        'cbProcessPriority.Items.AddRange(PriorityList.ToArray)
         cbProcessPriority.ComboBox.DataSource = PriorityList
         cbProcessPriority.ComboBox.DisplayMember = "Value"
         cbProcessPriority.ComboBox.ValueMember = "Key"
-        
     End Sub
     
     Private Sub LoadProcessPriority()
         Dim myProcess As Process = Process.GetCurrentProcess
-        Dim iPC As Integer = iniFile.GetInteger("Settings","ProcessPriority", CType(ProcessPriorityClass.Normal, Integer))
+        Dim iPC As ProcessPriorityClass = iniFile.GetInteger("Settings","ProcessPriority", CType(ProcessPriorityClass.Normal, Integer))
 '        Dim iBP As Integer = iniFile.GetString("Settings","BasePriority", 8)
         myProcess.PriorityClass = iPC
         cbProcessPriority.SelectedIndex = -1
@@ -162,7 +159,7 @@ Public Partial Class MainForm
         lvg = listView1.Groups.Item(intGroupIndex)
         lvi = New ListViewItem(New String(){strFileName, intGroupIndex.ToString})
         lvi.Group = lvg
-        lvi.StateImageIndex=0
+        lvi.ImageIndex=0
         listView1.Items.Add(lvi)
     End Sub
     
@@ -238,6 +235,9 @@ Public Partial Class MainForm
         Dim lvi As ListViewItem
         Dim intType As Integer
         Dim ReportGenerationResult As Integer
+        Dim intEmpty As Integer = 0
+        Dim intInvalid As Integer = 0
+        Dim intError As Integer = 0
         'Dim strReportFileName As String = IO.Path.ChangeExtension(Application.ExecutablePath, "frx")        
 
         'report1.Clear
@@ -251,23 +251,26 @@ Public Partial Class MainForm
             'msgbox(ccsFile)
             If not(System.IO.File.Exists(ccsFile)) Then io.File.Create(ccsFile).Close
             lvi.EnsureVisible
-            lvi.StateImageIndex=1
+            lvi.ImageIndex=1
             WriteTrace(strXMLFileName)
             
             ReportGenerationResult = GenerateReport(strXMLFileName, intType)
             Select Case ReportGenerationResult
                 Case ReportGenerationResults.Ok
-                    lvi.StateImageIndex=2
+                    lvi.ImageIndex=2
                     WriteLog("Печать завершена", strXMLFileName)
                 Case ReportGenerationResults.IsEmpty 
-                    lvi.StateImageIndex=3
+                	lvi.ImageIndex=3
+                	intEmpty +=1
                 Case ReportGenerationResults.InvalidXML
-                    lvi.StateImageIndex=4
+                	lvi.ImageIndex=4
+                	intInvalid +=1
                 Case ReportGenerationResults.Error
-                    lvi.StateImageIndex=5
+                	lvi.ImageIndex=5
+                	intError +=1
             End Select
             toolStripProgressBar1.Value = Me.listView1.Items.IndexOf(lvi)
-            toolStripProgressText.Text = String.Format("{0}/{1}", Me.listView1.Items.IndexOf(lvi), Me.listView1.Items.Count)
+            toolStripProgressText.Text = String.Format("{0}/{1} (Пустые: {2}, Ошибки: {3}, Неверный XML: {4})", Me.listView1.Items.IndexOf(lvi)+1, Me.listView1.Items.Count, intEmpty, intError, intInvalid)
             My.Application.DoEvents
             'convertXMLtoMDB(a.ToString)
         Next lvi
@@ -278,7 +281,7 @@ Public Partial Class MainForm
     #End Region
     
     Function GenerateReport(strXmlFileName As String, intType As Integer) As Integer
-        Dim RetVal As Boolean = -1
+        Dim RetVal As Integer = -1
         If System.IO.File.Exists(strXmlFileName) Then
 '            Dim dtFrom As Date
 '            Dim dtTo As Date
@@ -488,15 +491,21 @@ Public Partial Class MainForm
 
     Sub CbProcessPriority_SelectedIndexChanged(sender As Object, e As EventArgs)
         If cbProcessPriority.ComboBox.SelectedIndex > 0 Then
-            Dim iPC As Integer = CType(cbProcessPriority.SelectedItem, DictionaryEntry).Key
+            Dim iPC As Integer = CType(CType(cbProcessPriority.SelectedItem, DictionaryEntry).Key, Integer)
             If myProc.PriorityClass.IsDefined(GetType(ProcessPriorityClass), iPC) Then
                 myProc.PriorityClass = iPC
                 SaveProcessPriority
             End If
         End If
     End Sub
-
+    
+    
+    
+    
+    
+    
     Sub ToolStripLabel1_DoubleClick(sender As Object, e As EventArgs)
         WriteProcessInfo()
     End Sub
+
 End Class

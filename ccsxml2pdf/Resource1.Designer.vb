@@ -42,7 +42,7 @@ Friend Class Resource1
     Friend Shared ReadOnly Property ResourceManager() As Global.System.Resources.ResourceManager
         Get
             If Object.ReferenceEquals(resourceMan, Nothing) Then
-                Dim temp As Global.System.Resources.ResourceManager = New Global.System.Resources.ResourceManager("STMT_salary.Resource1", GetType(Resource1).Assembly)
+                Dim temp As Global.System.Resources.ResourceManager = New Global.System.Resources.ResourceManager("ccsxml2pdf.Resource1", GetType(Resource1).Assembly)
                 resourceMan = temp
             End If
             Return resourceMan
@@ -94,6 +94,13 @@ Friend Class Resource1
     Friend Shared ReadOnly Property Page_White_Edit() As System.Drawing.Bitmap
         Get
             Dim obj As Object = ResourceManager.GetObject("Page-White-Edit", resourceCulture)
+            Return CType(obj,System.Drawing.Bitmap)
+        End Get
+    End Property
+    
+    Friend Shared ReadOnly Property Printer() As System.Drawing.Bitmap
+        Get
+            Dim obj As Object = ResourceManager.GetObject("Printer", resourceCulture)
             Return CType(obj,System.Drawing.Bitmap)
         End Get
     End Property

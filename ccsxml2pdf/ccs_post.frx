@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="Vb" DoublePass="true" SmoothGraphics="true" ReportInfo.Name="30011004771АНДРЕЙ НИКОЛАЕВИЧ" ReportInfo.Author="pnosov" ReportInfo.Version="1" ReportInfo.Created="06/07/2013 13:12:46" ReportInfo.Modified="06/02/2014 13:33:35" ReportInfo.CreatorVersion="1.7.35.0" PrintSettings.ShowDialog="false">
+<Report ScriptLanguage="Vb" DoublePass="true" SmoothGraphics="true" StartReportEvent="_StartReport" ReportInfo.Name="41750003333 ГУРЕНКОВА ОЛЬГА БОРИСОВНА" ReportInfo.Author="pnosov" ReportInfo.Version="1" ReportInfo.Created="06/07/2013 13:12:46" ReportInfo.Modified="08/05/2014 18:19:15" ReportInfo.CreatorVersion="1.6.19.0" PrintSettings.ShowDialog="false">
   <ScriptText>Imports System
 Imports System.Collections
 Imports System.Collections.Generic
@@ -83,16 +83,33 @@ Namespace FastReport
       Dim strReportName as String
 '      SetBandsVisible()
       Report.ReportInfo.Name=&quot;&lt;empty&gt;&quot;
-      strReportName=CType(Report.GetColumnValue(&quot;G_CLIENT.ADDR_LINE_F&quot;), String)
 '      strReportName = String.Format(String.Format(&quot;{0}={1:yyyyMMdd}={2:yyyyMMdd}&quot;, _
 '        CType(Report.GetColumnValue(&quot;G_CLIENT.PARAMETER_B&quot;), String), _
 '        CType(Report.GetColumnValue(&quot;G_CLIENT.STMT_DATE_FROM&quot;), Date), _
 '        CType(Report.GetColumnValue(&quot;G_CLIENT.STMT_DATE_TO&quot;), Date)))
-      if CType(Report.GetParameterValue(&quot;prm_ADDRESS&quot;), String).Trim=&quot;&quot; then strReportName=&quot;&lt;empty&gt;&quot;
-      Report.ReportInfo.Name = strReportName &amp; CType(Report.GetParameterValue(&quot;prm_FIO&quot;), String)
-      'if CType(Report.GetColumnValue(&quot;G_CLIENT.N_ENTRIES&quot;), String)=&quot;0&quot; and CType(Report.GetColumnValue(&quot;G_CLIENT.N_G_S_CLIENT&quot;), String)=&quot;0&quot; then
-      '  Report.ReportInfo.Name=&quot;&lt;empty&gt;&quot;
-      'End If
+      'MsgBox (CType(Report.GetColumnValue(&quot;G_CURR_CONTRACT.BEG_BAL_CURR&quot;), Decimal).ToString)
+      
+      Dim str_BEG_BAL_CURR as String = CType(Report.GetColumnValue(&quot;G_CURR_CONTRACT.BEG_BAL_CURR&quot;), String)
+      Dim str_END_BALLANCE as String = CType(Report.GetColumnValue(&quot;G_CURR_CONTRACT.END_BALLANCE&quot;), String)
+      Dim dec_N_ENTRIES as decimal = CType(Report.GetColumnValue(&quot;G_CLIENT.N_ENTRIES&quot;), Decimal)
+      Dim dec_MIN_PAYM as Decimal = CType(Report.GetParameterValue(&quot;prm_MIN_PAYM&quot;), Decimal)
+      Dim dec_OWN_FUNDS as Decimal = CType(Report.GetParameterValue(&quot;prm_OWN_FUNDS&quot;), Decimal)
+      
+      
+      if CType(Report.GetParameterValue(&quot;prm_ADDRESS&quot;), String).Trim = &quot;&quot; Or _
+          ( _
+            (str_BEG_BAL_CURR = &quot;0&quot; or str_BEG_BAL_CURR = &quot;&quot;) And _
+            (str_END_BALLANCE = &quot;0&quot; or str_END_BALLANCE = &quot;&quot;) And _
+            (dec_N_ENTRIES    = &quot;0&quot;) And _
+            (dec_OWN_FUNDS    = 0) And _
+            (dec_MIN_PAYM     = 0) _
+          ) _
+      Then
+        strReportName = &quot;&lt;empty&gt;&quot;
+      else
+        strReportName=CType(Report.GetColumnValue(&quot;G_CLIENT.ADDR_LINE_F&quot;), String) &amp; &quot; &quot; &amp; CType(Report.GetParameterValue(&quot;prm_FIO&quot;), String)
+      End If
+      Report.ReportInfo.Name = strReportName
     End Sub
     
     Private Sub SetBandsVisible()
@@ -147,6 +164,30 @@ Namespace FastReport
     Private Sub band_G_FP_MESSAGE_AfterData(ByVal sender As object, ByVal e As EventArgs)
       Report.SetParameterValue(&quot;prm_ACC_NUM&quot;, GetVDecimal(CType(Report.GetColumnValue(&quot;G_FP_MESSAGE.FP_VALUE1&quot;), String)))
     End Sub
+
+    Private Sub _StartReport(ByVal sender As object, ByVal e As EventArgs)
+      Report.ReportInfo.Name=&quot;&lt;empty&gt;&quot;
+    End Sub
+
+    Private Sub band_IsBlocked_AfterData(ByVal sender As object, ByVal e As EventArgs)
+      if CType(Report.GetColumnValue(&quot;G_FP_MESSAGE.FP_LABEL1&quot;), String) &lt;&gt; &quot;&quot; then
+        Report.SetParameterValue(&quot;isBlocked&quot;,True)
+        txtBlocked.Visible=true
+        txtRegular.Visible=false
+      else
+        Report.SetParameterValue(&quot;isBlocked&quot;,False)
+        txtBlocked.Visible=false
+        txtRegular.Visible=true
+      End If
+    End Sub
+    
+    
+
+
+    Private Sub cell_OWN_FUNDS_AfterData(ByVal sender As object, ByVal e As EventArgs)
+      Report.SetParameterValue(&quot;prm_OWN_FUNDS&quot;, GetVDecimal(cell_OWN_FUNDS.Value))
+    End Sub
+
   End Class
 End Namespace
 </ScriptText>
@@ -285,7 +326,6 @@ End Namespace
       <Column Name="LIST_G_MESSAGE_DATE" DataType="System.String"/>
       <Column Name="MESSAGE_COUNTER" DataType="System.String"/>
       <Column Name="LIST_G_CONTRACT_Id" DataType="System.Int32"/>
-      <Column Name="LIST_G_A_ACNT_CONTRACT" DataType="System.String"/>
     </TableDataSource>
     <TableDataSource Name="LIST_G_CURR_CONTRACT" ReferenceName="Data.LIST_G_CURR_CONTRACT" DataType="System.Int32" Enabled="true">
       <Column Name="LIST_G_CURR_CONTRACT_Id" DataType="System.Int32"/>
@@ -437,6 +477,10 @@ End Namespace
     <Parameter Name="prm_ReportBuildDate" DataType="System.String"/>
     <Parameter Name="prm_DataSourceFileName" DataType="System.String"/>
     <Parameter Name="prm_ADDRESS" DataType="System.String" Expression="UpperCase([G_CLIENT.ADDR_LINE_B] &amp; &quot; &quot; &amp; [G_CLIENT.ADDR_LINE_C] &amp; &quot; &quot; &amp; [G_CLIENT.ADDR_LINE_D] &amp; &quot; &quot; &amp; IIf([ADDR_A]=&quot;&quot;,&quot;&quot;,vbCrLf + [ADDR_A])).Trim"/>
+    <Parameter Name="prm_BEG_BAL_CURR" DataType="System.String" Description="prm_BEG_BAL_CURR"/>
+    <Parameter Name="prm_END_BALLANCE" DataType="System.String"/>
+    <Parameter Name="prm_N_ENTRIES" DataType="System.String"/>
+    <Parameter Name="prm_OWN_FUNDS" DataType="System.String"/>
   </Dictionary>
   <ReportPage Name="Page1" RawPaperSize="9" RightMargin="7.5" BottomMargin="0" FirstPageSource="260" OtherPagesSource="262" Guides="355.32">
     <ReportTitleBand Name="ReportTitle1" Top="20" Width="727.65" Height="75.6"/>
@@ -445,7 +489,7 @@ End Namespace
       <SubreportObject Name="subInfo" Top="71.82" Width="355.32" Height="321.3" ShiftMode="Never" ReportPage="pgSubAccInfo" PrintOnParent="true"/>
       <TextObject Name="Text2" Top="56.7" Width="355.32" Height="15.12" CanGrow="true" CanShrink="true" Text="Отчет подготовлен по состоянию на [prm_ReportBuildDate]" Padding="0, 0, 0, 0" Font="Arial, 9pt"/>
       <TextObject Name="Text4" Top="41.58" Width="355.32" Height="15.12" CanGrow="true" CanShrink="true" Text="№ кредитного договора: [G_CLIENT.ADDR_LINE_F]" Padding="0, 0, 0, 0" Font="Arial, 9pt"/>
-      <RichObject Name="Rich3" Left="376.11" Top="217.35" Width="351.54" Height="175.77" CanGrow="true" ShiftMode="Never" Text="{\rtf1\ansi\ansicpg1251\deff0\deflang1049{\fonttbl{\f0\fswiss\fprq2\fcharset204{\*\fname Arial;}Arial CYR;}{\f1\fnil\fcharset204 Tahoma;}}&#13;&#10;{\*\generator Msftedit 5.41.15.1515;}\viewkind4\uc1\pard\sl276\slmult1\f0\fs19\'ce\'e1\'f0\'e0\'f9\'e0\'e5\'ec \'e2\'ed\'e8\'ec\'e0\'ed\'e8\'e5, \b\'f1 1.07.2014\b0  \'ea\'ee\'ec\'e8\'f1\'f1\'e8\'ff \'e7\'e0 \'ef\'f0\'e5\'e4\'ee\'f1\'f2\'e0\'e2\'eb\'e5\'ed\'e8\'e5 \'ce\'f2\'f7\'e5\'f2\'e0 \'ef\'ee\'f1\'f0\'e5\'e4\'f1\'f2\'e2\'ee\'ec \'cf\'ee\'f7\'f2\'fb \'d0\'ee\'f1\'f1\'e8\'e8 \'e1\'f3\'e4\'e5\'f2 \'f1\'ee\'f1\'f2\'e0\'e2\'eb\'ff\'f2\'fc \b 50 \'f0\'f3\'e1\'eb\'e5\'e9 \'e5\'e6\'e5\'ec\'e5\'f1\'ff\'f7\'ed\'ee\b0 . \'c4\'e0\'ed\'ed\'e0\'ff \'f3\'f1\'eb\'f3\'e3\'e0 \'e1\'f3\'e4\'e5\'f2 \'ee\'f2\'ea\'eb\'fe\'f7\'e5\'ed\'e0 \'ef\'ee \'c2\'e0\'f8\'e5\'e9 \'ea\'e0\'f0\'f2\'e5. \'c2\'fb \'e1\'f3\'e4\'e5\'f2\'e5 \'ef\'e5\'f0\'e5\'e2\'e5\'e4\'e5\'ed\'fb \'ed\'e0 \'ef\'ee\'eb\'f3\'f7\'e5\'ed\'e8\'e5 \'ce\'f2\'f7\'e5\'f2\'ee\'e2 \'ef\'ee \'fd\'eb\'e5\'ea\'f2\'f0\'ee\'ed\'ed\'ee\'e9 \'ef\'ee\'f7\'f2\'e5.\par&#13;&#10;\pard\sb60\sl276\slmult1\'c5\'f1\'eb\'e8 \'c2\'fb \'f5\'ee\'f2\'e8\'f2\'e5 \'ef\'f0\'ee\'e4\'ee\'eb\'e6\'e0\'f2\'fc \'ef\'ee\'eb\'f3\'f7\'e0\'f2\'fc \'ce\'f2\'f7\'e5\'f2\'fb \'ee\'e1 \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ff\'f5 \'ef\'ee \'ea\'e0\'f0\'f2\'e5 \'ef\'ee \'cf\'ee\'f7\'f2\'e5 \'d0\'ee\'f1\'f1\'e8\'e8, \'ef\'ee\'f1\'eb\'e5 1 \'e8\'fe\'eb\'ff \'c2\'e0\'ec \'ed\'e5\'ee\'e1\'f5\'ee\'e4\'e8\'ec\'ee \'ee\'e1\'f0\'e0\'f2\'e8\'f2\'fc\'f1\'ff \'e2 \'c1\'e0\'ed\'ea \'ef\'ee \'f2\'e5\'eb\'e5\'f4\'ee\'ed\'f3 8\~800\~200\~09\~81 \'e4\'eb\'ff \'ef\'ee\'e4\'ea\'eb\'fe\'f7\'e5\'ed\'e8\'ff \'ef\'eb\'e0\'f2\'ed\'ee\'e9 \'f3\'f1\'eb\'f3\'e3\'e8.\f1\fs17\par&#13;&#10;}&#13;&#10;" Padding="4, 4, 4, 4" AllowExpressions="false"/>
+      <RichObject Name="txtRegular" Left="376.11" Top="217.35" Width="351.54" Height="175.77" CanGrow="true" ShiftMode="Never" Text="{\rtf1\ansi\ansicpg1251\deff0\deflang1049{\fonttbl{\f0\fswiss\fprq2\fcharset204{\*\fname Arial;}Arial CYR;}{\f1\fnil\fcharset204 Tahoma;}}&#13;&#10;{\colortbl ;\red0\green0\blue255;}&#13;&#10;{\*\generator Msftedit 5.41.15.1515;}\viewkind4\uc1\pard\sl288\slmult1\b\f0\fs19\'cc\'e3\'ed\'ee\'e2\'e5\'ed\'ed\'ee \'e8 \'e1\'e5\'e7 \'ea\'ee\'ec\'e8\'f1\'f1\'e8\'e8\b0  \'ef\'ee\'ef\'ee\'eb\'ed\'ff\'e9\'f2\'e5 \'e1\'e0\'eb\'e0\'ed\'f1 \'c2\'e0\'f8\'e5\'e3\'ee \par&#13;&#10;\'ec\'ee\'e1\'e8\'eb\'fc\'ed\'ee\'e3\'ee \'f2\'e5\'eb\'e5\'f4\'ee\'ed\'e0 \'f1\'ee \'f1\'f7\'e5\'f2\'e0 \'ea\'e0\'f0\'f2\'fb:\par&#13;&#10;\'c4\'eb\'ff \'ee\'ef\'eb\'e0\'f2\'fb \'ee\'f2\'ef\'f0\'e0\'e2\'fc\'f2\'e5 \'ed\'e0 \'ed\'ee\'ec\'e5\'f0 9944 \'f2\'e5\'ea\'f1\'f2 TEL xxx,\par&#13;&#10;\'e3\'e4\'e5 xxx \endash  \'f1\'f3\'ec\'ec\'e0 \'e2 \'f0\'f3\'e1\'eb\'ff\'f5. \'cf\'f0\'e8\'ec\'e5\'f0 \'f1\'ee\'ee\'e1\'f9\'e5\'ed\'e8\'ff: \b TEL 300\b0\par&#13;&#10;\pard\'cf\'ee\'e4\'f0\'ee\'e1\'ed\'e5\'e5 \'ee\'e1 \'f3\'f1\'eb\'f3\'e3\'e5 \'ed\'e0 {\field{\*\fldinst{HYPERLINK &quot;http://www.rencredit.ru&quot; }}{\fldrslt{\cf1\ul www.rencredit.ru}}}\cf0\ulnone\f1\fs17\par&#13;&#10;}&#13;&#10;" Padding="4, 4, 4, 4" AllowExpressions="false"/>
       <TextObject Name="Text52" Left="376.11" Top="187.11" Width="351.54" Height="30.24" Border.Lines="Bottom" ShiftMode="Never" Text="Новости и информация" VertAlign="Bottom" Font="Arial, 9pt, style=Bold"/>
       <TextObject Name="Text48" Width="355.32" Height="41.58" Text="Отчет об операциях по карте" Padding="0, 0, 0, 0" VertAlign="Center" Font="Arial, 14pt, style=Bold"/>
       <ShapeObject Name="Shape1" Left="355.32" Width="374.22" Height="204.12" Visible="false" Border.Color="Gainsboro" Border.Width="0.25" Fill.Color="FloralWhite" ShiftMode="Never" Shape="RoundRectangle"/>
@@ -461,9 +505,10 @@ End Namespace
           <TableCell Name="Cell43" Text="[ZIP_CODE]" Padding="0, 0, 0, 0" Font="Arial, 10pt, style=Bold"/>
         </TableRow>
       </TableObject>
-      <BarcodeObject Name="Barcode1" Left="587.79" Top="37.8" Width="92" Height="13.23" Anchor="Top, Right" ShiftMode="Never" DataColumn="G_CLIENT.ADDR_LINE_F" Text="30011004771" ShowText="false" Zoom="0.8" Barcode="2/5 Interleaved"/>
+      <BarcodeObject Name="Barcode1" Left="587.79" Top="37.8" Width="92" Height="13.23" Anchor="Top, Right" ShiftMode="Never" DataColumn="G_CLIENT.ADDR_LINE_F" Text="41750003333" ShowText="false" Zoom="0.8" Barcode="2/5 Interleaved"/>
       <TextObject Name="Text1" Left="587.79" Top="51.03" Width="92.61" Height="11.34" Text="[G_CLIENT.ADDR_LINE_F]" HorzAlign="Center" Font="Arial, 6pt"/>
       <TextObject Name="Text7" Left="493.29" Top="37.8" Width="94.5" Height="24.57" Text="Вес: [[TotalPages]*5+5] гр." HorzAlign="Center" VertAlign="Center" Font="Arial, 7pt"/>
+      <RichObject Name="txtBlocked" Left="376.11" Top="217.35" Width="351.54" Height="175.77" Visible="false" CanGrow="true" ShiftMode="Never" Text="{\rtf1\ansi\ansicpg1251\deff0\deflang1049{\fonttbl{\f0\fswiss\fprq2\fcharset204{\*\fname Arial;}Arial CYR;}{\f1\fnil\fcharset204 Tahoma;}}&#13;&#10;{\*\generator Msftedit 5.41.15.1515;}\viewkind4\uc1\pard\f0\fs18\'c2\'c0\'d8 \'d1\'d7\'c5\'d2 \'c7\'c0\'c1\'cb\'ce\'ca\'c8\'d0\'ce\'c2\'c0\'cd \'c4\'ce \'cf\'ce\'cb\'cd\'ce\'c3\'ce \'cf\'ce\'c3\'c0\'d8\'c5\'cd\'c8\'df \'cc\'c8\'cd\'c8\'cc\'c0\'cb\'dc\'cd\'ce\'c3\'ce \'cf\'cb\'c0\'d2\'c5\'c6\'c0.\par&#13;&#10;\'c2\'ce \'c8\'c7\'c1\'c5\'c6\'c0\'cd\'c8\'c5 \'c4\'c0\'cb\'dc\'cd\'c5\'c9\'d8\'c5\'c3\'ce \'cd\'c0\'d7\'c8\'d1\'cb\'c5\'cd\'c8\'df \'d8\'d2\'d0\'c0\'d4\'cd\'db\'d5 \'d1\'c0\'cd\'ca\'d6\'c8\'c9 \'c8 \'cf\'c5\'d0\'c5\'c4\'c0\'d7\'c8 \'cc\'c0\'d2\'c5\'d0\'c8\'c0\'cb\'ce\'c2 \'c2 \'d1\'d3\'c4, \'cf\'d0\'ce\'d1\'c8\'cc \'c2\'c0\'d1 \b\'cd\'c5\'c7\'c0\'cc\'c5\'c4\'cb\'c8\'d2\'c5\'cb\'dc\'cd\'ce \'cf\'c5\'d0\'c5\'d7\'c8\'d1\'cb\'c8\'d2\'dc\b0  \'d1\'d3\'cc\'cc\'d3 \'cc\'c8\'cd\'c8\'cc\'c0\'cb\'dc\'cd\'ce\'c3\'ce \'cf\'cb\'c0\'d2\'c5\'c6\'c0 \'cd\'c0 \'c2\'c0\'d8 \'d1\'d7\'c5\'d2.\par&#13;&#10;\pard\'cf\'ce\'c4\'d0\'ce\'c1\'cd\'ce\'d1\'d2\'c8 \'cf\'ce \'d2\'c5\'cb\'c5\'d4\'ce\'cd\'d3 (495) 783-46-61\f1\fs17\par&#13;&#10;}&#13;&#10;"/>
       <DataBand Name="band_LIST_G_FINMESSAGE" Top="548.72" Width="727.65" AfterDataEvent="band_LIST_G_FINMESSAGE_AfterData" DataSource="LIST_G_FINMESSAGE">
         <DataBand Name="band_G_FINMESSAGE" Top="568.72" Width="727.65" DataSource="G_FINMESSAGE" Filter="[G_FINMESSAGE.LABEL1] like &quot;Дата формирования отчета*&quot;"/>
       </DataBand>
@@ -531,20 +576,20 @@ End Namespace
     <PageFooterBand Name="PageFooter1" Top="1165.28" Width="727.65" Height="143.64" PrintOn="FirstPage">
       <RichObject Name="Rich5" Top="1.89" Width="727.65" Height="141.75" CanGrow="true" Text="{\rtf1\ansi\ansicpg1251\deff0\deflang1049{\fonttbl{\f0\fswiss\fprq2\fcharset204{\*\fname Arial;}Arial CYR;}{\f1\fnil\fcharset204 Tahoma;}}&#13;&#10;{\colortbl ;\red0\green0\blue255;}&#13;&#10;{\*\generator Msftedit 5.41.15.1515;}\viewkind4\uc1\pard\nowidctlpar\b\f0\fs16\'c2 \'f6\'e5\'eb\'ff\'f5 \'ef\'ee\'e2\'fb\'f8\'e5\'ed\'e8\'ff \'e1\'e5\'e7\'ee\'ef\'e0\'f1\'ed\'ee\'f1\'f2\'e8, \'e8\'ed\'f4\'ee\'f0\'ec\'e8\'f0\'f3\'e5\'ec \'c2\'e0\'f1 \'ee \'ed\'e5\'ee\'e1\'f5\'ee\'e4\'e8\'ec\'fb\'f5 \'e4\'e5\'e9\'f1\'f2\'e2\'e8\'ff\'f5 \'e8 \'ef\'f0\'e0\'e2\'e8\'eb\'e0\'f5 \'e8\'f1\'ef\'ee\'eb\'fc\'e7\'ee\'e2\'e0\'ed\'e8\'ff \'ea\'e0\'f0\'f2\'fb:\par&#13;&#10;\b0\fs6\par&#13;&#10;\f1\fs17{\pict\wmetafile8\picwgoal90\pichgoal87 &#13;&#10;010009000003fd01000004005e01000000005e01000026060f00b202574d464301000000000001&#13;&#10;00f023000000000100000090020000000000009002000001000000e80000000000000000000000&#13;&#10;57020000450200000000000000000000983a0000ce38000020454d460000010090020000160000&#13;&#10;00020000003d0000006c0000000000000000050000000400004001000000010000000000000000&#13;&#10;00000000000000e2040000e8030049006e006b0073006300610070006500200030002e00340038&#13;&#10;002e00320020007200390038003100390020002800410075006700200031003400200032003000&#13;&#10;31003100290000002004bb00200451042104030421041a2020045504200454045f007200750062&#13;&#10;0069006e0065002e0065006d006600000000000000110000000c00000008000000090000001000&#13;&#10;0000983a0000ce3800000b000000100000005702000045020000460000002c0000001d00000053&#13;&#10;637265656e3d31323830783130323470782c20333230783235366d6d000000460000002c000000&#13;&#10;1e00000044726177696e673d302c30782d312c3870782c202d302c3078302c306d6d0000270000&#13;&#10;00180000000100000000000000de006d0000000000250000000c00000001000000130000000c00&#13;&#10;0000020000003b000000080000001b00000010000000983a0000ce3800003600000010000000ae&#13;&#10;1f0000ce38000058000000280000000000000000000000ffffffffffffffff03000000410ece38&#13;&#10;00005d2a00006e1736000000100000000000000001000000360000001000000006260000010000&#13;&#10;0058000000280000000000000000000000ffffffffffffffff030000001b310100983a0409983a&#13;&#10;ba143600000010000000983a0000ce3800003c000000080000003e000000180000000000000000&#13;&#10;0000005702000045020000250000000c00000000000080280000000c000000010000000e000000&#13;&#10;140000000000000010000000140000000400000003010800050000000b0200000000050000000c&#13;&#10;024602580207000000fc020000de006d000000040000002d010000040000000601020008000000&#13;&#10;fa02050000000000ffffff00040000002d0101004f000000380501002500570245024401450223&#13;&#10;01430203013e02e4003602c6002b02aa001d028f000c027600f9015f00e3014a00cb013800b101&#13;&#10;270095011a0077010f00570107003601020013010000f00000000000850100009a010100ae0104&#13;&#10;00c2010900d5011000e8011900f90124000902300018023d0026024c0032025c003d026e004602&#13;&#10;80004d0294005302a8005602be005702d4005702450208000000fa020000000000000000000004&#13;&#10;0000002d01020007000000fc020000ffffff000000040000002d01030004000000f00100000300&#13;&#10;00000000&#13;&#10;}\f0\fs16  \'cd\'c8\'ca\'ce\'c3\'c4\'c0 \'ed\'e5 \'ef\'f0\'e5\'e4\'ee\'f1\'f2\'e0\'e2\'eb\'ff\'e9\'f2\'e5 \'e8\'ed\'f4\'ee\'f0\'ec\'e0\'f6\'e8\'fe \'e2 \'ee\'f2\'e2\'e5\'f2 \'ed\'e0 \'ef\'ee\'f1\'f2\'f3\'ef\'e0\'fe\'f9\'e8\'e5 \'f2\'e5\'eb\'e5\'f4\'ee\'ed\'ed\'fb\'e5 \'e7\'e2\'ee\'ed\'ea\'e8 \'e8/\'e8\'eb\'e8 \'e2\'f5\'ee\'e4\'ff\'f9\'e8\'e5 SMS-\'f1\'ee\'ee\'e1\'f9\'e5\'ed\'e8\'ff, \'e2 \'ea\'ee\'f2\'ee\'f0\'fb\'f5 \'ee\'f2 \'e8\'ec\'e5\'ed\'e8 \'ca\'c1 \'ab\'d0\'e5\'ed\'e5\'f1\'f1\'e0\'ed\'f1 \'ca\'f0\'e5\'e4\'e8\'f2\'bb (\'ce\'ce\'ce) \'e8\'eb\'e8 \'eb\'fe\'e1\'ee\'e9 \'e4\'f0\'f3\'e3\'ee\'e9 \'ee\'f0\'e3\'e0\'ed\'e8\'e7\'e0\'f6\'e8\'e8 \'ef\'f0\'e5\'e4\'eb\'e0\'e3\'e0\'e5\'f2\'f1\'ff \'f1\'ee\'ee\'e1\'f9\'e8\'f2\'fc \'f0\'e5\'ea\'e2\'e8\'e7\'e8\'f2\'fb \'ea\'e0\'f0\'f2\'fb (\'ed\'ee\'ec\'e5\'f0, \'f1\'f0\'ee\'ea \'e4\'e5\'e9\'f1\'f2\'e2\'e8\'ff, \'f2\'f0\'b8\'f5\'e7\'ed\'e0\'f7\'ed\'fb\'e9 \'ea\'ee\'e4 \'e7\'e0\'f9\'e8\'f2\'fb CVC2/ CVV2 \'ed\'e0 \'ee\'e1\'ee\'f0\'ee\'f2\'ed\'ee\'e9 \'f1\'f2\'ee\'f0\'ee\'ed\'e5, \'cf\'c8\'cd-\'ea\'ee\'e4 \'ea\'e0\'f0\'f2\'fb), \'ef\'e5\'f0\'f1\'ee\'ed\'e0\'eb\'fc\'ed\'fb\'e5 \'e4\'e0\'ed\'ed\'fb\'e5 (\'ea\'ee\'e4\'ee\'e2\'ee\'e5 \'f1\'eb\'ee\'e2\'ee, \'ef\'e0\'f1\'ef\'ee\'f0\'f2\'ed\'fb\'e5 \'e4\'e0\'ed\'ed\'fb\'e5) \'e8\'eb\'e8 \'f1\'ee\'e2\'e5\'f0\'f8\'e8\'f2\'fc \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'fe \'e2 \'e1\'e0\'ed\'ea\'ee\'ec\'e0\'f2\'e5.\par&#13;&#10;\fs6\par&#13;&#10;\f1\fs17{\pict\wmetafile8\picwgoal90\pichgoal87 &#13;&#10;010009000003fd01000004005e01000000005e01000026060f00b202574d464301000000000001&#13;&#10;00f023000000000100000090020000000000009002000001000000e80000000000000000000000&#13;&#10;57020000450200000000000000000000983a0000ce38000020454d460000010090020000160000&#13;&#10;00020000003d0000006c0000000000000000050000000400004001000000010000000000000000&#13;&#10;00000000000000e2040000e8030049006e006b0073006300610070006500200030002e00340038&#13;&#10;002e00320020007200390038003100390020002800410075006700200031003400200032003000&#13;&#10;31003100290000002004bb00200451042104030421041a2020045504200454045f007200750062&#13;&#10;0069006e0065002e0065006d006600000000000000110000000c00000008000000090000001000&#13;&#10;0000983a0000ce3800000b000000100000005702000045020000460000002c0000001d00000053&#13;&#10;637265656e3d31323830783130323470782c20333230783235366d6d000000460000002c000000&#13;&#10;1e00000044726177696e673d302c30782d312c3870782c202d302c3078302c306d6d0000270000&#13;&#10;00180000000100000000000000de006d0000000000250000000c00000001000000130000000c00&#13;&#10;0000020000003b000000080000001b00000010000000983a0000ce3800003600000010000000ae&#13;&#10;1f0000ce38000058000000280000000000000000000000ffffffffffffffff03000000410ece38&#13;&#10;00005d2a00006e1736000000100000000000000001000000360000001000000006260000010000&#13;&#10;0058000000280000000000000000000000ffffffffffffffff030000001b310100983a0409983a&#13;&#10;ba143600000010000000983a0000ce3800003c000000080000003e000000180000000000000000&#13;&#10;0000005702000045020000250000000c00000000000080280000000c000000010000000e000000&#13;&#10;140000000000000010000000140000000400000003010800050000000b0200000000050000000c&#13;&#10;024602580207000000fc020000de006d000000040000002d010000040000000601020008000000&#13;&#10;fa02050000000000ffffff00040000002d0101004f000000380501002500570245024401450223&#13;&#10;01430203013e02e4003602c6002b02aa001d028f000c027600f9015f00e3014a00cb013800b101&#13;&#10;270095011a0077010f00570107003601020013010000f00000000000850100009a010100ae0104&#13;&#10;00c2010900d5011000e8011900f90124000902300018023d0026024c0032025c003d026e004602&#13;&#10;80004d0294005302a8005602be005702d4005702450208000000fa020000000000000000000004&#13;&#10;0000002d01020007000000fc020000ffffff000000040000002d01030004000000f00100000300&#13;&#10;00000000&#13;&#10;}\f0\fs16  \'c5\'f1\'eb\'e8 \'f3 \'c2\'e0\'f1 \'e2\'ee\'e7\'ed\'e8\'ea\'eb\'e8 \'ef\'ee\'e4\'ee\'e7\'f0\'e5\'ed\'e8\'ff, \'f7\'f2\'ee \'ea \'c2\'e0\'ec \'ee\'e1\'f0\'e0\'f2\'e8\'eb\'e8\'f1\'fc \'ec\'ee\'f8\'e5\'ed\'ed\'e8\'ea\'e8, \'e7\'e0\'ef\'e8\'f8\'e8\'f2\'e5 \'e4\'ee\'eb\'e6\'ed\'ee\'f1\'f2\'fc, \'ed\'e0\'e8\'ec\'e5\'ed\'ee\'e2\'e0\'ed\'e8\'e5 \'ee\'f2\'e4\'e5\'eb\'e0 \'e8 \'d4\'c8\'ce \'e7\'e2\'ee\'ed\'ff\'f9\'e5\'e3\'ee, \'e4\'e0\'eb\'e5\'e5 \'ef\'e5\'f0\'e5\'e7\'e2\'ee\'ed\'e8\'f2\'e5 \'e2 \'ab\'d0\'e5\'ed\'e5\'f1\'f1\'e0\'ed\'f1 \'ca\'f0\'e5\'e4\'e8\'f2\'bb \'ef\'ee \'f2\'e5\'eb\'e5\'f4\'ee\'ed\'f3, \'f3\'ea\'e0\'e7\'e0\'ed\'ed\'ee\'ec\'f3 \'ed\'e0 \'ee\'e1\'ee\'f0\'ee\'f2\'ed\'ee\'e9 \'f1\'f2\'ee\'f0\'ee\'ed\'e5 \'ea\'e0\'f0\'f2\'fb, \'e8 \'ef\'f0\'ee\'e2\'e5\'f0\'fc\'f2\'e5 \'e8\'ed\'f4\'ee\'f0\'ec\'e0\'f6\'e8\'fe.\par&#13;&#10;\fs6\par&#13;&#10;\pard\f1\fs17{\pict\wmetafile8\picwgoal90\pichgoal87 &#13;&#10;010009000003fd01000004005e01000000005e01000026060f00b202574d464301000000000001&#13;&#10;00f023000000000100000090020000000000009002000001000000e80000000000000000000000&#13;&#10;57020000450200000000000000000000983a0000ce38000020454d460000010090020000160000&#13;&#10;00020000003d0000006c0000000000000000050000000400004001000000010000000000000000&#13;&#10;00000000000000e2040000e8030049006e006b0073006300610070006500200030002e00340038&#13;&#10;002e00320020007200390038003100390020002800410075006700200031003400200032003000&#13;&#10;31003100290000002004bb00200451042104030421041a2020045504200454045f007200750062&#13;&#10;0069006e0065002e0065006d006600000000000000110000000c00000008000000090000001000&#13;&#10;0000983a0000ce3800000b000000100000005702000045020000460000002c0000001d00000053&#13;&#10;637265656e3d31323830783130323470782c20333230783235366d6d000000460000002c000000&#13;&#10;1e00000044726177696e673d302c30782d312c3870782c202d302c3078302c306d6d0000270000&#13;&#10;00180000000100000000000000de006d0000000000250000000c00000001000000130000000c00&#13;&#10;0000020000003b000000080000001b00000010000000983a0000ce3800003600000010000000ae&#13;&#10;1f0000ce38000058000000280000000000000000000000ffffffffffffffff03000000410ece38&#13;&#10;00005d2a00006e1736000000100000000000000001000000360000001000000006260000010000&#13;&#10;0058000000280000000000000000000000ffffffffffffffff030000001b310100983a0409983a&#13;&#10;ba143600000010000000983a0000ce3800003c000000080000003e000000180000000000000000&#13;&#10;0000005702000045020000250000000c00000000000080280000000c000000010000000e000000&#13;&#10;140000000000000010000000140000000400000003010800050000000b0200000000050000000c&#13;&#10;024602580207000000fc020000de006d000000040000002d010000040000000601020008000000&#13;&#10;fa02050000000000ffffff00040000002d0101004f000000380501002500570245024401450223&#13;&#10;01430203013e02e4003602c6002b02aa001d028f000c027600f9015f00e3014a00cb013800b101&#13;&#10;270095011a0077010f00570107003601020013010000f00000000000850100009a010100ae0104&#13;&#10;00c2010900d5011000e8011900f90124000902300018023d0026024c0032025c003d026e004602&#13;&#10;80004d0294005302a8005602be005702d4005702450208000000fa020000000000000000000004&#13;&#10;0000002d01020007000000fc020000ffffff000000040000002d01030004000000f00100000300&#13;&#10;00000000&#13;&#10;}\f0\fs16  \'d1\'f2\'e0\'ed\'e4\'e0\'f0\'f2\'ed\'fb\'e5 \'f8\'e0\'e1\'eb\'ee\'ed\'fb SMS-\'f1\'ee\'ee\'e1\'f9\'e5\'ed\'e8\'e9 \'f0\'e0\'e7\'ec\'e5\'f9\'e5\'ed\'fb \'ed\'e0 \'ee\'f4\'e8\'f6\'e8\'e0\'eb\'fc\'ed\'ee\'ec \'f1\'e0\'e9\'f2\'e5 \'c1\'e0\'ed\'ea\'e0: {\field{\*\fldinst{HYPERLINK &quot;http://www.rencredit.ru&quot; }}{\fldrslt{\cf1\ul www.rencredit.ru}}}\cf0\ulnone\f0\fs16 , \u8594? \line\'ee\'e1\'eb\'e0\'f1\'f2\'fc \'ab\'cf\'ee\'e4\'e4\'e5\'f0\'e6\'ea\'e0 \'ea\'eb\'e8\'e5\'ed\'f2\'ee\'e2\'bb \u8594? \'ab\'c4\'e8\'f1\'f2\'e0\'ed\'f6\'e8\'ee\'ed\'ed\'ee\'e5 \'ee\'e1\'f1\'eb\'f3\'e6\'e8\'e2\'e0\'ed\'e8\'e5\'bb \u8594? \'e4\'e0\'eb\'e5\'e5 \'abSMS-\'ee\'ef\'ee\'e2\'e5\'f9\'e5\'ed\'e8\'e5 \'ef\'ee \'ea\'e0\'f0\'f2\'e5\'bb.\par&#13;&#10;\fs6\par&#13;&#10;\f1\fs17{\pict\wmetafile8\picwgoal90\pichgoal87 &#13;&#10;010009000003fd01000004005e01000000005e01000026060f00b202574d464301000000000001&#13;&#10;00f023000000000100000090020000000000009002000001000000e80000000000000000000000&#13;&#10;57020000450200000000000000000000983a0000ce38000020454d460000010090020000160000&#13;&#10;00020000003d0000006c0000000000000000050000000400004001000000010000000000000000&#13;&#10;00000000000000e2040000e8030049006e006b0073006300610070006500200030002e00340038&#13;&#10;002e00320020007200390038003100390020002800410075006700200031003400200032003000&#13;&#10;31003100290000002004bb00200451042104030421041a2020045504200454045f007200750062&#13;&#10;0069006e0065002e0065006d006600000000000000110000000c00000008000000090000001000&#13;&#10;0000983a0000ce3800000b000000100000005702000045020000460000002c0000001d00000053&#13;&#10;637265656e3d31323830783130323470782c20333230783235366d6d000000460000002c000000&#13;&#10;1e00000044726177696e673d302c30782d312c3870782c202d302c3078302c306d6d0000270000&#13;&#10;00180000000100000000000000de006d0000000000250000000c00000001000000130000000c00&#13;&#10;0000020000003b000000080000001b00000010000000983a0000ce3800003600000010000000ae&#13;&#10;1f0000ce38000058000000280000000000000000000000ffffffffffffffff03000000410ece38&#13;&#10;00005d2a00006e1736000000100000000000000001000000360000001000000006260000010000&#13;&#10;0058000000280000000000000000000000ffffffffffffffff030000001b310100983a0409983a&#13;&#10;ba143600000010000000983a0000ce3800003c000000080000003e000000180000000000000000&#13;&#10;0000005702000045020000250000000c00000000000080280000000c000000010000000e000000&#13;&#10;140000000000000010000000140000000400000003010800050000000b0200000000050000000c&#13;&#10;024602580207000000fc020000de006d000000040000002d010000040000000601020008000000&#13;&#10;fa02050000000000ffffff00040000002d0101004f000000380501002500570245024401450223&#13;&#10;01430203013e02e4003602c6002b02aa001d028f000c027600f9015f00e3014a00cb013800b101&#13;&#10;270095011a0077010f00570107003601020013010000f00000000000850100009a010100ae0104&#13;&#10;00c2010900d5011000e8011900f90124000902300018023d0026024c0032025c003d026e004602&#13;&#10;80004d0294005302a8005602be005702d4005702450208000000fa020000000000000000000004&#13;&#10;0000002d01020007000000fc020000ffffff000000040000002d01030004000000f00100000300&#13;&#10;00000000&#13;&#10;}\f0\fs16  \'ce\'e1\'ee \'e2\'f1\'e5\'f5 \'f1\'eb\'f3\'f7\'e0\'ff\'f5 \'ec\'ee\'f8\'e5\'ed\'ed\'e8\'f7\'e5\'f1\'f2\'e2\'e0 \'f1\'ee\'ee\'e1\'f9\'e0\'e9\'f2\'e5 \'e2 \'ea\'f0\'f3\'e3\'eb\'ee\'f1\'f3\'f2\'ee\'f7\'ed\'f3\'fe \'d1\'eb\'f3\'e6\'e1\'f3 \'ef\'ee\'e4\'e4\'e5\'f0\'e6\'ea\'e8 \'ea\'eb\'e8\'e5\'ed\'f2\'ee\'e2 \'ef\'ee \'f2\'e5\'eb\'e5\'f4\'ee\'ed\'f3 \b 8(495) 981-0-981.\b0\f1\fs17\par&#13;&#10;}&#13;&#10;" AllowExpressions="false"/>
       <ChildBand Name="Child2" Top="1328.92" Width="727.65" Height="113.4" PrintIfDatabandEmpty="true">
-        <TextObject Name="Text108" Top="75.6" Width="727.65" Height="37.8" Dock="Bottom" Text="[prm_DataSourceFileName]" HorzAlign="Right" Font="Arial, 5pt"/>
+        <TextObject Name="Text108" Top="75.6" Width="727.65" Height="37.8" Dock="Bottom" Text="[IO.Path.GetFileName(IO.Path.GetDirectoryName([prm_DataSourceFileName]))]\[IO.Path.GetFileNameWithoutExtension([prm_DataSourceFileName])]" HorzAlign="Right" Font="Arial, 5pt"/>
         <TextObject Name="Text3" Top="37.8" Width="727.65" Height="37.8" Dock="Bottom" Text="страница [Page] из [TotalPages]" HorzAlign="Right" Font="Arial, 8pt"/>
       </ChildBand>
     </PageFooterBand>
   </ReportPage>
   <ReportPage Name="pgSubAccInfo" Guides="240.03,355.32">
-    <DataBand Name="Data2" Top="20" Width="718.2" CanGrow="true" CanShrink="true" AfterDataEvent="Data2_AfterData" DataSource="">
+    <DataBand Name="Data2" Top="20" Width="718.2" CanGrow="true" CanShrink="true" AfterDataEvent="Data2_AfterData">
       <DataBand Name="Data3" Top="90.24" Width="718.2" Height="88.83" CanGrow="true" CanShrink="true" DataSource="G_FP_MESSAGE" Filter="[G_FP_MESSAGE.FP_LABEL1ATTR]=&quot;4&quot;">
         <TableObject Name="Table2" Top="-1.89" Width="355.32" Height="90.72">
           <TableColumn Name="Column6" Width="240.03"/>
           <TableColumn Name="Column7" Width="115.29"/>
           <TableRow Name="Row7" Height="15.12" AutoSize="true">
             <TableCell Name="Cell28" Text="[G_FP_MESSAGE.FP_LABEL1]" Padding="0, 1, 0, 0" Font="Arial, 9pt"/>
-            <TableCell Name="Cell29" Text="[G_FP_MESSAGE.FP_VALUE1]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt"/>
+            <TableCell Name="cell_OWN_FUNDS" AfterDataEvent="cell_OWN_FUNDS_AfterData" Text="[G_FP_MESSAGE.FP_VALUE1]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt"/>
           </TableRow>
           <TableRow Name="Row8" Height="15.12" AutoSize="true">
             <TableCell Name="Cell30" Text="[G_FP_MESSAGE.FP_LABEL2]" Padding="0, 1, 0, 0" Font="Arial, 9pt"/>
@@ -696,6 +741,7 @@ End Namespace
         <TextObject Name="Text62" Width="213.57" Height="37.8" Border.Lines="Left, Bottom" Text="ДЕНЬГИ ДОЛЖНЫ ПОСТУПИТЬ НА ВАШ СЧЕТ НЕ ПОЗДНЕЕ" Padding="2, 5, 2, 5" VertAlign="Bottom" Font="Arial, 9pt, style=Bold"/>
         <TextObject Name="Text63" Left="213.57" Width="141.75" Height="37.8" Border.Lines="Right, Bottom" Text="[FormatDateTime(ToDateTime([G_FP_MESSAGE.FP_VALUE1]),&quot;Short Date&quot;)]" Padding="2, 5, 2, 5" Format="Date" Format.Format="d" HorzAlign="Right" VertAlign="Bottom" Font="Arial, 9pt, style=Bold"/>
       </DataBand>
+      <DataBand Name="band_IsBlocked" Top="637.69" Width="718.2" AfterDataEvent="band_IsBlocked_AfterData" DataSource="G_FP_MESSAGE" Filter="[G_FP_MESSAGE.FP_LABEL1ATTR]=&quot;5&quot;"/>
     </DataBand>
   </ReportPage>
   <ReportPage Name="pgPayment" RawPaperSize="9" LeftMargin="0" TopMargin="0" RightMargin="0" FirstPageSource="262" OtherPagesSource="262" Guides="9.45,765.45">
@@ -737,7 +783,7 @@ End Namespace
     </PageFooterBand>
   </ReportPage>
   <ReportPage Name="pgSubPaym" Visible="false" PaperWidth="110" LeftMargin="0" TopMargin="0" RightMargin="0" BottomMargin="0">
-    <DataBand Name="Data12" Top="20" Width="415.8" Height="143.64" DataSource="" Filter="[G_FP_MESSAGE.FP_LABEL1ATTR]=&quot;&quot;">
+    <DataBand Name="Data12" Top="20" Width="415.8" Height="143.64" Filter="[G_FP_MESSAGE.FP_LABEL1ATTR]=&quot;&quot;">
       <TextObject Name="Memo45" Width="323.19" Height="143.64" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="&lt;b&gt;&lt;u&gt;Получатель:&lt;/u&gt;&lt;/b&gt;&#13;&#10;[prm_FIO]&#13;&#10;№ счета: [prm_ACC_NUM]&#13;&#10;в КБ «Ренессанс Кредит» (ООО), Москва&#13;&#10;к/с 30101810900000000409 в отделении №3&#13;&#10;МГТУ ЦБ РФ   ИНН 7744000126    БИК 044599409&#13;&#10;&#13;&#10;&lt;b&gt;&lt;u&gt;Плательщик:&lt;/u&gt;&lt;/b&gt;" Padding="2, 1, 2, 1" HtmlTags="true"/>
     </DataBand>
   </ReportPage>
