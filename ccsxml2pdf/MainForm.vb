@@ -47,6 +47,17 @@ Public Partial Class MainForm
         'Dim strLastPrinterEmail As String = iniFile.GetString("Printers", "Printer_Email", "")
         'Dim strLastPrinterSalary As String = iniFile.GetString("Printers", "Printer_Salary", "")
         FillPrinterList ()
+        FillReportsList ()
+    End Sub
+    
+    Private Sub FillReportsList
+        cbReports.Items.Clear
+        cbReports.Items.Add("Авто")
+        Dim dirInfo As IO.DirectoryInfo = New IO.DirectoryInfo(IO.Path.GetDirectoryName(Application.ExecutablePath)) '   System.IO.Directory.GetFiles(IO.Path.GetDirectoryName(Application.ExecutablePath), "*.frx")
+        For Each fInfo As IO.FileInfo In dirInfo.EnumerateFiles("*.frx", IO.SearchOption.TopDirectoryOnly)
+            cbReports.Items.Add(fInfo.Name)
+        Next
+        cbReports.SelectedIndex = 0
     End Sub
     
     Private Sub FillProcessPriority
@@ -116,7 +127,7 @@ Public Partial Class MainForm
 '   End Sub
 
 
-    #Region "Drag'n'Drop"    
+    #Region "Drag'n'Drop"
     Sub ListView1DragDrop(sender As Object, e As DragEventArgs)
         ' Accept on files and folders.
         If (e.Data.GetDataPresent(DataFormats.FileDrop)) Then
@@ -228,6 +239,12 @@ Public Partial Class MainForm
     End Sub
 
     Sub BtnConvertClick(sender As Object, e As EventArgs)
+        ' bgw1.RunWorkerAsync()
+        ProcessFileList()
+    End Sub
+    #End Region
+    
+    Private Sub ProcessFileList()
         ' Dim f As Long
         Dim strXMLFileName As String
         Dim ccsFile as String
@@ -250,11 +267,15 @@ Public Partial Class MainForm
             ccsFile=io.Path.Combine(io.Path.GetDirectoryName(strXMLFileName),"ccs.dtd")
             'msgbox(ccsFile)
             If not(System.IO.File.Exists(ccsFile)) Then io.File.Create(ccsFile).Close
-            lvi.EnsureVisible
+            
+            listView1.BeginUpdate
+            '            lvi.EnsureVisible
+            listView1.EnsureVisible(listView1.Items.IndexOf(lvi))
             lvi.ImageIndex=1
             WriteTrace(strXMLFileName)
-            
+            listView1.EndUpdate
             ReportGenerationResult = GenerateReport(strXMLFileName, intType)
+            listView1.BeginUpdate
             Select Case ReportGenerationResult
                 Case ReportGenerationResults.Ok
                     lvi.ImageIndex=2
@@ -269,16 +290,17 @@ Public Partial Class MainForm
                 	lvi.ImageIndex=5
                 	intError +=1
             End Select
+            listView1.EndUpdate
             toolStripProgressBar1.Value = Me.listView1.Items.IndexOf(lvi)
             toolStripProgressText.Text = String.Format("{0}/{1} (Пустые: {2}, Ошибки: {3}, Неверный XML: {4})", Me.listView1.Items.IndexOf(lvi)+1, Me.listView1.Items.Count, intEmpty, intError, intInvalid)
-            My.Application.DoEvents
+            'My.Application.DoEvents
             'convertXMLtoMDB(a.ToString)
         Next lvi
         ' report1.Design
         WriteTrace(String.Format("Выполнено за {0}", GetDTInterval(dtFrom, DateAndTime.Now)))
         ' MsgBox(String.Format("Выполнено за {0}", GetDTInterval(dtFrom, DateAndTime.Now)), MsgBoxStyle.Information)
-    End Sub    
-    #End Region
+    End Sub
+    
     
     Function GenerateReport(strXmlFileName As String, intType As Integer) As Integer
         Dim RetVal As Integer = -1
@@ -291,16 +313,20 @@ Public Partial Class MainForm
             'Dim strDictonaryFileName As String = IO.Path.ChangeExtension(Application.ExecutablePath, "frd")
             'Dim strDTDFileName As String = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "CCS.dtd")
             
-            Select Case intType
-                Case 0 ' e-mail
-                    strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_email.frx")
-                Case 1 ' Russian Post
-                    strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_post.frx")
-                Case 2 ' Salary
-                    strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_salary.frx")
-                Case 3 ' e-mail
-                    strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_email.frx")
-            End Select
+            If cbReports.SelectedIndex=0 Then
+                Select Case intType
+                    Case 0 ' e-mail
+                        strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_email.frx")
+                    Case 1 ' Russian Post
+                        strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_post.frx")
+                    Case 2 ' Salary
+                        strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_salary.frx")
+                    Case 3 ' e-mail
+                        strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_email.frx")
+                End Select
+            Else
+                strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), cbReports.Text)
+            End If
             
             If report1.FileName = strReportFileName Then
                 report1.Dictionary.ClearRegisteredData
@@ -346,7 +372,6 @@ Public Partial Class MainForm
                 ' MsgBox(ex.Message, MsgBoxStyle.Critical)
                 Throw
             End Try
-
             ' Не печатать отчет, не содержащий ни одного листа.
             If (report1.PreparedPages.Count > 0) AndAlso (report1.ReportInfo.Name <> "<empty>") Then
                 If Me.chkPreview.Checked Then
@@ -425,12 +450,12 @@ Public Partial Class MainForm
     
     
     Function GetGroupIndex(strFileName As String) As Integer
-        If strFileName Like "*__E_48*" Then
-            Return 2
+        If strFileName Like "*_E_*" Then
+            Return 0
         ElseIf strFileName Like "*_C_*" Then
             Return 1
-        ElseIf strFileName Like "*_E_*" Then
-            Return 0
+        ElseIf strFileName Like "*__E_48*" Then
+            Return 2
         ElseIf strFileName Like "*-P-*" Then
             Return 3
         Else
@@ -508,4 +533,8 @@ Public Partial Class MainForm
         WriteProcessInfo()
     End Sub
 
+    
+    Sub Bgw1_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs)
+        ProcessFileList()
+    End Sub
 End Class
