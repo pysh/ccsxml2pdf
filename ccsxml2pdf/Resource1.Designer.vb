@@ -77,6 +77,13 @@ Friend Class Resource1
         End Get
     End Property
     
+    Friend Shared ReadOnly Property ccs_full_xml() As Byte()
+        Get
+            Dim obj As Object = ResourceManager.GetObject("ccs_full_xml", resourceCulture)
+            Return CType(obj,Byte())
+        End Get
+    End Property
+    
     Friend Shared ReadOnly Property Delete() As System.Drawing.Bitmap
         Get
             Dim obj As Object = ResourceManager.GetObject("Delete", resourceCulture)
@@ -91,6 +98,13 @@ Friend Class Resource1
         End Get
     End Property
     
+    Friend Shared ReadOnly Property Page_White_Acrobat_ico() As System.Drawing.Icon
+        Get
+            Dim obj As Object = ResourceManager.GetObject("Page-White-Acrobat_ico", resourceCulture)
+            Return CType(obj,System.Drawing.Icon)
+        End Get
+    End Property
+    
     Friend Shared ReadOnly Property Page_White_Edit() As System.Drawing.Bitmap
         Get
             Dim obj As Object = ResourceManager.GetObject("Page-White-Edit", resourceCulture)
@@ -102,6 +116,13 @@ Friend Class Resource1
         Get
             Dim obj As Object = ResourceManager.GetObject("Printer", resourceCulture)
             Return CType(obj,System.Drawing.Bitmap)
+        End Get
+    End Property
+    
+    Friend Shared ReadOnly Property printer_ico() As System.Drawing.Icon
+        Get
+            Dim obj As Object = ResourceManager.GetObject("printer_ico", resourceCulture)
+            Return CType(obj,System.Drawing.Icon)
         End Get
     End Property
 End Class

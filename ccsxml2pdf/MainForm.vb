@@ -8,12 +8,12 @@
 '
 
 Imports System.Drawing.Printing
+Imports Microsoft.WindowsAPICodePack.Taskbar
 
 Public Partial Class MainForm
     Public iniFile As New ini(IO.Path.ChangeExtension(Application.ExecutablePath, "ini"))
     Public report1 As New FastReport.Report()
     Public myProc As Process = Process.GetCurrentProcess
-    
     Public Structure myPapperSource
         Public SourceID As Integer
         Public SourceName As String
@@ -23,21 +23,22 @@ Public Partial Class MainForm
 '        Public PriorityID As Integer
 '        Public PriorityName As String
 '    End Structure
-'    
-'    Public ProcessPriorities As List(Of structProcessPriority) = New(
-    
-    
+
     Public Enum ReportGenerationResults
         Ok = 0
         IsEmpty = 1
         InvalidXML = 2
-        [Error] = -1
+        XMLNotFound = -1
     End Enum
-    
+
     Public Sub New()
         ' The Me.InitializeComponent call is required for Windows Forms designer support.
         Me.InitializeComponent()
-        Me.Text = String.Format("STMT_2014  v.{0}", Application.ProductVersion)
+        Me.Text = String.Format("{0}  v.{1}", Application.ProductName, Application.ProductVersion)
+
+        dataSet1.ReadXml(IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_null.xml"))
+        dataSet1.Clear()
+
         FillProcessPriority()
         LoadProcessPriority()
         '
@@ -252,22 +253,24 @@ Public Partial Class MainForm
         Dim lvi As ListViewItem
         Dim intType As Integer
         Dim ReportGenerationResult As Integer
+        Dim intOK As Integer = 0
         Dim intEmpty As Integer = 0
         Dim intInvalid As Integer = 0
         Dim intError As Integer = 0
-        'Dim strReportFileName As String = IO.Path.ChangeExtension(Application.ExecutablePath, "frx")        
-
+        'Dim strReportFileName As String = IO.Path.ChangeExtension(Application.ExecutablePath, "frx")
         'report1.Clear
         'report1.Load(strReportFileName)
         'report1.PrintSettings.Printer = cbPrinters.Text
-        toolStripProgressBar1.Maximum = Me.listView1.Items.Count-1
+        toolStripProgressBar1.Maximum = IIf(Me.listView1.Items.Count < 1, 0, Me.listView1.Items.Count-1)
         For Each lvi In Me.listView1.Items
+            If TaskbarManager.IsPlatformSupported Then
+                TaskbarManager.Instance.SetOverlayIcon(Me.Handle, Resource1.printer_ico, "Печать")
+            End If
             strXMLFileName=lvi.SubItems(0).Text
             intType = GetGroupIndex(IO.Path.GetFileName(strXMLFileName))
             ccsFile=io.Path.Combine(io.Path.GetDirectoryName(strXMLFileName),"ccs.dtd")
             'msgbox(ccsFile)
             If not(System.IO.File.Exists(ccsFile)) Then io.File.Create(ccsFile).Close
-            
             listView1.BeginUpdate
             '            lvi.EnsureVisible
             listView1.EnsureVisible(listView1.Items.IndexOf(lvi))
@@ -280,113 +283,128 @@ Public Partial Class MainForm
                 Case ReportGenerationResults.Ok
                     lvi.ImageIndex=2
                     WriteLog("Печать завершена", strXMLFileName)
+                    intOK +=1
                 Case ReportGenerationResults.IsEmpty 
                 	lvi.ImageIndex=3
                 	intEmpty +=1
                 Case ReportGenerationResults.InvalidXML
                 	lvi.ImageIndex=4
                 	intInvalid +=1
-                Case ReportGenerationResults.Error
+                Case ReportGenerationResults.XMLNotFound
                 	lvi.ImageIndex=5
                 	intError +=1
             End Select
             listView1.EndUpdate
+            ' Обновляем статистику
             toolStripProgressBar1.Value = Me.listView1.Items.IndexOf(lvi)
             toolStripProgressText.Text = String.Format("{0}/{1} (Пустые: {2}, Ошибки: {3}, Неверный XML: {4})", Me.listView1.Items.IndexOf(lvi)+1, Me.listView1.Items.Count, intEmpty, intError, intInvalid)
+            lblStatOK.Text = intOK.ToString
+            lblStatIsEmpty.Text = intEmpty.ToString
+            lblStatInvalidXML.Text = intInvalid.ToString
+            lblStatError.Text = intError.ToString
+            lblStatTotal.Text = Me.listView1.Items.Count.ToString
+            
+            If TaskbarManager.IsPlatformSupported Then
+                TaskbarManager.Instance.SetProgressValue(toolStripProgressBar1.Value, toolStripProgressBar1.Maximum, Me.Handle)
+            End If
             'My.Application.DoEvents
             'convertXMLtoMDB(a.ToString)
         Next lvi
+        If TaskbarManager.IsPlatformSupported Then
+            ' TaskbarManager.Instance.SetOverlayIcon(Me.Handle, Icon.,"")
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress, Me.Handle)
+        End If
         ' report1.Design
         WriteTrace(String.Format("Выполнено за {0}", GetDTInterval(dtFrom, DateAndTime.Now)))
         ' MsgBox(String.Format("Выполнено за {0}", GetDTInterval(dtFrom, DateAndTime.Now)), MsgBoxStyle.Information)
     End Sub
-    
+
+    Function GetReportName(intType As Integer) As String
+        Dim strReportFileName As String = ""
+        If cbReports.SelectedIndex=0 Then
+            Select Case intType
+                Case 0 ' e-mail
+                    strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_email.frx")
+                Case 1 ' Russian Post
+                    strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_post.frx")
+                Case 2 ' Salary
+                    strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_salary.frx")
+                Case 3 ' e-mail
+                    strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_email.frx")
+            End Select
+        Else
+            strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), cbReports.Text)
+        End If
+        Return strReportFileName
+    End Function
     
     Function GenerateReport(strXmlFileName As String, intType As Integer) As Integer
         Dim RetVal As Integer = -1
-        If System.IO.File.Exists(strXmlFileName) Then
-'            Dim dtFrom As Date
-'            Dim dtTo As Date
-'            Dim strEmail As String
-'            Dim strReportName As String
-            Dim strReportFileName As String = "" ' = IO.Path.ChangeExtension(Application.ExecutablePath, "frx")
+        If Not System.IO.File.Exists(strXmlFileName) Then
+            RetVal = ReportGenerationResults.XMLNotFound ' Отсутствует XML-файл
+        Else
+            Dim strReportFileName As String = GetReportName(intType) ' = IO.Path.ChangeExtension(Application.ExecutablePath, "frx")
             'Dim strDictonaryFileName As String = IO.Path.ChangeExtension(Application.ExecutablePath, "frd")
             'Dim strDTDFileName As String = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "CCS.dtd")
-            
-            If cbReports.SelectedIndex=0 Then
-                Select Case intType
-                    Case 0 ' e-mail
-                        strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_email.frx")
-                    Case 1 ' Russian Post
-                        strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_post.frx")
-                    Case 2 ' Salary
-                        strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_salary.frx")
-                    Case 3 ' e-mail
-                        strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_email.frx")
-                End Select
-            Else
-                strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), cbReports.Text)
-            End If
-            
-            If report1.FileName = strReportFileName Then
-                report1.Dictionary.ClearRegisteredData
-                
-            Else
-                report1.Clear
-                WriteTrace ("Loading report...")
-                report1.Load(strReportFileName)
-            End If
-            WriteTrace ("Register data...")
-'            -------
             dataSet1.Clear
             dataSet1.ReadXml(strXMLFileName)
-            If dataSet1.Tables.Contains("G_CLIENT") Then
-                
+            If (Not dataSet1.Tables.Contains("G_CLIENT")) OrElse (dataSet1.Tables("G_CLIENT").Rows.Count < 1) Then
+                RetVal = ReportGenerationResults.InvalidXML 'Неизвестный формат файла (Нет таблицы G_CLIENT)
             Else
-                RetVal = 2 'Неизвестный формат файла
-                Return RetVal
-                Exit Function
-            End If
-            
-            Try
-                report1.RegisterData(dataSet1)
-            Catch ex As Exception
-                WriteLog("Generic Exception Handler (DataSet.ReadXML): " &  ex.ToString(), strXMLFileName)
-                Throw
-            End Try
-            
-'            -- OR --
-'            Dim conn As FastReport.Data.XmlDataConnection = report1.Dictionary.Connections.Item(0)
-'            conn.XmlFile = strXmlFileName
-'            --------
-            report1.PrintSettings.Printer = cbPrinters.Text
-'            If Not report1.Parameters.Contains("prm_DataSourceFileName") Then report1.Parameters.Add("prm_DataSourceFileName")
-            report1.SetParameterValue("prm_DataSourceFileName", strXmlFileName)
-            ' report1.Design()
-            WriteTrace ("Prepare report...")
-            WriteLog("Подготовка отчета", strXMLFileName)
-            Try
-                report1.Prepare(False)
-            Catch ex As Exception
-                WriteLog("Generic Exception Handler (Report.Prepare): {0}" & ex.ToString(), strXMLFileName)
-                ' MsgBox(ex.Message, MsgBoxStyle.Critical)
-                Throw
-            End Try
-            ' Не печатать отчет, не содержащий ни одного листа.
-            If (report1.PreparedPages.Count > 0) AndAlso (report1.ReportInfo.Name <> "<empty>") Then
-                If Me.chkPreview.Checked Then
-                    report1.PrintSettings.ShowDialog = True
-                    WriteLog("Просмотр отчета", strXMLFileName)
-                    report1.ShowPrepared()
+                ' Открытие шаблона отчета
+'                If report1.FileName = strReportFileName Then
+'                    report1.Dictionary.ClearRegisteredData
+'                Else
+                    report1.Clear
+                    Application.DoEvents
+                    WriteTrace ("Loading report...")
+                    report1.Load(strReportFileName)
+'                End If
+
+'                --------
+'                Dim conn As FastReport.Data.XmlDataConnection = report1.Dictionary.Connections.Item(0)
+'                conn.XmlFile = strXmlFileName
+'                --------
+                report1.PrintSettings.Printer = cbPrinters.Text
+'                If Not report1.Parameters.Contains("prm_DataSourceFileName") Then report1.Parameters.Add("prm_DataSourceFileName")
+                report1.SetParameterValue("prm_DataSourceFileName", strXmlFileName)
+                report1.ReportInfo.Name = "<empty>"
+                Application.DoEvents()
+
+                ' *** Регистрация данных ***
+                Try
+                    WriteTrace ("Register data...")
+                    report1.RegisterData(dataSet1)
+                Catch ex As Exception
+                    WriteLog("Generic Exception Handler (DataSet.ReadXML): " &  ex.ToString(), strXMLFileName)
+                    Throw
+                End Try
+                ' *** Подготовка отчета ***
+                WriteTrace ("Prepare report...")
+                WriteLog("Подготовка отчета", strXMLFileName)
+                Try
+                    report1.Prepare(False)
+                Catch ex As Exception
+                    WriteLog("Generic Exception Handler (Report.Prepare): {0}" & ex.ToString(), strXMLFileName)
+                    ' MsgBox(ex.Message, MsgBoxStyle.Critical)
+                    Throw
+                End Try
+                ' Не печатать отчет, не содержащий ни одного листа.
+                If not ((report1.PreparedPages.Count > 0) AndAlso (report1.ReportInfo.Name <> "<empty>")) Then
+                    RetVal = ReportGenerationResults.IsEmpty ' Пустой отчет
+                    WriteLog("Отчет пустой, пропускаем", strXMLFileName)
                 Else
-                    report1.PrintSettings.ShowDialog = False
-                    WriteLog("Печать отчета", strXMLFileName)
-                    report1.PrintPrepared()
+                    If Me.chkPreview.Checked Then
+                        report1.PrintSettings.ShowDialog = True
+                        WriteLog("Просмотр отчета", strXMLFileName)
+                        report1.ShowPrepared()
+                    Else
+                        report1.PrintSettings.ShowDialog = False
+                        WriteLog("Печать отчета", strXMLFileName)
+                        report1.PrintPrepared()
+                    End If
+                    RetVal = ReportGenerationResults.Ok ' Ок
                 End If
-                RetVal = 0 ' Ок
-            Else
-                RetVal = 1 ' Пустой отчет
-                WriteLog("Отчет пустой, пропускаем", strXMLFileName)
             End If
         End If
         Return RetVal
@@ -537,4 +555,5 @@ Public Partial Class MainForm
     Sub Bgw1_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs)
         ProcessFileList()
     End Sub
+
 End Class

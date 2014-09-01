@@ -34,16 +34,16 @@ Partial Class MainForm
 	''' </summary>
 	Private Sub InitializeComponent()
 	    Me.components = New System.ComponentModel.Container()
-	    Dim listViewGroup1 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Электронные", System.Windows.Forms.HorizontalAlignment.Left)
-	    Dim listViewGroup2 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Почта России", System.Windows.Forms.HorizontalAlignment.Left)
-	    Dim listViewGroup3 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Зарплатные", System.Windows.Forms.HorizontalAlignment.Left)
-	    Dim listViewGroup4 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Стандартный Продукт", System.Windows.Forms.HorizontalAlignment.Left)
+	    Dim listViewGroup5 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Электронные", System.Windows.Forms.HorizontalAlignment.Left)
+	    Dim listViewGroup6 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Почта России", System.Windows.Forms.HorizontalAlignment.Left)
+	    Dim listViewGroup7 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Зарплатные", System.Windows.Forms.HorizontalAlignment.Left)
+	    Dim listViewGroup8 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Стандартный Продукт", System.Windows.Forms.HorizontalAlignment.Left)
 	    Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
-	    Dim designerSettings1 As FastReport.Design.DesignerSettings = New FastReport.Design.DesignerSettings()
-	    Dim designerRestrictions1 As FastReport.Design.DesignerRestrictions = New FastReport.Design.DesignerRestrictions()
-	    Dim emailSettings1 As FastReport.Export.Email.EmailSettings = New FastReport.Export.Email.EmailSettings()
-	    Dim previewSettings1 As FastReport.PreviewSettings = New FastReport.PreviewSettings()
-	    Dim reportSettings1 As FastReport.ReportSettings = New FastReport.ReportSettings()
+	    Dim designerSettings2 As FastReport.Design.DesignerSettings = New FastReport.Design.DesignerSettings()
+	    Dim designerRestrictions2 As FastReport.Design.DesignerRestrictions = New FastReport.Design.DesignerRestrictions()
+	    Dim emailSettings2 As FastReport.Export.Email.EmailSettings = New FastReport.Export.Email.EmailSettings()
+	    Dim previewSettings2 As FastReport.PreviewSettings = New FastReport.PreviewSettings()
+	    Dim reportSettings2 As FastReport.ReportSettings = New FastReport.ReportSettings()
 	    Me.toolStrip1 = New System.Windows.Forms.ToolStrip()
 	    Me.toolStripButton1 = New System.Windows.Forms.ToolStripButton()
 	    Me.toolStripButton2 = New System.Windows.Forms.ToolStripButton()
@@ -60,6 +60,18 @@ Partial Class MainForm
 	    Me.toolStripProgressText = New System.Windows.Forms.ToolStripStatusLabel()
 	    Me.toolStripProgressBar1 = New System.Windows.Forms.ToolStripProgressBar()
 	    Me.panel1 = New System.Windows.Forms.Panel()
+	    Me.tableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
+	    Me.lblStatTotal = New System.Windows.Forms.Label()
+	    Me.lblStatError = New System.Windows.Forms.Label()
+	    Me.label13 = New System.Windows.Forms.Label()
+	    Me.label4 = New System.Windows.Forms.Label()
+	    Me.label6 = New System.Windows.Forms.Label()
+	    Me.lblStatOK = New System.Windows.Forms.Label()
+	    Me.lblStatIsEmpty = New System.Windows.Forms.Label()
+	    Me.lblStatInvalidXML = New System.Windows.Forms.Label()
+	    Me.label10 = New System.Windows.Forms.Label()
+	    Me.label8 = New System.Windows.Forms.Label()
+	    Me.label5 = New System.Windows.Forms.Label()
 	    Me.cbReports = New System.Windows.Forms.ComboBox()
 	    Me.label3 = New System.Windows.Forms.Label()
 	    Me.cbPaperPlain = New System.Windows.Forms.ComboBox()
@@ -83,6 +95,7 @@ Partial Class MainForm
 	    Me.toolStrip1.SuspendLayout
 	    Me.statusStrip1.SuspendLayout
 	    Me.panel1.SuspendLayout
+	    Me.tableLayoutPanel1.SuspendLayout
 	    CType(Me.pictureBox1,System.ComponentModel.ISupportInitialize).BeginInit
 	    CType(Me.dataSet1,System.ComponentModel.ISupportInitialize).BeginInit
 	    Me.SuspendLayout
@@ -173,7 +186,7 @@ Partial Class MainForm
 	    'statusStrip1
 	    '
 	    Me.statusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.status1, Me.toolStripProgressText, Me.toolStripProgressBar1})
-	    Me.statusStrip1.Location = New System.Drawing.Point(0, 381)
+	    Me.statusStrip1.Location = New System.Drawing.Point(0, 395)
 	    Me.statusStrip1.Name = "statusStrip1"
 	    Me.statusStrip1.Size = New System.Drawing.Size(844, 22)
 	    Me.statusStrip1.TabIndex = 1
@@ -201,6 +214,7 @@ Partial Class MainForm
 	    '
 	    'panel1
 	    '
+	    Me.panel1.Controls.Add(Me.tableLayoutPanel1)
 	    Me.panel1.Controls.Add(Me.cbReports)
 	    Me.panel1.Controls.Add(Me.label3)
 	    Me.panel1.Controls.Add(Me.cbPaperPlain)
@@ -216,8 +230,128 @@ Partial Class MainForm
 	    Me.panel1.Dock = System.Windows.Forms.DockStyle.Left
 	    Me.panel1.Location = New System.Drawing.Point(0, 39)
 	    Me.panel1.Name = "panel1"
-	    Me.panel1.Size = New System.Drawing.Size(331, 342)
+	    Me.panel1.Size = New System.Drawing.Size(331, 356)
 	    Me.panel1.TabIndex = 2
+	    '
+	    'tableLayoutPanel1
+	    '
+	    Me.tableLayoutPanel1.ColumnCount = 2
+	    Me.tableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 69.19643!))
+	    Me.tableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.80357!))
+	    Me.tableLayoutPanel1.Controls.Add(Me.lblStatTotal, 1, 5)
+	    Me.tableLayoutPanel1.Controls.Add(Me.lblStatError, 1, 4)
+	    Me.tableLayoutPanel1.Controls.Add(Me.label13, 0, 4)
+	    Me.tableLayoutPanel1.Controls.Add(Me.label4, 0, 0)
+	    Me.tableLayoutPanel1.Controls.Add(Me.label6, 0, 1)
+	    Me.tableLayoutPanel1.Controls.Add(Me.lblStatOK, 1, 1)
+	    Me.tableLayoutPanel1.Controls.Add(Me.lblStatIsEmpty, 1, 2)
+	    Me.tableLayoutPanel1.Controls.Add(Me.lblStatInvalidXML, 1, 3)
+	    Me.tableLayoutPanel1.Controls.Add(Me.label10, 0, 3)
+	    Me.tableLayoutPanel1.Controls.Add(Me.label8, 0, 2)
+	    Me.tableLayoutPanel1.Controls.Add(Me.label5, 0, 5)
+	    Me.tableLayoutPanel1.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize
+	    Me.tableLayoutPanel1.Location = New System.Drawing.Point(89, 180)
+	    Me.tableLayoutPanel1.Name = "tableLayoutPanel1"
+	    Me.tableLayoutPanel1.RowCount = 6
+	    Me.tableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20!))
+	    Me.tableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16!))
+	    Me.tableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16!))
+	    Me.tableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16!))
+	    Me.tableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16!))
+	    Me.tableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16!))
+	    Me.tableLayoutPanel1.Size = New System.Drawing.Size(184, 88)
+	    Me.tableLayoutPanel1.TabIndex = 12
+	    '
+	    'lblStatTotal
+	    '
+	    Me.lblStatTotal.Location = New System.Drawing.Point(130, 73)
+	    Me.lblStatTotal.Name = "lblStatTotal"
+	    Me.lblStatTotal.Size = New System.Drawing.Size(51, 14)
+	    Me.lblStatTotal.TabIndex = 20
+	    '
+	    'lblStatError
+	    '
+	    Me.lblStatError.Location = New System.Drawing.Point(130, 59)
+	    Me.lblStatError.Name = "lblStatError"
+	    Me.lblStatError.Size = New System.Drawing.Size(51, 14)
+	    Me.lblStatError.TabIndex = 19
+	    '
+	    'label13
+	    '
+	    Me.label13.Location = New System.Drawing.Point(3, 59)
+	    Me.label13.Name = "label13"
+	    Me.label13.Size = New System.Drawing.Size(121, 14)
+	    Me.label13.TabIndex = 16
+	    Me.label13.Text = "XML с ошибками:"
+	    '
+	    'label4
+	    '
+	    Me.label4.Dock = System.Windows.Forms.DockStyle.Fill
+	    Me.label4.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(204,Byte))
+	    Me.label4.Location = New System.Drawing.Point(3, 0)
+	    Me.label4.Name = "label4"
+	    Me.label4.Size = New System.Drawing.Size(121, 17)
+	    Me.label4.TabIndex = 7
+	    Me.label4.Text = "Статистика"
+	    '
+	    'label6
+	    '
+	    Me.label6.Dock = System.Windows.Forms.DockStyle.Fill
+	    Me.label6.Location = New System.Drawing.Point(3, 17)
+	    Me.label6.Name = "label6"
+	    Me.label6.Size = New System.Drawing.Size(121, 14)
+	    Me.label6.TabIndex = 9
+	    Me.label6.Text = "Успешно обработано:"
+	    '
+	    'lblStatOK
+	    '
+	    Me.lblStatOK.Dock = System.Windows.Forms.DockStyle.Fill
+	    Me.lblStatOK.Location = New System.Drawing.Point(130, 17)
+	    Me.lblStatOK.Name = "lblStatOK"
+	    Me.lblStatOK.Size = New System.Drawing.Size(51, 14)
+	    Me.lblStatOK.TabIndex = 10
+	    '
+	    'lblStatIsEmpty
+	    '
+	    Me.lblStatIsEmpty.Dock = System.Windows.Forms.DockStyle.Fill
+	    Me.lblStatIsEmpty.Location = New System.Drawing.Point(130, 31)
+	    Me.lblStatIsEmpty.Name = "lblStatIsEmpty"
+	    Me.lblStatIsEmpty.Size = New System.Drawing.Size(51, 14)
+	    Me.lblStatIsEmpty.TabIndex = 12
+	    '
+	    'lblStatInvalidXML
+	    '
+	    Me.lblStatInvalidXML.Dock = System.Windows.Forms.DockStyle.Fill
+	    Me.lblStatInvalidXML.Location = New System.Drawing.Point(130, 45)
+	    Me.lblStatInvalidXML.Name = "lblStatInvalidXML"
+	    Me.lblStatInvalidXML.Size = New System.Drawing.Size(51, 14)
+	    Me.lblStatInvalidXML.TabIndex = 14
+	    '
+	    'label10
+	    '
+	    Me.label10.Dock = System.Windows.Forms.DockStyle.Fill
+	    Me.label10.Location = New System.Drawing.Point(3, 45)
+	    Me.label10.Name = "label10"
+	    Me.label10.Size = New System.Drawing.Size(121, 14)
+	    Me.label10.TabIndex = 13
+	    Me.label10.Text = "Некорректные XML:"
+	    '
+	    'label8
+	    '
+	    Me.label8.Dock = System.Windows.Forms.DockStyle.Fill
+	    Me.label8.Location = New System.Drawing.Point(3, 31)
+	    Me.label8.Name = "label8"
+	    Me.label8.Size = New System.Drawing.Size(121, 14)
+	    Me.label8.TabIndex = 11
+	    Me.label8.Text = "Пустые выписки:"
+	    '
+	    'label5
+	    '
+	    Me.label5.Location = New System.Drawing.Point(3, 73)
+	    Me.label5.Name = "label5"
+	    Me.label5.Size = New System.Drawing.Size(121, 14)
+	    Me.label5.TabIndex = 17
+	    Me.label5.Text = "Всего файлов:"
 	    '
 	    'cbReports
 	    '
@@ -305,7 +439,7 @@ Partial Class MainForm
 	    Me.btnConvert.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left),System.Windows.Forms.AnchorStyles)
 	    Me.btnConvert.Image = Global.ccsxml2pdf.Resource1.Page_White_Acrobat_32x32
 	    Me.btnConvert.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-	    Me.btnConvert.Location = New System.Drawing.Point(229, 276)
+	    Me.btnConvert.Location = New System.Drawing.Point(229, 290)
 	    Me.btnConvert.Name = "btnConvert"
 	    Me.btnConvert.Size = New System.Drawing.Size(84, 55)
 	    Me.btnConvert.TabIndex = 2
@@ -319,7 +453,7 @@ Partial Class MainForm
 	    Me.btnClearList.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left),System.Windows.Forms.AnchorStyles)
 	    Me.btnClearList.Image = Global.ccsxml2pdf.Resource1.Delete
 	    Me.btnClearList.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-	    Me.btnClearList.Location = New System.Drawing.Point(120, 276)
+	    Me.btnClearList.Location = New System.Drawing.Point(120, 290)
 	    Me.btnClearList.Name = "btnClearList"
 	    Me.btnClearList.Size = New System.Drawing.Size(103, 55)
 	    Me.btnClearList.TabIndex = 1
@@ -333,7 +467,7 @@ Partial Class MainForm
 	    Me.btnAddFiles.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left),System.Windows.Forms.AnchorStyles)
 	    Me.btnAddFiles.Image = Global.ccsxml2pdf.Resource1.Add
 	    Me.btnAddFiles.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-	    Me.btnAddFiles.Location = New System.Drawing.Point(12, 276)
+	    Me.btnAddFiles.Location = New System.Drawing.Point(12, 290)
 	    Me.btnAddFiles.Name = "btnAddFiles"
 	    Me.btnAddFiles.Size = New System.Drawing.Size(102, 55)
 	    Me.btnAddFiles.TabIndex = 0
@@ -351,21 +485,21 @@ Partial Class MainForm
 	    Me.listView1.Dock = System.Windows.Forms.DockStyle.Fill
 	    Me.listView1.FullRowSelect = true
 	    Me.listView1.GridLines = true
-	    listViewGroup1.Header = "Электронные"
-	    listViewGroup1.Name = "grpEmail"
-	    listViewGroup2.Header = "Почта России"
-	    listViewGroup2.Name = "grpRusPost"
-	    listViewGroup3.Header = "Зарплатные"
-	    listViewGroup3.Name = "grpSalary"
-	    listViewGroup4.Header = "Стандартный Продукт"
-	    listViewGroup4.Name = "grpStandardProduct"
-	    Me.listView1.Groups.AddRange(New System.Windows.Forms.ListViewGroup() {listViewGroup1, listViewGroup2, listViewGroup3, listViewGroup4})
+	    listViewGroup5.Header = "Электронные"
+	    listViewGroup5.Name = "grpEmail"
+	    listViewGroup6.Header = "Почта России"
+	    listViewGroup6.Name = "grpRusPost"
+	    listViewGroup7.Header = "Зарплатные"
+	    listViewGroup7.Name = "grpSalary"
+	    listViewGroup8.Header = "Стандартный Продукт"
+	    listViewGroup8.Name = "grpStandardProduct"
+	    Me.listView1.Groups.AddRange(New System.Windows.Forms.ListViewGroup() {listViewGroup5, listViewGroup6, listViewGroup7, listViewGroup8})
 	    Me.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable
 	    Me.listView1.HideSelection = false
 	    Me.listView1.Location = New System.Drawing.Point(331, 39)
 	    Me.listView1.MultiSelect = false
 	    Me.listView1.Name = "listView1"
-	    Me.listView1.Size = New System.Drawing.Size(513, 342)
+	    Me.listView1.Size = New System.Drawing.Size(513, 356)
 	    Me.listView1.SmallImageList = Me.imglstFileStates
 	    Me.listView1.StateImageList = Me.imgLstFileChk
 	    Me.listView1.TabIndex = 20
@@ -411,25 +545,25 @@ Partial Class MainForm
 	    '
 	    'environmentSettings1
 	    '
-	    designerSettings1.ApplicationConnection = Nothing
-	    designerSettings1.DefaultFont = New System.Drawing.Font("Arial", 10!)
-	    designerSettings1.Icon = Nothing
-	    designerSettings1.Restrictions = designerRestrictions1
-	    designerSettings1.Text = ""
-	    Me.environmentSettings1.DesignerSettings = designerSettings1
-	    emailSettings1.Address = ""
-	    emailSettings1.Host = ""
-	    emailSettings1.MessageTemplate = ""
-	    emailSettings1.Name = ""
-	    emailSettings1.Password = ""
-	    emailSettings1.UserName = ""
-	    Me.environmentSettings1.EmailSettings = emailSettings1
-	    previewSettings1.Icon = CType(resources.GetObject("previewSettings1.Icon"),System.Drawing.Icon)
-	    previewSettings1.Text = ""
-	    Me.environmentSettings1.PreviewSettings = previewSettings1
-	    reportSettings1.DefaultLanguage = FastReport.Language.Vb
-	    reportSettings1.ShowProgress = false
-	    Me.environmentSettings1.ReportSettings = reportSettings1
+	    designerSettings2.ApplicationConnection = Nothing
+	    designerSettings2.DefaultFont = New System.Drawing.Font("Arial", 10!)
+	    designerSettings2.Icon = Nothing
+	    designerSettings2.Restrictions = designerRestrictions2
+	    designerSettings2.Text = ""
+	    Me.environmentSettings1.DesignerSettings = designerSettings2
+	    emailSettings2.Address = ""
+	    emailSettings2.Host = ""
+	    emailSettings2.MessageTemplate = ""
+	    emailSettings2.Name = ""
+	    emailSettings2.Password = ""
+	    emailSettings2.UserName = ""
+	    Me.environmentSettings1.EmailSettings = emailSettings2
+	    previewSettings2.Icon = CType(resources.GetObject("previewSettings2.Icon"),System.Drawing.Icon)
+	    previewSettings2.Text = ""
+	    Me.environmentSettings1.PreviewSettings = previewSettings2
+	    reportSettings2.DefaultLanguage = FastReport.Language.Vb
+	    reportSettings2.ShowProgress = false
+	    Me.environmentSettings1.ReportSettings = reportSettings2
 	    Me.environmentSettings1.UIStyle = FastReport.Utils.UIStyle.VisualStudio2005
 	    '
 	    'bgw1
@@ -440,11 +574,12 @@ Partial Class MainForm
 	    '
 	    Me.AutoScaleDimensions = New System.Drawing.SizeF(6!, 13!)
 	    Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-	    Me.ClientSize = New System.Drawing.Size(844, 403)
+	    Me.ClientSize = New System.Drawing.Size(844, 417)
 	    Me.Controls.Add(Me.listView1)
 	    Me.Controls.Add(Me.panel1)
 	    Me.Controls.Add(Me.statusStrip1)
 	    Me.Controls.Add(Me.toolStrip1)
+	    Me.Icon = Global.ccsxml2pdf.Resource1.Page_White_Acrobat_ico
 	    Me.Name = "MainForm"
 	    Me.Text = "STMT_2014"
 	    Me.toolStrip1.ResumeLayout(false)
@@ -452,11 +587,24 @@ Partial Class MainForm
 	    Me.statusStrip1.ResumeLayout(false)
 	    Me.statusStrip1.PerformLayout
 	    Me.panel1.ResumeLayout(false)
+	    Me.tableLayoutPanel1.ResumeLayout(false)
 	    CType(Me.pictureBox1,System.ComponentModel.ISupportInitialize).EndInit
 	    CType(Me.dataSet1,System.ComponentModel.ISupportInitialize).EndInit
 	    Me.ResumeLayout(false)
 	    Me.PerformLayout
 	End Sub
+	Private lblStatTotal As System.Windows.Forms.Label
+	Private lblStatError As System.Windows.Forms.Label
+	Private lblStatInvalidXML As System.Windows.Forms.Label
+	Private lblStatIsEmpty As System.Windows.Forms.Label
+	Private lblStatOK As System.Windows.Forms.Label
+	Private label5 As System.Windows.Forms.Label
+	Private label8 As System.Windows.Forms.Label
+	Private label10 As System.Windows.Forms.Label
+	Private label6 As System.Windows.Forms.Label
+	Private label4 As System.Windows.Forms.Label
+	Private label13 As System.Windows.Forms.Label
+	Private tableLayoutPanel1 As System.Windows.Forms.TableLayoutPanel
 	Private label3 As System.Windows.Forms.Label
 	Private cbReports As System.Windows.Forms.ComboBox
 	Private bgw1 As System.ComponentModel.BackgroundWorker
