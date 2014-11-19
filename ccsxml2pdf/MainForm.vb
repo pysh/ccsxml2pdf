@@ -6,17 +6,20 @@
 ' 
 ' Для изменения этого шаблона используйте Сервис | Настройка | Кодирование | Правка стандартных заголовков.
 '
+Option Compare Text
 
 Imports System.Drawing.Printing
+Imports System.Globalization
 Imports Microsoft.WindowsAPICodePack.Taskbar
 
 Public Partial Class MainForm
-    Public iniFile As New ini(IO.Path.ChangeExtension(Application.ExecutablePath, "ini"))
-    Public report1 As New FastReport.Report()
-    Public myProc As Process = Process.GetCurrentProcess
-    Public Structure myPapperSource
-        Public SourceID As Integer
-        Public SourceName As String
+    Private iniFile As New ini(IO.Path.ChangeExtension(Application.ExecutablePath, "ini"))
+    Private report1 As New FastReport.Report()
+    ' Private myProc As Process = Process.GetCurrentProcess
+    
+    Private Structure myPapperSource
+        Private SourceID As Integer
+        Private SourceName As String
     End Structure
 
 '    Public Structure structProcessPriority
@@ -24,13 +27,13 @@ Public Partial Class MainForm
 '        Public PriorityName As String
 '    End Structure
 
-    Public Enum ReportGenerationResults
+    Private Enum ReportGenerationResults As Integer
         Ok = 0
         IsEmpty = 1
-        InvalidXML = 2
-        XMLNotFound = -1
+        InvalidXml = 2
+        XmlNotFound = -1
     End Enum
-
+    
     Public Sub New()
         ' The Me.InitializeComponent call is required for Windows Forms designer support.
         Me.InitializeComponent()
@@ -41,6 +44,7 @@ Public Partial Class MainForm
 
         FillProcessPriority()
         LoadProcessPriority()
+        ' Application.CurrentCulture = CultureInfo.GetCultureInfo("En-en")
         '
         ' TODO : Add constructor code after InitializeComponents
         '
@@ -75,9 +79,9 @@ Public Partial Class MainForm
         cbProcessPriority.ComboBox.ValueMember = "Key"
     End Sub
     
-    Private Sub LoadProcessPriority()
+    Private Sub LoadProcessPriority
         Dim myProcess As Process = Process.GetCurrentProcess
-        Dim iPC As ProcessPriorityClass = iniFile.GetInteger("Settings","ProcessPriority", CType(ProcessPriorityClass.Normal, Integer))
+        Dim iPC As ProcessPriorityClass = iniFile.GetInteger("Settings", "ProcessPriority", CInt(ProcessPriorityClass.Normal))
 '        Dim iBP As Integer = iniFile.GetString("Settings","BasePriority", 8)
         myProcess.PriorityClass = iPC
         cbProcessPriority.SelectedIndex = -1
@@ -90,7 +94,7 @@ Public Partial Class MainForm
     End Sub
 
     Private Sub SaveProcessPriority(Optional intPriority As ProcessPriorityClass = 0)
-        If intPriority = 0 Then intPriority = CType(myProc.PriorityClass, Integer)
+        If intPriority = 0 Then intPriority = Process.GetCurrentProcess.PriorityClass
         iniFile.WriteInteger("Settings", "ProcessPriority",intPriority)
     End Sub
 
@@ -167,18 +171,18 @@ Public Partial Class MainForm
         Dim intGroupIndex As Integer
         Dim lvi As ListViewItem
         Dim lvg As ListViewGroup
-        intGroupIndex = GetGroupIndex(IO.Path.GetFileName(strFileName))
+        intGroupIndex = GetGroupIndex(IO.Path.GetFileName(strFileName).ToUpper(CultureInfo.CurrentCulture))
         lvg = listView1.Groups.Item(intGroupIndex)
-        lvi = New ListViewItem(New String(){strFileName, intGroupIndex.ToString})
+        lvi = New ListViewItem(New String(){strFileName, intGroupIndex.ToString(CultureInfo.CurrentCulture)})
         lvi.Group = lvg
         lvi.ImageIndex=0
         listView1.Items.Add(lvi)
     End Sub
     
-    Public Sub WriteLog(strMessage As String, strXMLFileName As String)
-        Dim strLogFileName As String = IO.Path.Combine(IO.Path.GetDirectoryName(strXMLFileName),"xml2pdf.log")
+    Shared Public Sub WriteLog(strMessage As String, strXmlFileName As String)
+        Dim strLogFileName As String = IO.Path.Combine(IO.Path.GetDirectoryName(strXmlFileName),"xml2pdf.log")
         Using writer As IO.StreamWriter = New IO.StreamWriter(strLogFileName, True)
-            writer.WriteLine(Join({Now, strXMLFileName, strMessage}, ";"))
+            writer.WriteLine(Join({Now, strXmlFileName, strMessage}, ";"))
         End Using
     End Sub
 
@@ -210,21 +214,21 @@ Public Partial Class MainForm
         End Try
     End Sub    
     
-    Function GetDTInterval(ByVal dtFrom As Date, ByVal dtTo As Date) As String
+    Shared Function GetDTInterval(ByVal dtFrom As Date, ByVal dtTo As Date) As String
         Dim timeSec As Long, timeMin As Long, timeHour As Long
         timeSec = DateDiff(DateInterval.Second, dtFrom, dtTo)
         timeHour = timeSec \ 3600
         timeMin = (timeSec Mod 3600) \ 60
         timeSec = (timeSec Mod 3600) Mod 60
-        GetDTInterval = String.Format("{0}:{1}:{2}", Format(timeHour, "00"), Format(timeMin, "00"), Format(timeSec, "00"))
-    End Function    
+        Return String.Format("{0}:{1}:{2}", Format(timeHour, "00"), Format(timeMin, "00"), Format(timeSec, "00"))
+    End Function
     
     
     #Region "Обработка нажатий кнопок"
     Sub BtnAddFilesClick(sender As Object, e As EventArgs)
         Dim q As String
         OpenFileDialog1.Multiselect = True
-        If OpenFileDialog1.ShowDialog() = Windows.Forms.DialogResult.OK Then
+        If OpenFileDialog1.ShowDialog() = System.Windows.Forms.DialogResult.OK Then
             For Each q In OpenFileDialog1.FileNames
                 AddFile(q)
             Next
@@ -261,13 +265,13 @@ Public Partial Class MainForm
         'report1.Clear
         'report1.Load(strReportFileName)
         'report1.PrintSettings.Printer = cbPrinters.Text
-        toolStripProgressBar1.Maximum = IIf(Me.listView1.Items.Count < 1, 0, Me.listView1.Items.Count-1)
+        toolStripProgressBar1.Maximum = CInt(IIf(Me.listView1.Items.Count < 1, 0, Me.listView1.Items.Count-1))
         For Each lvi In Me.listView1.Items
             If TaskbarManager.IsPlatformSupported Then
                 TaskbarManager.Instance.SetOverlayIcon(Me.Handle, Resource1.printer_ico, "Печать")
             End If
             strXMLFileName=lvi.SubItems(0).Text
-            intType = GetGroupIndex(IO.Path.GetFileName(strXMLFileName))
+            intType = GetGroupIndex(IO.Path.GetFileName(strXMLFileName).ToUpper(CultureInfo.CurrentCulture))
             ccsFile=io.Path.Combine(io.Path.GetDirectoryName(strXMLFileName),"ccs.dtd")
             'msgbox(ccsFile)
             If not(System.IO.File.Exists(ccsFile)) Then io.File.Create(ccsFile).Close
@@ -298,11 +302,11 @@ Public Partial Class MainForm
             ' Обновляем статистику
             toolStripProgressBar1.Value = Me.listView1.Items.IndexOf(lvi)
             toolStripProgressText.Text = String.Format("{0}/{1} (Пустые: {2}, Ошибки: {3}, Неверный XML: {4})", Me.listView1.Items.IndexOf(lvi)+1, Me.listView1.Items.Count, intEmpty, intError, intInvalid)
-            lblStatOK.Text = intOK.ToString
-            lblStatIsEmpty.Text = intEmpty.ToString
-            lblStatInvalidXML.Text = intInvalid.ToString
-            lblStatError.Text = intError.ToString
-            lblStatTotal.Text = Me.listView1.Items.Count.ToString
+            lblStatOK.Text = intOK.ToString(CultureInfo.CurrentCulture)
+            lblStatIsEmpty.Text = intEmpty.ToString(CultureInfo.CurrentCulture)
+            lblStatInvalidXML.Text = intInvalid.ToString(CultureInfo.CurrentCulture)
+            lblStatError.Text = intError.ToString(CultureInfo.CurrentCulture)
+            lblStatTotal.Text = Me.listView1.Items.Count.ToString(CultureInfo.CurrentCulture)
             
             If TaskbarManager.IsPlatformSupported Then
                 TaskbarManager.Instance.SetProgressValue(toolStripProgressBar1.Value, toolStripProgressBar1.Maximum, Me.Handle)
@@ -315,14 +319,14 @@ Public Partial Class MainForm
             TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress, Me.Handle)
         End If
         ' report1.Design
-        WriteTrace(String.Format("Выполнено за {0}", GetDTInterval(dtFrom, DateAndTime.Now)))
+        WriteTrace(String.Format(CultureInfo.CurrentCulture,"Выполнено за {0}", GetDTInterval(dtFrom, DateAndTime.Now)))
         ' MsgBox(String.Format("Выполнено за {0}", GetDTInterval(dtFrom, DateAndTime.Now)), MsgBoxStyle.Information)
     End Sub
 
-    Function GetReportName(intType As Integer) As String
+    Function GetReportName(reportType As Integer) As String
         Dim strReportFileName As String = ""
         If cbReports.SelectedIndex=0 Then
-            Select Case intType
+            Select Case reportType
                 Case 0 ' e-mail
                     strReportFileName = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "ccs_email.frx")
                 Case 1 ' Russian Post
@@ -338,92 +342,102 @@ Public Partial Class MainForm
         Return strReportFileName
     End Function
     
-    Function GenerateReport(strXmlFileName As String, intType As Integer) As Integer
+    Function GenerateReport(strXmlFileName As String, reportType As Integer) As Integer
         Dim RetVal As Integer = -1
         If Not System.IO.File.Exists(strXmlFileName) Then
             RetVal = ReportGenerationResults.XMLNotFound ' Отсутствует XML-файл
         Else
-            Dim strReportFileName As String = GetReportName(intType) ' = IO.Path.ChangeExtension(Application.ExecutablePath, "frx")
+            Dim strReportFileName As String = GetReportName(reportType) ' = IO.Path.ChangeExtension(Application.ExecutablePath, "frx")
             'Dim strDictonaryFileName As String = IO.Path.ChangeExtension(Application.ExecutablePath, "frd")
             'Dim strDTDFileName As String = IO.Path.Combine(IO.Path.GetDirectoryName(Application.ExecutablePath), "CCS.dtd")
             dataSet1.Clear
-            dataSet1.ReadXml(strXMLFileName)
-            If (Not dataSet1.Tables.Contains("G_CLIENT")) OrElse (dataSet1.Tables("G_CLIENT").Rows.Count < 1) Then
-                RetVal = ReportGenerationResults.InvalidXML 'Неизвестный формат файла (Нет таблицы G_CLIENT)
-            Else
-                ' Открытие шаблона отчета
-'                If report1.FileName = strReportFileName Then
-'                    report1.Dictionary.ClearRegisteredData
-'                Else
-                    report1.Clear
-                    Application.DoEvents
-                    WriteTrace ("Loading report...")
-                    report1.Load(strReportFileName)
-'                End If
-
-'                --------
-'                Dim conn As FastReport.Data.XmlDataConnection = report1.Dictionary.Connections.Item(0)
-'                conn.XmlFile = strXmlFileName
-'                --------
-                report1.PrintSettings.Printer = cbPrinters.Text
-'                If Not report1.Parameters.Contains("prm_DataSourceFileName") Then report1.Parameters.Add("prm_DataSourceFileName")
-                report1.SetParameterValue("prm_DataSourceFileName", strXmlFileName)
-                report1.ReportInfo.Name = "<empty>"
-                Application.DoEvents()
-
-                ' *** Регистрация данных ***
-                Try
-                    WriteTrace ("Register data...")
-                    report1.RegisterData(dataSet1)
-                Catch ex As Exception
-                    WriteLog("Generic Exception Handler (DataSet.ReadXML): " &  ex.ToString(), strXMLFileName)
-                    Throw
-                End Try
-                ' *** Подготовка отчета ***
-                WriteTrace ("Prepare report...")
-                WriteLog("Подготовка отчета", strXMLFileName)
-                Try
-                    report1.Prepare(False)
-                Catch ex As Exception
-                    WriteLog("Generic Exception Handler (Report.Prepare): {0}" & ex.ToString(), strXMLFileName)
-                    ' MsgBox(ex.Message, MsgBoxStyle.Critical)
-                    Throw
-                End Try
-                ' Не печатать отчет, не содержащий ни одного листа.
-                If not ((report1.PreparedPages.Count > 0) AndAlso (report1.ReportInfo.Name <> "<empty>")) Then
-                    RetVal = ReportGenerationResults.IsEmpty ' Пустой отчет
-                    WriteLog("Отчет пустой, пропускаем", strXMLFileName)
+                If (Not ReadDataSet(dataSet1, strXMLFileName)) orElse (Not dataSet1.Tables.Contains("G_CLIENT")) OrElse (dataSet1.Tables("G_CLIENT").Rows.Count < 1) Then
+                    RetVal = ReportGenerationResults.InvalidXML 'Неизвестный формат файла (Нет таблицы G_CLIENT)
                 Else
-                    If Me.chkPreview.Checked Then
-                        report1.PrintSettings.ShowDialog = True
-                        WriteLog("Просмотр отчета", strXMLFileName)
-                        report1.ShowPrepared()
+                    ' Открытие шаблона отчета
+    '                If report1.FileName = strReportFileName Then
+    '                    report1.Dictionary.ClearRegisteredData
+    '                Else
+                        report1.Clear
+                        Application.DoEvents
+                        WriteTrace ("Loading report...")
+                        report1.Load(strReportFileName)
+    '                End If
+    
+    '                --------
+    '                Dim conn As FastReport.Data.XmlDataConnection = report1.Dictionary.Connections.Item(0)
+    '                conn.XmlFile = strXmlFileName
+    '                --------
+                    report1.PrintSettings.Printer = cbPrinters.Text
+    '                If Not report1.Parameters.Contains("prm_DataSourceFileName") Then report1.Parameters.Add("prm_DataSourceFileName")
+                    report1.SetParameterValue("prm_DataSourceFileName", strXmlFileName)
+                    report1.ReportInfo.Name = "<empty>"
+                    Application.DoEvents()
+    
+                    ' *** Регистрация данных ***
+                    Try
+                        WriteTrace ("Register data...")
+                        report1.RegisterData(dataSet1)
+                    Catch ex As Exception
+                        WriteLog("Generic Exception Handler (DataSet.ReadXML): " &  ex.ToString(), strXMLFileName)
+                        Throw
+                    End Try
+                    ' *** Подготовка отчета ***
+                    WriteTrace ("Prepare report...")
+                    WriteLog("Подготовка отчета", strXMLFileName)
+                    Try
+                        report1.Prepare(False)
+                    Catch ex As Exception
+                        WriteLog("Generic Exception Handler (Report.Prepare): {0}" & ex.ToString(), strXMLFileName)
+                        ' MsgBox(ex.Message, MsgBoxStyle.Critical)
+                        Throw
+                    End Try
+                    ' Не печатать отчет, не содержащий ни одного листа.
+                    If not ((report1.PreparedPages.Count > 0) AndAlso (report1.ReportInfo.Name <> "<empty>")) Then
+                        RetVal = ReportGenerationResults.IsEmpty ' Пустой отчет
+                        WriteLog("Отчет пустой, пропускаем", strXMLFileName)
                     Else
-                        report1.PrintSettings.ShowDialog = False
-                        WriteLog("Печать отчета", strXMLFileName)
-                        report1.PrintPrepared()
+                        If Me.chkPreview.Checked Then
+                            report1.PrintSettings.ShowDialog = True
+                            WriteLog("Просмотр отчета", strXMLFileName)
+                            report1.ShowPrepared()
+                        Else
+                            report1.PrintSettings.ShowDialog = False
+                            WriteLog("Печать отчета", strXMLFileName)
+                            report1.PrintPrepared()
+                        End If
+                        RetVal = ReportGenerationResults.Ok ' Ок
                     End If
-                    RetVal = ReportGenerationResults.Ok ' Ок
                 End If
-            End If
         End If
         Return RetVal
     End Function
-
-    Function ExportReportToPDF(ByRef Rep As FastReport.Report, strPDFFileName As String) As Boolean
+    
+    Shared Function ReadDataSet(ds As Data.DataSet, strXmlFileName As String) As Boolean
+        Try
+            ds.ReadXml(strXmlFileName)
+            Return True
+        Catch ex As Exception
+            Return False
+            Throw
+        End Try
+    End Function
+    
+    Shared Function ExportReportToPdf(rep As FastReport.Report, strPdfFileName As String) As Boolean
         ' создаем экземпляр экспорта в HTML
         Dim export As New FastReport.Export.Pdf.PDFExport
         export.Compressed = False
         Try
-            export.Export(report1, strPDFFileName)
+            export.Export(rep, strPdfFileName)
             Return True
         Catch
             Return False
+            Throw
         End Try
     End Function
 
-    Sub CbPrintersSelectedIndexChanged(sender As Object, e As EventArgs)
-        Dim ppi As New List(Of System.Collections.DictionaryEntry)
+    Sub CBPrintersSelectedIndexChanged(sender As Object, e As EventArgs)
+        ' Dim ppi As New List(Of System.Collections.DictionaryEntry)
         Dim strPrinterName As String = cbPrinters.Text ' CType(cbPrinters.SelectedItem, String)
         iniFile.WriteString("Settings", "Printer", cbPrinters.Text)
         If cbPrinters.Text <> "" Then
@@ -442,17 +456,20 @@ Public Partial Class MainForm
         End If
     End Sub
     
-    Sub CbPaperPreprint_SelectionChangeCommitted(sender As Object, e As EventArgs)
+    
+    Private Sub CBPaperPreprintSelectedIndexChanged(sender As Object, e As EventArgs)
         Dim strPrinterName As String = CType(cbPrinters.SelectedItem, String)
+        Dim value As DictionaryEntry = CType(Me.cbPaperPreprint.SelectedItem, DictionaryEntry)
         If strPrinterName <> "" Then
-            iniFile.WriteInteger(strPrinterName, "PaperPreprint", CType(Me.cbPaperPreprint.SelectedItem.Key, Integer))
+            iniFile.WriteInteger(strPrinterName, "PaperPreprint", CType(value.Key, Integer))
         End If
     End Sub
-
-    Sub CbPaperPlain_SelectionChangeCommitted(sender As Object, e As EventArgs)
+    
+    Sub CBPaperPlainSelectedIndexChanged(sender As Object, e As EventArgs)
         Dim strPrinterName As String = CType(cbPrinters.SelectedItem, String)
+        Dim value As DictionaryEntry = CType(Me.cbPaperPlain.SelectedItem, DictionaryEntry)
         If strPrinterName <> "" Then
-            iniFile.WriteInteger(strPrinterName, "PaperPlain", CType(cbPaperPlain.SelectedItem.Key, Integer))
+            iniFile.WriteInteger(strPrinterName, "PaperPlain", CType(value.Key, Integer))
         End If
     End Sub
     
@@ -461,19 +478,19 @@ Public Partial Class MainForm
             report1.Design()
         Catch ex As Exception
             MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1)
-'            Throw
+            Throw
         End Try
     End Sub
     
     
     
-    Function GetGroupIndex(strFileName As String) As Integer
-        If strFileName Like "*_E_*" Then
-            Return 0
+    Shared Function GetGroupIndex(strFileName As String) As Integer
+        If strFileName Like "*__E_48*" Then
+            Return 2
         ElseIf strFileName Like "*_C_*" Then
             Return 1
-        ElseIf strFileName Like "*__E_48*" Then
-            Return 2
+        ElseIf strFileName Like "*_E_*" Then
+            Return 0
         ElseIf strFileName Like "*-P-*" Then
             Return 3
         Else
@@ -517,26 +534,27 @@ Public Partial Class MainForm
     End Function
     
     
-    Private Sub WriteProcessInfo()
+    Private Shared Sub WriteProcessInfo()
         Dim myProcess As Process = Process.GetCurrentProcess
         Dim strInfo As String = ""
-        strInfo = strInfo & vbcrlf & String.Format("  physical memory usage: {0}", myProcess.WorkingSet64)
-        strInfo = strInfo & vbcrlf & String.Format("  base priority: {0}", myProcess.BasePriority)
-        strInfo = strInfo & vbcrlf & String.Format("  priority class: {0}", myProcess.PriorityClass)
-        strInfo = strInfo & vbcrlf & String.Format("  user processor time: {0}", myProcess.UserProcessorTime)
-        strInfo = strInfo & vbcrlf & String.Format("  privileged processor time: {0}", myProcess.PrivilegedProcessorTime)
-        strInfo = strInfo & vbcrlf & String.Format("  total processor time: {0}", myProcess.TotalProcessorTime)
-        strInfo = strInfo & vbcrlf & String.Format("  PagedSystemMemorySize64: {0}", myProcess.PagedSystemMemorySize64)
-        strInfo = strInfo & vbcrlf & String.Format("  PagedMemorySize64: {0}", myProcess.PagedMemorySize64)
+        strInfo = strInfo & vbcrlf & String.Format(CultureInfo.CurrentCulture, "  physical memory usage: {0}", myProcess.WorkingSet64)
+        strInfo = strInfo & vbcrlf & String.Format(CultureInfo.CurrentCulture, "  base priority: {0}", myProcess.BasePriority)
+        strInfo = strInfo & vbcrlf & String.Format(CultureInfo.CurrentCulture, "  priority class: {0}", myProcess.PriorityClass)
+        strInfo = strInfo & vbcrlf & String.Format(CultureInfo.CurrentCulture, "  user processor time: {0}", myProcess.UserProcessorTime)
+        strInfo = strInfo & vbcrlf & String.Format(CultureInfo.CurrentCulture, "  privileged processor time: {0}", myProcess.PrivilegedProcessorTime)
+        strInfo = strInfo & vbcrlf & String.Format(CultureInfo.CurrentCulture, "  total processor time: {0}", myProcess.TotalProcessorTime)
+        strInfo = strInfo & vbcrlf & String.Format(CultureInfo.CurrentCulture, "  PagedSystemMemorySize64: {0}", myProcess.PagedSystemMemorySize64)
+        strInfo = strInfo & vbcrlf & String.Format(CultureInfo.CurrentCulture, "  PagedMemorySize64: {0}", myProcess.PagedMemorySize64)
         Debug.WriteLine(strInfo)
         MsgBox(strInfo)
     End Sub
 
     Sub CbProcessPriority_SelectedIndexChanged(sender As Object, e As EventArgs)
+        Dim p As System.Diagnostics.Process = System.Diagnostics.Process.GetCurrentProcess
         If cbProcessPriority.ComboBox.SelectedIndex > 0 Then
             Dim iPC As Integer = CType(CType(cbProcessPriority.SelectedItem, DictionaryEntry).Key, Integer)
-            If myProc.PriorityClass.IsDefined(GetType(ProcessPriorityClass), iPC) Then
-                myProc.PriorityClass = iPC
+            If Process.GetCurrentProcess.PriorityClass.IsDefined(GetType(ProcessPriorityClass), iPC) Then
+                Process.GetCurrentProcess.PriorityClass = iPC
                 SaveProcessPriority
             End If
         End If

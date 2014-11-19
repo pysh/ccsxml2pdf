@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="Vb" DoublePass="true" SmoothGraphics="true" StartReportEvent="_StartReport" ReportInfo.Name=&quot;&lt;empty&gt;&quot; ReportInfo.Author="pnosov" ReportInfo.Version="1" ReportInfo.Created="06/07/2013 13:12:46" ReportInfo.Modified="08/05/2014 18:19:15" ReportInfo.CreatorVersion="1.6.19.0" PrintSettings.ShowDialog="false">
+<Report ScriptLanguage="Vb" DoublePass="true" SmoothGraphics="true" StartReportEvent="_StartReport" ReportInfo.Name="&lt;empty&gt;" ReportInfo.Author="pnosov" ReportInfo.Version="1" ReportInfo.Created="06/07/2013 13:12:46" ReportInfo.Modified="08/05/2014 18:19:15" ReportInfo.CreatorVersion="1.6.19.0" PrintSettings.ShowDialog="false">
   <ScriptText>Imports System
 Imports System.Collections
 Imports System.Collections.Generic
@@ -57,7 +57,7 @@ Namespace FastReport
       Dim RetVal as String
       RetVal = CType(strIN, String).Replace(&quot;руб.&quot;,&quot;&quot;).Replace(&quot;руб&quot;,&quot;&quot;).Trim
       RetVal = RetVal.Replace(&quot;.&quot;, decimalSeparator).Replace(&quot;,&quot;, decimalSeparator).Replace(&quot; &quot;,&quot;&quot;).Trim
-      Return CDec(RetVal)
+      Return CDbl(RetVal)
     End Function
    
     Private Function GetVDecimalWithSign(strIn as Object, Optional intSign as Integer = 0, Optional boolForcePlusSign as boolean = false, Optional strSuffix as string = &quot;&quot;) as Object
@@ -66,11 +66,11 @@ Namespace FastReport
       If IsNumeric(RetVal) then
         Select case intSign
           Case is &gt; 0
-            RetVal = Abs(CDec(RetVal))
+            RetVal = Abs(CDbl(RetVal))
           Case is &lt; 0
-            RetVal = 0 - Abs(CDec(RetVal))
+            RetVal = 0 - Abs(CDbl(RetVal))
           Case Else
-            RetVal = CDec(RetVal)
+            RetVal = CDbl(RetVal)
         End Select
         RetVal = IIf((RetVal &gt; 0) and boolForcePlusSign,&quot;+&quot;,&quot;&quot;) &amp; String.Format(&quot;{0:# ##0.00}&quot;, RetVal).ToString.Trim &amp; strSuffix
       Else

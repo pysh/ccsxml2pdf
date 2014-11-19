@@ -6,8 +6,7 @@
 ' 
 ' Для изменения этого шаблона используйте Сервис | Настройка | Кодирование | Правка стандартных заголовков.
 '
-Public Class ini
-
+Public Class Ini
         Private Declare Ansi Function GetPrivateProfileString _
       Lib "kernel32.dll" Alias "GetPrivateProfileStringA" _
       (ByVal lpApplicationName As String, _
@@ -33,8 +32,8 @@ Public Class ini
         Dim strFilename As String
 
         ' Constructor, accepting a filename
-        Public Sub New(ByVal Filename As String)
-            strFilename = Filename
+        Public Sub New(ByVal FileName As String)
+            strFilename = FileName
         End Sub
 
         ' Read-only filename property
@@ -44,11 +43,11 @@ Public Class ini
             End Get
         End Property
 
-        Public Function GetString(ByVal Section As String, ByVal Key As String, ByVal [Default] As String) As String
+        Public Function GetString(ByVal section As String, ByVal key As String, ByVal [default] As String) As String
             ' Returns a string from your INI file
             Dim intCharCount As Integer
             Dim objResult As New System.Text.StringBuilder(1024)
-            intCharCount = GetPrivateProfileString(Section, Key, [Default], objResult, objResult.Capacity, strFilename)
+            intCharCount = GetPrivateProfileString(Section, Key, [default], objResult, objResult.Capacity, strFilename)
             If intCharCount > 0 Then
                 GetString = Left(objResult.ToString, intCharCount)
             Else
@@ -56,39 +55,39 @@ Public Class ini
             End If
         End Function
 
-        Public Function GetInteger(ByVal Section As String, _
-          ByVal Key As String, ByVal [Default] As Integer) As Integer
+        Public Function GetInteger(ByVal section As String, _
+          ByVal key As String, ByVal [default] As Int32) As Integer
             ' Returns an integer from your INI file
-            Return GetPrivateProfileInt(Section, Key, _
-               [Default], strFilename)
+            Return GetPrivateProfileInt(section, key, _
+               [default], strFilename)
         End Function
 
-        Public Function GetBoolean(ByVal Section As String, _
-          ByVal Key As String, ByVal [Default] As Boolean) As Boolean
+        Public Function GetBoolean(ByVal section As String, _
+          ByVal key As String, ByVal [default] As Boolean) As Boolean
             ' Returns a boolean from your INI file
-            Return (GetPrivateProfileInt(Section, Key, _
-               CInt([Default]), strFilename) = 1)
+            Return (GetPrivateProfileInt(section, Key, _
+               CInt([default]), strFilename) = 1)
         End Function
 
-        Public Sub WriteString(ByVal Section As String, _
-          ByVal Key As String, ByVal Value As String)
+        Public Sub WriteString(ByVal section As String, _
+          ByVal key As String, ByVal value As String)
             ' Writes a string to your INI file
-            WritePrivateProfileString(Section, Key, Value, strFilename)
+            WritePrivateProfileString(section, key, Value, strFilename)
             Flush()
         End Sub
 
-        Public Sub WriteInteger(ByVal Section As String, _
-          ByVal Key As String, ByVal Value As Integer)
+        Public Sub WriteInteger(ByVal section As String, _
+          ByVal key As String, ByVal value As Integer)
             ' Writes an integer to your INI file
-            WriteString(Section, Key, CStr(Value))
+            WriteString(section, key, CStr(Value))
             Flush()
         End Sub
 
-        Public Sub WriteBoolean(ByVal Section As String, ByVal Key As String, ByVal Value As Boolean)
+        Public Sub WriteBoolean(ByVal section As String, ByVal key As String, ByVal value As Boolean)
             ' Writes a boolean to your INI file
             Dim Sendval As String = "0"
-            If Value Then Sendval = "1"
-            WriteString(Section, Key, Sendval)
+            If value Then Sendval = "1"
+            WriteString(section, key, Sendval)
             Flush()
         End Sub
 

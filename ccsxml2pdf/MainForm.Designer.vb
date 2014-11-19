@@ -34,16 +34,16 @@ Partial Class MainForm
 	''' </summary>
 	Private Sub InitializeComponent()
 	    Me.components = New System.ComponentModel.Container()
-	    Dim listViewGroup5 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Электронные", System.Windows.Forms.HorizontalAlignment.Left)
-	    Dim listViewGroup6 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Почта России", System.Windows.Forms.HorizontalAlignment.Left)
-	    Dim listViewGroup7 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Зарплатные", System.Windows.Forms.HorizontalAlignment.Left)
-	    Dim listViewGroup8 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Стандартный Продукт", System.Windows.Forms.HorizontalAlignment.Left)
+	    Dim listViewGroup1 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Электронные", System.Windows.Forms.HorizontalAlignment.Left)
+	    Dim listViewGroup2 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Почта России", System.Windows.Forms.HorizontalAlignment.Left)
+	    Dim listViewGroup3 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Зарплатные", System.Windows.Forms.HorizontalAlignment.Left)
+	    Dim listViewGroup4 As System.Windows.Forms.ListViewGroup = New System.Windows.Forms.ListViewGroup("Стандартный Продукт", System.Windows.Forms.HorizontalAlignment.Left)
 	    Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
-	    Dim designerSettings2 As FastReport.Design.DesignerSettings = New FastReport.Design.DesignerSettings()
-	    Dim designerRestrictions2 As FastReport.Design.DesignerRestrictions = New FastReport.Design.DesignerRestrictions()
-	    Dim emailSettings2 As FastReport.Export.Email.EmailSettings = New FastReport.Export.Email.EmailSettings()
-	    Dim previewSettings2 As FastReport.PreviewSettings = New FastReport.PreviewSettings()
-	    Dim reportSettings2 As FastReport.ReportSettings = New FastReport.ReportSettings()
+	    Dim designerSettings1 As FastReport.Design.DesignerSettings = New FastReport.Design.DesignerSettings()
+	    Dim designerRestrictions1 As FastReport.Design.DesignerRestrictions = New FastReport.Design.DesignerRestrictions()
+	    Dim emailSettings1 As FastReport.Export.Email.EmailSettings = New FastReport.Export.Email.EmailSettings()
+	    Dim previewSettings1 As FastReport.PreviewSettings = New FastReport.PreviewSettings()
+	    Dim reportSettings1 As FastReport.ReportSettings = New FastReport.ReportSettings()
 	    Me.toolStrip1 = New System.Windows.Forms.ToolStrip()
 	    Me.toolStripButton1 = New System.Windows.Forms.ToolStripButton()
 	    Me.toolStripButton2 = New System.Windows.Forms.ToolStripButton()
@@ -60,6 +60,7 @@ Partial Class MainForm
 	    Me.toolStripProgressText = New System.Windows.Forms.ToolStripStatusLabel()
 	    Me.toolStripProgressBar1 = New System.Windows.Forms.ToolStripProgressBar()
 	    Me.panel1 = New System.Windows.Forms.Panel()
+	    Me.dataSet1 = New System.Data.DataSet()
 	    Me.tableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
 	    Me.lblStatTotal = New System.Windows.Forms.Label()
 	    Me.lblStatError = New System.Windows.Forms.Label()
@@ -88,16 +89,15 @@ Partial Class MainForm
 	    Me.СolumnHeader1 = New System.Windows.Forms.ColumnHeader()
 	    Me.imglstFileStates = New System.Windows.Forms.ImageList(Me.components)
 	    Me.imgLstFileChk = New System.Windows.Forms.ImageList(Me.components)
-	    Me.dataSet1 = New System.Data.DataSet()
 	    Me.openFileDialog1 = New System.Windows.Forms.OpenFileDialog()
 	    Me.environmentSettings1 = New FastReport.EnvironmentSettings()
 	    Me.bgw1 = New System.ComponentModel.BackgroundWorker()
 	    Me.toolStrip1.SuspendLayout
 	    Me.statusStrip1.SuspendLayout
 	    Me.panel1.SuspendLayout
+	    CType(Me.dataSet1,System.ComponentModel.ISupportInitialize).BeginInit
 	    Me.tableLayoutPanel1.SuspendLayout
 	    CType(Me.pictureBox1,System.ComponentModel.ISupportInitialize).BeginInit
-	    CType(Me.dataSet1,System.ComponentModel.ISupportInitialize).BeginInit
 	    Me.SuspendLayout
 	    '
 	    'toolStrip1
@@ -232,6 +232,10 @@ Partial Class MainForm
 	    Me.panel1.Name = "panel1"
 	    Me.panel1.Size = New System.Drawing.Size(331, 356)
 	    Me.panel1.TabIndex = 2
+	    '
+	    'dataSet1
+	    '
+	    Me.dataSet1.DataSetName = "NewDataSet"
 	    '
 	    'tableLayoutPanel1
 	    '
@@ -378,7 +382,7 @@ Partial Class MainForm
 	    Me.cbPaperPlain.Name = "cbPaperPlain"
 	    Me.cbPaperPlain.Size = New System.Drawing.Size(224, 21)
 	    Me.cbPaperPlain.TabIndex = 9
-	    AddHandler Me.cbPaperPlain.SelectionChangeCommitted, AddressOf Me.CbPaperPlain_SelectionChangeCommitted
+	    AddHandler Me.cbPaperPlain.SelectedIndexChanged, AddressOf Me.CBPaperPlainSelectedIndexChanged
 	    '
 	    'label2
 	    '
@@ -396,7 +400,7 @@ Partial Class MainForm
 	    Me.cbPaperPreprint.Name = "cbPaperPreprint"
 	    Me.cbPaperPreprint.Size = New System.Drawing.Size(224, 21)
 	    Me.cbPaperPreprint.TabIndex = 7
-	    AddHandler Me.cbPaperPreprint.SelectionChangeCommitted, AddressOf Me.CbPaperPreprint_SelectionChangeCommitted
+	    AddHandler Me.cbPaperPreprint.SelectedIndexChanged, AddressOf Me.CBPaperPreprintSelectedIndexChanged
 	    '
 	    'label1
 	    '
@@ -485,15 +489,15 @@ Partial Class MainForm
 	    Me.listView1.Dock = System.Windows.Forms.DockStyle.Fill
 	    Me.listView1.FullRowSelect = true
 	    Me.listView1.GridLines = true
-	    listViewGroup5.Header = "Электронные"
-	    listViewGroup5.Name = "grpEmail"
-	    listViewGroup6.Header = "Почта России"
-	    listViewGroup6.Name = "grpRusPost"
-	    listViewGroup7.Header = "Зарплатные"
-	    listViewGroup7.Name = "grpSalary"
-	    listViewGroup8.Header = "Стандартный Продукт"
-	    listViewGroup8.Name = "grpStandardProduct"
-	    Me.listView1.Groups.AddRange(New System.Windows.Forms.ListViewGroup() {listViewGroup5, listViewGroup6, listViewGroup7, listViewGroup8})
+	    listViewGroup1.Header = "Электронные"
+	    listViewGroup1.Name = "grpEmail"
+	    listViewGroup2.Header = "Почта России"
+	    listViewGroup2.Name = "grpRusPost"
+	    listViewGroup3.Header = "Зарплатные"
+	    listViewGroup3.Name = "grpSalary"
+	    listViewGroup4.Header = "Стандартный Продукт"
+	    listViewGroup4.Name = "grpStandardProduct"
+	    Me.listView1.Groups.AddRange(New System.Windows.Forms.ListViewGroup() {listViewGroup1, listViewGroup2, listViewGroup3, listViewGroup4})
 	    Me.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable
 	    Me.listView1.HideSelection = false
 	    Me.listView1.Location = New System.Drawing.Point(331, 39)
@@ -532,10 +536,6 @@ Partial Class MainForm
 	    Me.imgLstFileChk.Images.SetKeyName(0, "control_play.png")
 	    Me.imgLstFileChk.Images.SetKeyName(1, "control_pause.png")
 	    '
-	    'dataSet1
-	    '
-	    Me.dataSet1.DataSetName = "NewDataSet"
-	    '
 	    'openFileDialog1
 	    '
 	    Me.openFileDialog1.DefaultExt = "xml"
@@ -545,25 +545,25 @@ Partial Class MainForm
 	    '
 	    'environmentSettings1
 	    '
-	    designerSettings2.ApplicationConnection = Nothing
-	    designerSettings2.DefaultFont = New System.Drawing.Font("Arial", 10!)
-	    designerSettings2.Icon = Nothing
-	    designerSettings2.Restrictions = designerRestrictions2
-	    designerSettings2.Text = ""
-	    Me.environmentSettings1.DesignerSettings = designerSettings2
-	    emailSettings2.Address = ""
-	    emailSettings2.Host = ""
-	    emailSettings2.MessageTemplate = ""
-	    emailSettings2.Name = ""
-	    emailSettings2.Password = ""
-	    emailSettings2.UserName = ""
-	    Me.environmentSettings1.EmailSettings = emailSettings2
-	    previewSettings2.Icon = CType(resources.GetObject("previewSettings2.Icon"),System.Drawing.Icon)
-	    previewSettings2.Text = ""
-	    Me.environmentSettings1.PreviewSettings = previewSettings2
-	    reportSettings2.DefaultLanguage = FastReport.Language.Vb
-	    reportSettings2.ShowProgress = false
-	    Me.environmentSettings1.ReportSettings = reportSettings2
+	    designerSettings1.ApplicationConnection = Nothing
+	    designerSettings1.DefaultFont = New System.Drawing.Font("Arial", 10!)
+	    designerSettings1.Icon = Nothing
+	    designerSettings1.Restrictions = designerRestrictions1
+	    designerSettings1.Text = ""
+	    Me.environmentSettings1.DesignerSettings = designerSettings1
+	    emailSettings1.Address = ""
+	    emailSettings1.Host = ""
+	    emailSettings1.MessageTemplate = ""
+	    emailSettings1.Name = ""
+	    emailSettings1.Password = ""
+	    emailSettings1.UserName = ""
+	    Me.environmentSettings1.EmailSettings = emailSettings1
+	    previewSettings1.Icon = CType(resources.GetObject("previewSettings1.Icon"),System.Drawing.Icon)
+	    previewSettings1.Text = ""
+	    Me.environmentSettings1.PreviewSettings = previewSettings1
+	    reportSettings1.DefaultLanguage = FastReport.Language.Vb
+	    reportSettings1.ShowProgress = false
+	    Me.environmentSettings1.ReportSettings = reportSettings1
 	    Me.environmentSettings1.UIStyle = FastReport.Utils.UIStyle.VisualStudio2005
 	    '
 	    'bgw1
@@ -587,9 +587,9 @@ Partial Class MainForm
 	    Me.statusStrip1.ResumeLayout(false)
 	    Me.statusStrip1.PerformLayout
 	    Me.panel1.ResumeLayout(false)
+	    CType(Me.dataSet1,System.ComponentModel.ISupportInitialize).EndInit
 	    Me.tableLayoutPanel1.ResumeLayout(false)
 	    CType(Me.pictureBox1,System.ComponentModel.ISupportInitialize).EndInit
-	    CType(Me.dataSet1,System.ComponentModel.ISupportInitialize).EndInit
 	    Me.ResumeLayout(false)
 	    Me.PerformLayout
 	End Sub

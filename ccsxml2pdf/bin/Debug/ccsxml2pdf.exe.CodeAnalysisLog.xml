@@ -1,0 +1,408 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="c:\program files\microsoft fxcop 10.0\Xml\FxCopReport.xsl"?>
+<FxCopReport Version="10.0">
+ <Targets>
+  <Target Name="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf\bin\Debug\ccsxml2pdf.exe">
+   <Modules>
+    <Module Name="ccsxml2pdf.exe">
+     <Messages>
+      <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+       <Issue Name="NoStrongName" Certainty="95" Level="CriticalError">Sign 'ccsxml2pdf.exe' with a strong name key.</Issue>
+      </Message>
+      <Message Id="ccsxml" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+       <Issue Name="Assembly" Certainty="85" Level="Error">Correct the casing of 'ccsxml' in assembly name 'ccsxml2pdf.exe' by changing it to 'Ccsxml'.</Issue>
+      </Message>
+      <Message Id="pdf" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+       <Issue Name="Assembly" Certainty="85" Level="Error">Correct the casing of 'pdf' in assembly name 'ccsxml2pdf.exe' by changing it to 'Pdf'.</Issue>
+      </Message>
+      <Message TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+       <Issue Certainty="95" Level="Error">Mark 'ccsxml2pdf.exe' with CLSCompliant(true) because it exposes externally visible types.</Issue>
+      </Message>
+      <Message TypeName="MarkAssembliesWithNeutralResourcesLanguage" Category="Microsoft.Performance" CheckId="CA1824" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+       <Issue Certainty="95" Level="Warning">Because assembly 'ccsxml2pdf.exe' contains a ResX-based resource file, mark it with the NeutralResourcesLanguage attribute, specifying the language of the resources within the assembly. This could improve lookup performance the first time a resource is retrieved.</Issue>
+      </Message>
+     </Messages>
+     <Namespaces>
+      <Namespace Name="ccsxml2pdf">
+       <Types>
+        <Type Name="Ini" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#.ctor(System.String)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="File" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="85" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="ini.vb" Line="35">In member 'Ini.New(String)', correct the casing of 'File' in parameter name 'FileName' by changing it to 'file'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Flush()" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message Id="ccsxml2pdf.Ini.FlushPrivateProfileString(System.Int32,System.Int32,System.Int32,System.String@)" TypeName="DoNotIgnoreMethodResults" Category="Microsoft.Usage" CheckId="CA1806" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Name="HResultOrErrorCode" Certainty="95" Level="Warning" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="ini.vb" Line="96">'Ini.Flush()' calls 'Ini.FlushPrivateProfileString(Integer, Integer, Integer, ByRef String)' but does not use the HRESULT or error code that the method returns. This could lead to unexpected behavior in error conditions or low-resource situations. Use the result in a conditional statement, assign the result to a variable, or pass it as an argument to another method.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#FlushPrivateProfileString(System.Int32,System.Int32,System.Int32,System.String&amp;)" Kind="Method" Static="True" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+             <Issue Certainty="95" Level="CriticalWarning">Because it is a P/Invoke method, 'Ini.FlushPrivateProfileString(Integer, Integer, Integer, ByRef String)' should be defined in a class named NativeMethods, SafeNativeMethods, or UnsafeNativeMethods.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetInteger(System.String,System.String,System.Int32)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="integer" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+             <Issue Name="LanguageSpecificMember" Certainty="75" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="ini.vb" Line="58">Consider replacing the language-specific data type identifier 'Integer' in member name 'Ini.GetInteger(String, String, Integer)' with either a language-independent equivalent or a more generic term, such as 'value'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetPrivateProfileInt(System.String&amp;,System.String&amp;,System.Int32,System.String&amp;)" Kind="Method" Static="True" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+             <Issue Certainty="95" Level="CriticalWarning">Because it is a P/Invoke method, 'Ini.GetPrivateProfileInt(ByRef String, ByRef String, Integer, ByRef String)' should be defined in a class named NativeMethods, SafeNativeMethods, or UnsafeNativeMethods.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetPrivateProfileString(System.String&amp;,System.String&amp;,System.String&amp;,System.Text.StringBuilder,System.Int32,System.String&amp;)" Kind="Method" Static="True" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+             <Issue Certainty="95" Level="CriticalWarning">Because it is a P/Invoke method, 'Ini.GetPrivateProfileString(ByRef String, ByRef String, ByRef String, StringBuilder, Integer, ByRef String)' should be defined in a class named NativeMethods, SafeNativeMethods, or UnsafeNativeMethods.</Issue>
+            </Message>
+            <Message Id="3" TypeName="SpecifyMarshalingForPInvokeStringArguments" Category="Microsoft.Globalization" CheckId="CA2101" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Name="ParameterImplicitAnsi" Certainty="75" Level="Error">To reduce security risk, marshal parameter 'lpReturnedString' as Unicode, by setting DllImport.CharSet to CharSet.Unicode, or by explicitly marshaling the parameter as UnmanagedType.LPWStr. If you need to marshal this string as ANSI or system-dependent, specify MarshalAs explicitly, and set BestFitMapping=false; for added security, also set ThrowOnUnmappableChar=true.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#WritePrivateProfileString(System.String&amp;,System.String&amp;,System.String&amp;,System.String&amp;)" Kind="Method" Static="True" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+             <Issue Certainty="95" Level="CriticalWarning">Because it is a P/Invoke method, 'Ini.WritePrivateProfileString(ByRef String, ByRef String, ByRef String, ByRef String)' should be defined in a class named NativeMethods, SafeNativeMethods, or UnsafeNativeMethods.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#WriteString(System.String,System.String,System.String)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="ccsxml2pdf.Ini.WritePrivateProfileString(System.String@,System.String@,System.String@,System.String@)" TypeName="DoNotIgnoreMethodResults" Category="Microsoft.Usage" CheckId="CA1806" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Name="HResultOrErrorCode" Certainty="95" Level="Warning" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="ini.vb" Line="75">'Ini.WriteString(String, String, String)' calls 'Ini.WritePrivateProfileString(ByRef String, ByRef String, ByRef String, ByRef String)' but does not use the HRESULT or error code that the method returns. This could lead to unexpected behavior in error conditions or low-resource situations. Use the result in a conditional statement, assign the result to a variable, or pass it as an argument to another method.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="MainForm" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#.ctor()" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Name="IFormatProviderAlternateString" Certainty="95" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="40">Because the behavior of 'String.Format(String, Object, Object)' could vary based on the current user's locale settings, replace this call in 'MainForm.New()' with a call to 'String.Format(IFormatProvider, String, ParamArray Object())'. If the result of 'String.Format(IFormatProvider, String, ParamArray Object())' will be displayed to the user, specify 'CultureInfo.CurrentCulture()' as the 'IFormatProvider' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture()'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Bgw1_DoWork(System.Object,System.ComponentModel.DoWorkEventArgs)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="IdentifiersShouldNotContainUnderscores" Category="Microsoft.Naming" CheckId="CA1707" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="95" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="573">Remove the underscores from member name 'MainForm.Bgw1_DoWork(Object, DoWorkEventArgs)'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#BtnOpenReportDesignerClick(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="SpecifyMessageBoxOptions" Category="Microsoft.Globalization" CheckId="CA1300" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="480">Change 'MainForm.BtnOpenReportDesignerClick(Object, EventArgs)' to call the MessageBox.Show overload that specifies MessageBoxOptions, and make sure to set MessageBoxOptions.RightAlign and MessageBoxOptions.RtlReading if RightToLeft is set to RightToLeft.Yes on the parent control.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#CbProcessPriority_SelectedIndexChanged(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="DoNotIndirectlyExposeMethodsWithLinkDemands" Category="Microsoft.Security" CheckId="CA2122" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="552">'MainForm.CbProcessPriority_SelectedIndexChanged(Object, EventArgs)' calls into 'Process.GetCurrentProcess()' which has a LinkDemand. By making this call, 'Process.GetCurrentProcess()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.CbProcessPriority_SelectedIndexChanged(Object, EventArgs)'&#xD;&#xA;   -&gt;'MainForm.CbProcessPriority_SelectedIndexChanged(Object, EventArgs)'</Issue>
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="552">'MainForm.CbProcessPriority_SelectedIndexChanged(Object, EventArgs)' calls into 'Process.PriorityClass.Set(ProcessPriorityClass)' which has a LinkDemand. By making this call, 'Process.PriorityClass.Set(ProcessPriorityClass)' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.CbProcessPriority_SelectedIndexChanged(Object, EventArgs)'&#xD;&#xA;   -&gt;'MainForm.CbProcessPriority_SelectedIndexChanged(Object, EventArgs)'</Issue>
+            </Message>
+            <Message Id="Cb" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="85" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="552">Correct the casing of 'Cb' in member name 'MainForm.CbProcessPriority_SelectedIndexChanged(Object, EventArgs)' by changing it to 'CB'.</Issue>
+            </Message>
+            <Message TypeName="IdentifiersShouldNotContainUnderscores" Category="Microsoft.Naming" CheckId="CA1707" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="95" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="552">Remove the underscores from member name 'MainForm.CbProcessPriority_SelectedIndexChanged(Object, EventArgs)'.</Issue>
+            </Message>
+            <Message Id="p" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Warning" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="553">'MainForm.CbProcessPriority_SelectedIndexChanged(Object, EventArgs)' declares a variable, 'p', of type 'Process', which is never used or is only assigned to. Use this variable or remove it.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetDTInterval(System.DateTime,System.DateTime)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Name="IFormatProviderAlternateString" Certainty="95" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="223">Because the behavior of 'String.Format(String, Object, Object, Object)' could vary based on the current user's locale settings, replace this call in 'MainForm.GetDTInterval(Date, Date)' with a call to 'String.Format(IFormatProvider, String, ParamArray Object())'. If the result of 'String.Format(IFormatProvider, String, ParamArray Object())' will be displayed to the user, specify 'CultureInfo.CurrentCulture()' as the 'IFormatProvider' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture()'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetPaperSources(System.String)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+             <Issue Certainty="95" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="523">Change 'List(Of DictionaryEntry)' in 'MainForm.GetPaperSources(String)' to use Collection&lt;T&gt;, ReadOnlyCollection&lt;T&gt; or KeyedCollection&lt;K,V&gt;</Issue>
+            </Message>
+            <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="DependsOnFix">
+             <Issue Certainty="95" Level="Warning" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="523">The 'this' parameter (or 'Me' in Visual Basic) of 'MainForm.GetPaperSources(String)' is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Issue>
+            </Message>
+            <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Name="IFormatProviderAlternateString" Certainty="95" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="528">Because the behavior of 'String.Format(String, Object, Object)' could vary based on the current user's locale settings, replace this call in 'MainForm.GetPaperSources(String)' with a call to 'String.Format(IFormatProvider, String, ParamArray Object())'. If the result of 'String.Format(IFormatProvider, String, ParamArray Object())' will be displayed to the user, specify 'CultureInfo.CurrentCulture()' as the 'IFormatProvider' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture()'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#InitializeComponent()" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="SetLocaleForDataTypes" Category="Microsoft.Globalization" CheckId="CA1306" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Certainty="90" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.Designer.vb" Line="63">Be sure to set the DataSet Locale property wherever 'MainForm.InitializeComponent()' creates an instance of that type.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#ListView1DragDrop(System.Object,System.Windows.Forms.DragEventArgs)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Name="IFormatProviderAlternateString" Certainty="95" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="151">Because the behavior of 'String.Format(String, Object, Object)' could vary based on the current user's locale settings, replace this call in 'MainForm.ListView1DragDrop(Object, DragEventArgs)' with a call to 'String.Format(IFormatProvider, String, ParamArray Object())'. If the result of 'String.Format(IFormatProvider, String, ParamArray Object())' will be displayed to the user, specify 'CultureInfo.CurrentCulture()' as the 'IFormatProvider' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture()'.</Issue>
+             <Issue Name="IFormatProviderAlternateString" Certainty="95" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="155">Because the behavior of 'String.Format(String, Object, Object)' could vary based on the current user's locale settings, replace this call in 'MainForm.ListView1DragDrop(Object, DragEventArgs)' with a call to 'String.Format(IFormatProvider, String, ParamArray Object())'. If the result of 'String.Format(IFormatProvider, String, ParamArray Object())' will be displayed to the user, specify 'CultureInfo.CurrentCulture()' as the 'IFormatProvider' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture()'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#LoadProcessPriority()" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="DoNotIndirectlyExposeMethodsWithLinkDemands" Category="Microsoft.Security" CheckId="CA2122" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="82">'MainForm.LoadProcessPriority()' calls into 'Process.GetCurrentProcess()' which has a LinkDemand. By making this call, 'Process.GetCurrentProcess()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.LoadProcessPriority()'&#xD;&#xA;   -&gt;'MainForm.LoadProcessPriority()'&#xD;&#xA;   -&gt;'MainForm.New()'</Issue>
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="82">'MainForm.LoadProcessPriority()' calls into 'Process.PriorityClass.Set(ProcessPriorityClass)' which has a LinkDemand. By making this call, 'Process.PriorityClass.Set(ProcessPriorityClass)' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.LoadProcessPriority()'&#xD;&#xA;   -&gt;'MainForm.LoadProcessPriority()'&#xD;&#xA;   -&gt;'MainForm.New()'</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#ProcessFileList()" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message Id="System.String.Format(System.String,System.Object[])" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Name="IFormatProviderAlternateString" Certainty="95" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="304">Because the behavior of 'String.Format(String, ParamArray Object())' could vary based on the current user's locale settings, replace this call in 'MainForm.ProcessFileList()' with a call to 'String.Format(IFormatProvider, String, ParamArray Object())'. If the result of 'String.Format(IFormatProvider, String, ParamArray Object())' will be displayed to the user, specify 'CultureInfo.CurrentCulture()' as the 'IFormatProvider' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture()'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#SaveProcessPriority(System.Diagnostics.ProcessPriorityClass)" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="DoNotIndirectlyExposeMethodsWithLinkDemands" Category="Microsoft.Security" CheckId="CA2122" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="96">'MainForm.SaveProcessPriority(ProcessPriorityClass)' calls into 'Process.GetCurrentProcess()' which has a LinkDemand. By making this call, 'Process.GetCurrentProcess()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.SaveProcessPriority(ProcessPriorityClass)'&#xD;&#xA;   -&gt;'MainForm.SaveProcessPriority(ProcessPriorityClass)'&#xD;&#xA;   -&gt;'MainForm.CbProcessPriority_SelectedIndexChanged(Object, EventArgs)'</Issue>
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="96">'MainForm.SaveProcessPriority(ProcessPriorityClass)' calls into 'Process.PriorityClass.Get()' which has a LinkDemand. By making this call, 'Process.PriorityClass.Get()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.SaveProcessPriority(ProcessPriorityClass)'&#xD;&#xA;   -&gt;'MainForm.SaveProcessPriority(ProcessPriorityClass)'&#xD;&#xA;   -&gt;'MainForm.CbProcessPriority_SelectedIndexChanged(Object, EventArgs)'</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#ToolStripLabel1_DoubleClick(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="IdentifiersShouldNotContainUnderscores" Category="Microsoft.Naming" CheckId="CA1707" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="95" Level="Error" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="568">Remove the underscores from member name 'MainForm.ToolStripLabel1_DoubleClick(Object, EventArgs)'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#WriteProcessInfo()" Kind="Method" Static="True" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="DoNotIndirectlyExposeMethodsWithLinkDemands" Category="Microsoft.Security" CheckId="CA2122" Status="Active" Created="2014-11-19 10:11:24Z" FixCategory="NonBreaking">
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="537">'MainForm.WriteProcessInfo()' calls into 'Process.BasePriority.Get()' which has a LinkDemand. By making this call, 'Process.BasePriority.Get()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.ToolStripLabel1_DoubleClick(Object, EventArgs)'</Issue>
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="537">'MainForm.WriteProcessInfo()' calls into 'Process.GetCurrentProcess()' which has a LinkDemand. By making this call, 'Process.GetCurrentProcess()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.ToolStripLabel1_DoubleClick(Object, EventArgs)'</Issue>
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="537">'MainForm.WriteProcessInfo()' calls into 'Process.PagedMemorySize64.Get()' which has a LinkDemand. By making this call, 'Process.PagedMemorySize64.Get()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.ToolStripLabel1_DoubleClick(Object, EventArgs)'</Issue>
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="537">'MainForm.WriteProcessInfo()' calls into 'Process.PagedSystemMemorySize64.Get()' which has a LinkDemand. By making this call, 'Process.PagedSystemMemorySize64.Get()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.ToolStripLabel1_DoubleClick(Object, EventArgs)'</Issue>
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="537">'MainForm.WriteProcessInfo()' calls into 'Process.PriorityClass.Get()' which has a LinkDemand. By making this call, 'Process.PriorityClass.Get()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.ToolStripLabel1_DoubleClick(Object, EventArgs)'</Issue>
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="537">'MainForm.WriteProcessInfo()' calls into 'Process.PrivilegedProcessorTime.Get()' which has a LinkDemand. By making this call, 'Process.PrivilegedProcessorTime.Get()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.ToolStripLabel1_DoubleClick(Object, EventArgs)'</Issue>
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="537">'MainForm.WriteProcessInfo()' calls into 'Process.TotalProcessorTime.Get()' which has a LinkDemand. By making this call, 'Process.TotalProcessorTime.Get()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.ToolStripLabel1_DoubleClick(Object, EventArgs)'</Issue>
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="537">'MainForm.WriteProcessInfo()' calls into 'Process.UserProcessorTime.Get()' which has a LinkDemand. By making this call, 'Process.UserProcessorTime.Get()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.ToolStripLabel1_DoubleClick(Object, EventArgs)'</Issue>
+             <Issue Certainty="33" Level="CriticalError" Path="G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf" File="MainForm.vb" Line="537">'MainForm.WriteProcessInfo()' calls into 'Process.WorkingSet64.Get()' which has a LinkDemand. By making this call, 'Process.WorkingSet64.Get()' is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: &#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.WriteProcessInfo()'&#xD;&#xA;   -&gt;'MainForm.ToolStripLabel1_DoubleClick(Object, EventArgs)'</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+ </Targets>
+ <Rules>
+  <Rule TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210">
+   <Name>Assemblies should have valid strong names</Name>
+   <Description>Either the assembly has no strong name, an invalid one, or the strong name is valid only because of the computer configuration. The assembly should not be deployed in this state. The most common causes of this are: 1) The assembly's contents were modified after it was signed. 2) The signing process failed. 3) The assembly was delay-signed. 4) A registry key existed that allowed the check to pass (where it would not have otherwise).</Description>
+   <Resolution Name="NoStrongName">Sign {0} with a strong name key.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182127(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">CriticalError</MessageLevel>
+   <File Name="designrules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002">
+   <Name>Do not expose generic lists</Name>
+   <Description>Do not expose List&lt;T&gt; in object models. Use Collection&lt;T&gt;, ReadOnlyCollection&lt;T&gt; or KeyedCollection&lt;K,V&gt; instead. List&lt;T&gt; is meant to be used from implementation, not in object model API. List&lt;T&gt; is optimized for performance at the cost of long term versioning. For example, if you return List&lt;T&gt; to the client code, you will not ever be able to receive notifications when client code modifies the collection.</Description>
+   <Resolution Name="Default">Change {0} in {1} to use Collection&lt;T&gt;, ReadOnlyCollection&lt;T&gt; or KeyedCollection&lt;K,V&gt;</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182142(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Error</MessageLevel>
+   <File Name="designrules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="DoNotIgnoreMethodResults" Category="Microsoft.Usage" CheckId="CA1806">
+   <Name>Do not ignore method results</Name>
+   <Description>The result of methods that return new instances of strings should be assigned to a variable and subsequently used. If the result of a method that creates a new object, such as String.ToLower(), is not assigned to a variable, the call is wasted.</Description>
+   <Resolution Name="HResultOrErrorCode">{0} calls {1} but does not use the HRESULT or error code that the method returns. This could lead to unexpected behavior in error conditions or low-resource situations. Use the result in a conditional statement, assign the result to a variable, or pass it as an argument to another method.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182273(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Warning</MessageLevel>
+   <File Name="usagerules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="DoNotIndirectlyExposeMethodsWithLinkDemands" Category="Microsoft.Security" CheckId="CA2122">
+   <Name>Do not indirectly expose methods with link demands</Name>
+   <Description>Do not wrap a method protected by a LinkDemand with a method that does not perform a security check. A LinkDemand checks the permissions of the immediate caller rather than checking the permissions of all callers in the call stack. In this case, the permissions of the wrapper method will be checked. If the wrapper method does not, itself, check the permissions of callers higher in the call stack, malicious code might be able to execute the wrapped function even though it lacks permission to do so.</Description>
+   <Resolution Name="Default">{0} calls into {1} which has a LinkDemand. By making this call, {1} is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: {2}</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182303(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="33">CriticalError</MessageLevel>
+   <File Name="securityrules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709">
+   <Name>Identifiers should be cased correctly</Name>
+   <Description>Type, namespace, and member identifiers are Pascal-cased. Parameter identifiers are camel-cased. Two letter acronyms within these identifiers should be upper-cased, for example, use System.IO instead of System.Io. Acronyms of three or more letters should be Pascal-cased, for example, use System.Xml instead of System.XML. The pascal-casing convention capitalizes the first letter of each word, as in BackColor. The camel-casing convention formats the first letter of the first word in lowercase and capitalizes the first letter of all subsequent words, as in backgroundColor. Although it may be common practice for some two letter acronyms to not be fully capitalized, violations of this rule should not be excluded for this reason. For example, 'DbConnection', is common but incorrect; use DBConnection. A violation of this rule might be required for compatibility with existing, non-managed symbol schemes. In general, however, these symbols should not be visible outside the assembly that uses them.</Description>
+   <Resolution Name="Assembly">Correct the casing of '{0}' in assembly name {1} by changing it to '{2}'.</Resolution>
+   <Resolution Name="Member">Correct the casing of '{0}' in member name {1} by changing it to '{2}'.</Resolution>
+   <Resolution Name="MemberParameter">In member {0}, correct the casing of '{1}' in parameter name {2} by changing it to '{3}'.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182240(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="85">Error</MessageLevel>
+   <File Name="namingrules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720">
+   <Name>Identifiers should not contain type names</Name>
+   <Description>Avoid using language-specific types name in parameters and members and data type identifiers in parameters. Types names might not be intuitive for all developers. It is recommended that you select a generic name, such as 'value', instead. If this is not sufficient, be sure to use the type name as it is defined in the .NET Framework Library and avoid language-specific type names completely. Some examples of C#-specific type names are 'float' (use 'Single' if a generic name is not sufficient), and 'ulong' (use 'UInt64' if a generic name is not sufficient).</Description>
+   <Resolution Name="LanguageSpecificMember">Consider replacing the language-specific data type identifier '{0}' in member name {1} with either a language-independent equivalent or a more generic term, such as 'value'.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/bb531486(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="75">Error</MessageLevel>
+   <File Name="namingrules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="IdentifiersShouldNotContainUnderscores" Category="Microsoft.Naming" CheckId="CA1707">
+   <Name>Identifiers should not contain underscores</Name>
+   <Description>Do not use underscores when specifying identifiers. Some generated Visual Studio identifiers for applications contain underscore characters. Underscore characters should generally be avoided in public identifiers.</Description>
+   <Resolution Name="Member">Remove the underscores from member name {0}.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182245(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Error</MessageLevel>
+   <File Name="namingrules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014">
+   <Name>Mark assemblies with CLSCompliantAttribute</Name>
+   <Description>Assemblies should explicitly state their CLS compliance using the CLSCompliant attribute. An assembly without this attribute is not CLS-compliant. Assemblies, modules, and types can be CLS-compliant even if some parts of the assembly, module, or type are not CLS-compliant. The following rules apply: 1) If the element is marked CLSCompliant, any noncompliant members must have the CLSCompliant attribute present with its argument set to false. 2) A comparable CLS-compliant alternative member must be supplied for each member that is not CLS-compliant.</Description>
+   <Resolution Name="Default">Mark {0} with CLSCompliant(true) because it exposes externally visible types.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182156(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Error</MessageLevel>
+   <File Name="designrules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="MarkAssembliesWithNeutralResourcesLanguage" Category="Microsoft.Performance" CheckId="CA1824">
+   <Name>Mark assemblies with NeutralResourcesLanguageAttribute</Name>
+   <Description>The NeutralResourcesLanguage attribute informs the ResourceManager of the language used to render the neutral culture's resources for an assembly. When looking up resources in the same culture as the neutral resources language, the ResourceManager automatically uses the resources located in the main assembly, instead of searching for a satellite assembly with the current user interface culture for the current thread. This will improve lookup performance for the first resource you load and can reduce your working set.</Description>
+   <Resolution Name="Default">Because assembly {0} contains a ResX-based resource file, mark it with the NeutralResourcesLanguage attribute, specifying the language of the resources within the assembly. This could improve lookup performance the first time a resource is retrieved.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/bb385967(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Warning</MessageLevel>
+   <File Name="performancerules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
+   <Name>Mark members as static</Name>
+   <Description>Methods which do not access instance data or call instance methods can be marked as static (Shared in Visual Basic). After doing so, the compiler will emit non-virtual call sites to these members which will prevent a check at runtime for each call that ensures the current object pointer is non-null. This can result in a measurable performance gain for performance-sensitive code. In some cases, the failure to access the current object instance represents a correctness issue.</Description>
+   <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms245046(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Warning</MessageLevel>
+   <File Name="performancerules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060">
+   <Name>Move P/Invokes to NativeMethods class</Name>
+   <Description>This type contains members with the DllImport attribute. Members with the DllImport attribute should be contained in classes named NativeMethods, SafeNativeMethods, or UnsafeNativeMethods.</Description>
+   <Resolution Name="Default">Because it is a P/Invoke method, {0} should be defined in a class named NativeMethods, SafeNativeMethods, or UnsafeNativeMethods.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182161(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">CriticalWarning</MessageLevel>
+   <File Name="designrules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804">
+   <Name>Remove unused locals</Name>
+   <Description>Remove locals that are not used or are only assigned to in method implementations.</Description>
+   <Resolution Name="Default">{0} declares a variable, {1}, of type {2}, which is never used or is only assigned to. Use this variable or remove it.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182278(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Warning</MessageLevel>
+   <File Name="performancerules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="SetLocaleForDataTypes" Category="Microsoft.Globalization" CheckId="CA1306">
+   <Name>Set locale for data types</Name>
+   <Description>In most cases, Locale should be explicitly set to CultureInfo.InvariantCulture on DataSet and DataTable instances. Upon creation of a DataSet or DataTable instance, the Locale is set to the current culture. In most cases, the Locale should be set to CultureInfo.InvariantCulture to guarantee proper sorting behavior in all cultures.</Description>
+   <Resolution Name="Default">Be sure to set the {0} Locale property wherever {1} creates an instance of that type.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182188(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="90">Error</MessageLevel>
+   <File Name="globalizationrules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305">
+   <Name>Specify IFormatProvider</Name>
+   <Description>If an overload exists that takes an IFormatProvider argument, it should always be called in favor of an overload that does not. Some methods in the runtime convert a value to or from a string representation and take a string parameter that contains one or more characters, called format specifiers, which indicate how the value is to be converted. If the meaning of the format specifier varies by culture, a formatting object supplies the actual characters used in the string representation. In scenarios where sorting and comparison behavior should never change between cultures, specify CultureInfo.InvariantCulture, otherwise, specify CultureInfo.CurrentCulture.</Description>
+   <Resolution Name="IFormatProviderAlternateString">Because the behavior of {0} could vary based on the current user's locale settings, replace this call in {1} with a call to {2}. If the result of {2} will be displayed to the user, specify {3} as the 'IFormatProvider' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify {4}.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182190(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Error</MessageLevel>
+   <File Name="globalizationrules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="SpecifyMarshalingForPInvokeStringArguments" Category="Microsoft.Globalization" CheckId="CA2101">
+   <Name>Specify marshaling for P/Invoke string arguments</Name>
+   <Description>When marshaling strings as ANSI (or as Auto on Win9x), some characters may be changed. If best-fit mapping is on, strings that appear different in Unicode will be marshaled to identical ANSI strings, which may lead to incorrect security decisions. Turning best-fit mapping off reduces this risk, as all characters without equivalents are mapped to '?'. Also, note that CharSet.Ansi is the default setting for all string marshaling; Unicode marshaling must be specified explicitly, either as a CharSet setting of DllImport or StructLayout, or as a MarshalAs attribute with a Unicode (or system-dependent) UnmanagedType.</Description>
+   <Resolution Name="ParameterImplicitAnsi">To reduce security risk, marshal parameter {0} as Unicode, by setting DllImport.CharSet to CharSet.Unicode, or by explicitly marshaling the parameter as UnmanagedType.LPWStr. If you need to marshal this string as ANSI or system-dependent, specify MarshalAs explicitly, and set BestFitMapping=false; for added security, also set ThrowOnUnmappableChar=true.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182319(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="75">Error</MessageLevel>
+   <File Name="globalizationrules.dll" Version="10.0.0.0" />
+  </Rule>
+  <Rule TypeName="SpecifyMessageBoxOptions" Category="Microsoft.Globalization" CheckId="CA1300">
+   <Name>Specify MessageBoxOptions</Name>
+   <Description>In order to run correctly on right-to-left systems, all calls to MessageBox.Show should use the overload that specifies MessageBoxOptions as an argument. Programs should detect whether they are running on a right-to-left system at run-time and pass the appropriate MessageBoxOptions value in order to display correctly.</Description>
+   <Resolution Name="Default">Change {0} to call the MessageBox.Show overload that specifies MessageBoxOptions, and make sure to set MessageBoxOptions.RightAlign and MessageBoxOptions.RtlReading if RightToLeft is set to RightToLeft.Yes on the parent control.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182191(VS.100).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Error</MessageLevel>
+   <File Name="globalizationrules.dll" Version="10.0.0.0" />
+  </Rule>
+ </Rules>
+ <Localized>
+  <String Key="Category">Category</String>
+  <String Key="Certainty">Certainty</String>
+  <String Key="CollapseAll">Collapse All</String>
+  <String Key="CheckId">Check Id</String>
+  <String Key="Error">Error</String>
+  <String Key="Errors">error(s)</String>
+  <String Key="ExpandAll">Expand All</String>
+  <String Key="Help">Help</String>
+  <String Key="Line">Line</String>
+  <String Key="Messages">message(s)</String>
+  <String Key="LocationNotStoredInPdb">[Location not stored in Pdb]</String>
+  <String Key="Project">Project</String>
+  <String Key="Resolution">Resolution</String>
+  <String Key="Rule">Rule</String>
+  <String Key="RuleFile">Rule File</String>
+  <String Key="RuleDescription">Rule Description</String>
+  <String Key="Source">Source</String>
+  <String Key="Status">Status</String>
+  <String Key="Target">Target</String>
+  <String Key="Warning">Warning</String>
+  <String Key="Warnings">warning(s)</String>
+  <String Key="ReportTitle">Code Analysis Report</String>
+ </Localized>
+</FxCopReport>
