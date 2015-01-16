@@ -34,6 +34,8 @@ Public Partial Class MainForm
         XmlNotFound = -1
     End Enum
     
+    Private frPDFExport As New FastReport.Export.Pdf.PDFExport
+    
     Public Sub New()
         ' The Me.InitializeComponent call is required for Windows Forms designer support.
         Me.InitializeComponent()
@@ -355,14 +357,14 @@ Public Partial Class MainForm
                     RetVal = ReportGenerationResults.InvalidXML 'Неизвестный формат файла (Нет таблицы G_CLIENT)
                 Else
                     ' Открытие шаблона отчета
-    '                If report1.FileName = strReportFileName Then
-    '                    report1.Dictionary.ClearRegisteredData
-    '                Else
+                    If report1.FileName = strReportFileName Then
+                        report1.Dictionary.ClearRegisteredData
+                    Else
                         report1.Clear
                         Application.DoEvents
                         WriteTrace ("Loading report...")
                         report1.Load(strReportFileName)
-    '                End If
+                    End If
     
     '                --------
     '                Dim conn As FastReport.Data.XmlDataConnection = report1.Dictionary.Connections.Item(0)
@@ -402,9 +404,18 @@ Public Partial Class MainForm
                             WriteLog("Просмотр отчета", strXMLFileName)
                             report1.ShowPrepared()
                         Else
-                            report1.PrintSettings.ShowDialog = False
-                            WriteLog("Печать отчета", strXMLFileName)
-                            report1.PrintPrepared()
+                            If iniFile.GetBoolean("Settings", "UseInternalPDFExport", False) Then
+                                Dim strPDFFileName As String = IO.path.Combine(IO.Path.GetDirectoryName(strXmlFileName), report1.ReportInfo.Name & ".pdf")
+                                If ExportReportToPdf(report1, strPDFFileName) then
+                                    WriteLog("Отчет экспортирован", strXMLFileName)
+                                Else
+                                    WriteLog("Ошибка экспорта: " & strPDFFileName, strXMLFileName)
+                                End If
+                            Else
+                                report1.PrintSettings.ShowDialog = False
+                                report1.PrintPrepared()
+                                WriteLog("Отчет отправлен на печать", strXMLFileName)
+                            End If
                         End If
                         RetVal = ReportGenerationResults.Ok ' Ок
                     End If
@@ -423,12 +434,11 @@ Public Partial Class MainForm
         End Try
     End Function
     
-    Shared Function ExportReportToPdf(rep As FastReport.Report, strPdfFileName As String) As Boolean
-        ' создаем экземпляр экспорта в HTML
-        Dim export As New FastReport.Export.Pdf.PDFExport
-        export.Compressed = False
+    Private Function ExportReportToPdf(rep As FastReport.Report, strPdfFileName As String) As Boolean
+        frPDFExport.PrintOptimized = True
+        frPDFExport.Compressed = True
         Try
-            export.Export(rep, strPdfFileName)
+            frPDFExport.Export(rep, strPdfFileName)
             Return True
         Catch
             Return False

@@ -16,3 +16,4 @@ G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf\obj\Release\ccsxml2pdf.R
 G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf\obj\Release\GenerateResource.read.1.tlog
 G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf\obj\Release\GenerateResource.write.1.tlog
 G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf\obj\Release\ccsxml2pdf.exe
+G:\CARDS\OTS\Носов\!SRC\!SVN\ccsxml2pdf\ccsxml2pdf\obj\Release\GenerateResource.read.4.tlog
