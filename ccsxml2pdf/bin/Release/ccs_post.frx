@@ -1,0 +1,790 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="Vb" DoublePass="true" SmoothGraphics="true" StartReportEvent="_StartReport" ReportInfo.Name="&lt;empty&gt;" ReportInfo.Author="pnosov" ReportInfo.Version="1" ReportInfo.Created="06/07/2013 13:12:46" ReportInfo.Modified="08/05/2014 18:19:15" ReportInfo.CreatorVersion="1.6.19.0" PrintSettings.ShowDialog="false">
+  <ScriptText>Imports System
+Imports System.Collections
+Imports System.Collections.Generic
+Imports System.ComponentModel
+Imports System.Windows.Forms
+Imports System.Drawing
+Imports Microsoft.VisualBasic
+Imports FastReport
+Imports FastReport.Data
+Imports FastReport.Dialog
+Imports FastReport.Table
+Imports FastReport.Barcode
+Imports FastReport.Utils
+Imports System.Globalization.CultureInfo
+
+Namespace FastReport
+  Public Class ReportScript
+    Public nfi As System.Globalization.NumberFormatInfo = System.Globalization.CultureInfo.CurrentCulture.NumberFormat
+    Public dfi As System.Globalization.DateTimeFormatInfo = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat
+    Public decimalSeparator As String = nfi.NumberDecimalSeparator
+    Public dateSeparator as string = dfi.DateSeparator
+
+    Public Function UpdateTransDetails(strTransDetail as string) as string
+      if strTransDetail = &quot;uOS -&gt; Nostro suspense&quot; then
+        strTransDetail = &quot;Комиссия за подключение к программе страхования (погашение)&quot;
+      ElseIf strTransDetail = &quot;Комиссия за услугу &quot;&quot;SMS-оповещение&quot;&quot; -&gt; Nostro Suspense&quot; Then
+        strTransDetail = &quot;Комиссия за услугу &quot;&quot;SMS-оповещение&quot;&quot; (погашение)&quot;
+      ElseIf strTransDetail = &quot;uOS -&gt; Nostro suspense&quot; Then
+        strTransDetail = &quot;Комиссия за подключение к программе страхования (погашение)&quot;
+      End If
+      strTransDetail = strTransDetail.Replace(&quot;cashback_outward&quot;,&quot;&quot;).Trim
+      strTransDetail = strTransDetail.Replace(&quot; -&gt; Nostro Suspense&quot;,&quot;&quot;).Trim
+      strTransDetail = strTransDetail.Replace(&quot; Внутрибанковские документы&quot;,&quot;&quot;).Trim
+      Return strTransDetail
+    End Function
+    
+    Public Function GetVDate (strIN as Object) as string
+      strIN = Replace(CType(strIN, String), &quot;-JAN-&quot;, dateSeparator &amp; &quot;01&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;-FEB-&quot;, dateSeparator &amp; &quot;02&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;-MAR-&quot;, dateSeparator &amp; &quot;03&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;-APR-&quot;, dateSeparator &amp; &quot;04&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;-MAY-&quot;, dateSeparator &amp; &quot;05&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;-JUN-&quot;, dateSeparator &amp; &quot;06&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;-JUL-&quot;, dateSeparator &amp; &quot;07&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;-AUG-&quot;, dateSeparator &amp; &quot;08&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;-SEP-&quot;, dateSeparator &amp; &quot;09&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;-OCT-&quot;, dateSeparator &amp; &quot;10&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;-NOV-&quot;, dateSeparator &amp; &quot;11&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;-DEC-&quot;, dateSeparator &amp; &quot;12&quot; &amp; dateSeparator)
+      strIN = Replace(CType(strIN, String), &quot;/&quot;, dateSeparator)
+      Return strIN
+    End Function
+   
+    Public Function GetVDecimal(strIn as Object) as Object
+      Dim RetVal as String
+      RetVal = CType(strIN, String).Replace(&quot;руб.&quot;,&quot;&quot;).Replace(&quot;руб&quot;,&quot;&quot;).Trim
+      RetVal = RetVal.Replace(&quot;.&quot;, decimalSeparator).Replace(&quot;,&quot;, decimalSeparator).Replace(&quot; &quot;,&quot;&quot;).Trim
+      Return CDbl(RetVal)
+    End Function
+   
+    Private Function GetVDecimalWithSign(strIn as Object, Optional intSign as Integer = 0, Optional boolForcePlusSign as boolean = false, Optional strSuffix as string = &quot;&quot;) as Object
+      Dim RetVal as Object
+      RetVal = GetVDecimal(strIN)
+      If IsNumeric(RetVal) then
+        Select case intSign
+          Case is &gt; 0
+            RetVal = Abs(CDbl(RetVal))
+          Case is &lt; 0
+            RetVal = 0 - Abs(CDbl(RetVal))
+          Case Else
+            RetVal = CDbl(RetVal)
+        End Select
+        RetVal = IIf((RetVal &gt; 0) and boolForcePlusSign,&quot;+&quot;,&quot;&quot;) &amp; String.Format(&quot;{0:# ##0.00}&quot;, RetVal).ToString.Trim &amp; strSuffix
+      Else
+        RetVal = strIn
+      End If
+      Return RetVal
+    End Function  
+
+    Private Sub Data7_BeforePrint(ByVal sender As object, ByVal e As EventArgs)
+      Dim strReportName as String
+'      SetBandsVisible()
+      Report.ReportInfo.Name=&quot;&lt;empty&gt;&quot;
+'      strReportName = String.Format(String.Format(&quot;{0}={1:yyyyMMdd}={2:yyyyMMdd}&quot;, _
+'        CType(Report.GetColumnValue(&quot;G_CLIENT.PARAMETER_B&quot;), String), _
+'        CType(Report.GetColumnValue(&quot;G_CLIENT.STMT_DATE_FROM&quot;), Date), _
+'        CType(Report.GetColumnValue(&quot;G_CLIENT.STMT_DATE_TO&quot;), Date)))
+      'MsgBox (CType(Report.GetColumnValue(&quot;G_CURR_CONTRACT.BEG_BAL_CURR&quot;), Decimal).ToString)
+      
+      Dim str_BEG_BAL_CURR as String = CType(Report.GetColumnValue(&quot;G_CURR_CONTRACT.BEG_BAL_CURR&quot;), String)
+      Dim str_END_BALLANCE as String = CType(Report.GetColumnValue(&quot;G_CURR_CONTRACT.END_BALLANCE&quot;), String)
+      Dim dec_N_ENTRIES as decimal = CType(Report.GetColumnValue(&quot;G_CLIENT.N_ENTRIES&quot;), Decimal)
+      Dim dec_MIN_PAYM as Decimal = CType(Report.GetParameterValue(&quot;prm_MIN_PAYM&quot;), Decimal)
+      Dim dec_OWN_FUNDS as Decimal = CType(Report.GetParameterValue(&quot;prm_OWN_FUNDS&quot;), Decimal)
+      
+      
+      if CType(Report.GetParameterValue(&quot;prm_ADDRESS&quot;), String).Trim = &quot;&quot; Or _
+          ( _
+            (str_BEG_BAL_CURR = &quot;0&quot; or str_BEG_BAL_CURR = &quot;&quot;) And _
+            (str_END_BALLANCE = &quot;0&quot; or str_END_BALLANCE = &quot;&quot;) And _
+            (dec_N_ENTRIES    = &quot;0&quot;) And _
+            (dec_OWN_FUNDS    = 0) And _
+            (dec_MIN_PAYM     = 0) _
+          ) _
+      Then
+        strReportName = &quot;&lt;empty&gt;&quot;
+      else
+        strReportName=CType(Report.GetColumnValue(&quot;G_CLIENT.ADDR_LINE_F&quot;), String) &amp; &quot; &quot; &amp; CType(Report.GetParameterValue(&quot;prm_FIO&quot;), String)
+      End If
+      Report.ReportInfo.Name = strReportName
+    End Sub
+    
+    Private Sub SetBandsVisible()
+'      msgbox(Report.Dictionary.Connections.Item(0).name)
+'      Dim cnn As DataConnectionBase = Report.Dictionary.Connections.Item(0)
+'      Dim tbl as TableDataSource
+'      
+'      Band_LIST_G_A_ACNT_CONTRACT.Visible = false
+'      Band_G_A_ACNT_CONTRACT.Visible = false
+'      Band_LIST_G_A_ID.Visible = false
+'      
+'      For f As Integer = 0 To cnn.tables.count-1
+'        tbl = cnn.Tables.Item(f)
+'        Select Case tbl.Name
+'          Case &quot;LIST_G_A_ACNT_CONTRACT&quot;
+'           Band_LIST_G_A_ACNT_CONTRACT.Visible = true
+'          Case &quot;G_A_ACNT_CONTRACT&quot;
+'            Band_G_A_ACNT_CONTRACT.Visible = true
+'          Case &quot;LIST_G_A_ID&quot;
+'            Band_LIST_G_A_ID.Visible = true
+'        End Select
+'      Next f
+    End Sub
+
+    Private Sub txtOperationsHeader_BeforePrint(ByVal sender As object, ByVal e As EventArgs)
+      txtOperationsHeader.Visible = not(DataHeader6.Repeated)
+    End Sub
+
+    Private Sub Data4_AfterData(ByVal sender As object, ByVal e As EventArgs)
+      
+    End Sub
+
+    Private Sub Data10_AfterData(ByVal sender As object, ByVal e As EventArgs)
+      Report.SetParameterValue(&quot;prm_MIN_PAYM&quot;, GetVDecimal(CType(Report.GetColumnValue(&quot;G_FP_MESSAGE.FP_VALUE2&quot;), String)))
+    End Sub
+
+
+
+    Private Sub bandIsBlocked_AfterData(ByVal sender As object, ByVal e As EventArgs)
+      if Report.GetColumnValue(&quot;G_FP_MESSAGE.FP_LABEL1&quot;) &lt;&gt; &quot;&quot; then
+        Report.SetParameterValue(&quot;prm_ACC_BLOCKED&quot;, True)
+      End If
+    End Sub
+    
+
+    Private Sub band_LIST_G_FINMESSAGE_AfterData(ByVal sender As object, ByVal e As EventArgs)
+      Dim strDate as string = CType(Report.GetColumnValue(&quot;G_FINMESSAGE.LABEL1&quot;), String)
+      strDate = GetVDate(strDate.Replace(&quot;Дата формирования отчета &quot;,&quot;&quot;).Trim)
+      Report.SetParameterValue(&quot;prm_ReportBuildDate&quot;, strDate)
+    End Sub
+
+    Private Sub band_G_FP_MESSAGE_AfterData(ByVal sender As object, ByVal e As EventArgs)
+      Report.SetParameterValue(&quot;prm_ACC_NUM&quot;, GetVDecimal(CType(Report.GetColumnValue(&quot;G_FP_MESSAGE.FP_VALUE1&quot;), String)))
+    End Sub
+
+    Private Sub _StartReport(ByVal sender As object, ByVal e As EventArgs)
+      Report.ReportInfo.Name=&quot;&lt;empty&gt;&quot;
+    End Sub
+
+    Private Sub band_IsBlocked_AfterData(ByVal sender As object, ByVal e As EventArgs)
+      if CType(Report.GetColumnValue(&quot;G_FP_MESSAGE.FP_LABEL1&quot;), String) &lt;&gt; &quot;&quot; then
+        Report.SetParameterValue(&quot;isBlocked&quot;,True)
+        txtBlocked.Visible=true
+        txtRegular.Visible=false
+      else
+        Report.SetParameterValue(&quot;isBlocked&quot;,False)
+        txtBlocked.Visible=false
+        txtRegular.Visible=true
+      End If
+    End Sub
+    
+    
+
+
+    Private Sub cell_OWN_FUNDS_AfterData(ByVal sender As object, ByVal e As EventArgs)
+      Report.SetParameterValue(&quot;prm_OWN_FUNDS&quot;, GetVDecimal(cell_OWN_FUNDS.Value))
+    End Sub
+
+  End Class
+End Namespace
+</ScriptText>
+  <Styles>
+    <Style Name="stlTableHeader1" Border.Lines="All" Border.Color="White" Fill.Color="147, 193, 26" TextFill.Color="White" Font="Arial, 7.5pt, style=Bold"/>
+    <Style Name="stlTableEven1" Fill.Color="147, 193, 26" ApplyBorder="false" ApplyTextFill="false" ApplyFont="false"/>
+  </Styles>
+  <Dictionary>
+    <TableDataSource Name="CARDHOLDER_CONTRACT_STATEMENT2" ReferenceName="Data.CARDHOLDER_CONTRACT_STATEMENT2" DataType="System.Int32" Enabled="true">
+      <Column Name="CARDHOLDER_CONTRACT_STATEMENT2_Id" DataType="System.Int32"/>
+      <Column Name="OFFICE" DataType="System.String"/>
+      <Column Name="REPORTTYPE" DataType="System.String"/>
+      <Column Name="FININST" DataType="System.String"/>
+      <Column Name="GLOB_LANG" DataType="System.String"/>
+      <Column Name="CONTRACT_LIST" DataType="System.String"/>
+      <Column Name="ITEM_CONDITION" DataType="System.String"/>
+      <Column Name="ENTRY_CONDITION" DataType="System.String"/>
+      <Column Name="N_G_CLIENT" DataType="System.String"/>
+      <Column Name="CYCLE_DATE_TO" DataType="System.String"/>
+      <Column Name="CONNECT_BY" DataType="System.String"/>
+    </TableDataSource>
+    <TableDataSource Name="LIST_G_CLIENT" ReferenceName="Data.LIST_G_CLIENT" DataType="System.Int32" Enabled="true">
+      <Column Name="LIST_G_CLIENT_Id" DataType="System.Int32"/>
+      <Column Name="CARDHOLDER_CONTRACT_STATEMENT2_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="G_CLIENT" ReferenceName="Data.G_CLIENT" DataType="System.Int32" Enabled="true">
+      <Column Name="ACNT_CONTRACT_ID" DataType="System.String"/>
+      <Column Name="MAIN_CONTRACT" DataType="System.String"/>
+      <Column Name="PARAMETER_A" DataType="System.String"/>
+      <Column Name="PARAMETER_B" DataType="System.String"/>
+      <Column Name="PARAMETER_C" DataType="System.String"/>
+      <Column Name="PARAMETER_D" DataType="System.String"/>
+      <Column Name="PARAMETER_E" DataType="System.String"/>
+      <Column Name="PARAMETER_F" DataType="System.String"/>
+      <Column Name="PARAMETER_G" DataType="System.String"/>
+      <Column Name="PARAMETER_H" DataType="System.String"/>
+      <Column Name="PAYM_IMM_AMNT_ALL" DataType="System.String"/>
+      <Column Name="PAYM_DUE_AMNT_ALL" DataType="System.String"/>
+      <Column Name="PAYM_DUE_DATE_ALL" DataType="System.String"/>
+      <Column Name="ACNT_CONTRACT_CURR" DataType="System.String"/>
+      <Column Name="ACNT_CONTRACT_CURR_CODE" DataType="System.String"/>
+      <Column Name="CREDIT_LIMIT" DataType="System.String"/>
+      <Column Name="TOTAL_BLOCKED" DataType="System.String"/>
+      <Column Name="AMOUNT_AVAILABLE" DataType="System.String"/>
+      <Column Name="CHECK_AVAILABLE" DataType="System.String"/>
+      <Column Name="ADDR_LINE_A" DataType="System.String"/>
+      <Column Name="ADDR_LINE_B" DataType="System.String"/>
+      <Column Name="ADDR_LINE_C" DataType="System.String"/>
+      <Column Name="ADDR_LINE_D" DataType="System.String"/>
+      <Column Name="ADDR_LINE_E" DataType="System.String"/>
+      <Column Name="ADDR_LINE_F" DataType="System.String"/>
+      <Column Name="MESSAGE_ACC" DataType="System.String"/>
+      <Column Name="MESSAGE_SP" DataType="System.String"/>
+      <Column Name="ADD_INFO" DataType="System.String"/>
+      <Column Name="G_CLIENT_Id" DataType="System.Int32"/>
+      <Column Name="LIST_G_LIMITERS" DataType="System.String"/>
+      <Column Name="N_ENTRIES" DataType="System.String"/>
+      <Column Name="STMT_DATE_FROM" DataType="System.String"/>
+      <Column Name="STMT_DATE_TO" DataType="System.String"/>
+      <Column Name="N_G_S_CLIENT" DataType="System.String"/>
+      <Column Name="LIST_G_CLIENT_Id" DataType="System.Int32"/>
+      <Column Name="Column" Alias="calc_ACC_NUM" Enabled="false" DataType="System.Int32" Calculated="true" Expression=""/>
+    </TableDataSource>
+    <TableDataSource Name="LIST_G_FP_MESSAGE" ReferenceName="Data.LIST_G_FP_MESSAGE" DataType="System.Int32" Enabled="true">
+      <Column Name="LIST_G_FP_MESSAGE_Id" DataType="System.Int32"/>
+      <Column Name="G_CLIENT_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="G_FP_MESSAGE" ReferenceName="Data.G_FP_MESSAGE" DataType="System.Int32" Enabled="true">
+      <Column Name="FP_FRAME_ATTR" DataType="System.String"/>
+      <Column Name="FP_LABEL1" DataType="System.String"/>
+      <Column Name="FP_LABEL1ATTR" DataType="System.String"/>
+      <Column Name="FP_VALUE1" DataType="System.String"/>
+      <Column Name="FP_VALUE1ATTR" DataType="System.String"/>
+      <Column Name="FP_LABEL2" DataType="System.String"/>
+      <Column Name="FP_LABEL2ATTR" DataType="System.String"/>
+      <Column Name="FP_VALUE2" DataType="System.String"/>
+      <Column Name="FP_VALUE2ATTR" DataType="System.String"/>
+      <Column Name="FP_LABEL3" DataType="System.String"/>
+      <Column Name="FP_LABEL3ATTR" DataType="System.String"/>
+      <Column Name="FP_VALUE3" DataType="System.String"/>
+      <Column Name="FP_VALUE3ATTR" DataType="System.String"/>
+      <Column Name="FP_LABEL4" DataType="System.String"/>
+      <Column Name="FP_LABEL4ATTR" DataType="System.String"/>
+      <Column Name="FP_VALUE4" DataType="System.String"/>
+      <Column Name="FP_VALUE4ATTR" DataType="System.String"/>
+      <Column Name="FP_LABEL5" DataType="System.String"/>
+      <Column Name="FP_LABEL5ATTR" DataType="System.String"/>
+      <Column Name="FP_VALUE5" DataType="System.String"/>
+      <Column Name="FP_VALUE5ATTR" DataType="System.String"/>
+      <Column Name="FP_LABEL6" DataType="System.String"/>
+      <Column Name="FP_LABEL6ATTR" DataType="System.String"/>
+      <Column Name="FP_VALUE6" DataType="System.String"/>
+      <Column Name="FP_VALUE6ATTR" DataType="System.String"/>
+      <Column Name="LIST_G_FP_MESSAGE_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="LIST_G_FINMESSAGE" ReferenceName="Data.LIST_G_FINMESSAGE" DataType="System.Int32" Enabled="true">
+      <Column Name="LIST_G_FINMESSAGE_Id" DataType="System.Int32"/>
+      <Column Name="G_CLIENT_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="G_FINMESSAGE" ReferenceName="Data.G_FINMESSAGE" DataType="System.Int32" Enabled="true">
+      <Column Name="FRAME_ATTR" DataType="System.String"/>
+      <Column Name="LABEL1" DataType="System.String"/>
+      <Column Name="LABEL1ATTR" DataType="System.String"/>
+      <Column Name="VALUE1" DataType="System.String"/>
+      <Column Name="VALUE1ATTR" DataType="System.String"/>
+      <Column Name="LABEL2" DataType="System.String"/>
+      <Column Name="LABEL2ATTR" DataType="System.String"/>
+      <Column Name="VALUE2" DataType="System.String"/>
+      <Column Name="VALUE2ATTR" DataType="System.String"/>
+      <Column Name="LABEL3" DataType="System.String"/>
+      <Column Name="LABEL3ATTR" DataType="System.String"/>
+      <Column Name="VALUE3" DataType="System.String"/>
+      <Column Name="VALUE3ATTR" DataType="System.String"/>
+      <Column Name="LABEL4" DataType="System.String"/>
+      <Column Name="LABEL4ATTR" DataType="System.String"/>
+      <Column Name="VALUE4" DataType="System.String"/>
+      <Column Name="VALUE4ATTR" DataType="System.String"/>
+      <Column Name="LABEL5" DataType="System.String"/>
+      <Column Name="LABEL5ATTR" DataType="System.String"/>
+      <Column Name="VALUE5" DataType="System.String"/>
+      <Column Name="VALUE5ATTR" DataType="System.String"/>
+      <Column Name="LABEL6" DataType="System.String"/>
+      <Column Name="LABEL6ATTR" DataType="System.String"/>
+      <Column Name="VALUE6" DataType="System.String"/>
+      <Column Name="VALUE6ATTR" DataType="System.String"/>
+      <Column Name="LIST_G_FINMESSAGE_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="LIST_G_CONTRACT" ReferenceName="Data.LIST_G_CONTRACT" DataType="System.Int32" Enabled="true">
+      <Column Name="LIST_G_CONTRACT_Id" DataType="System.Int32"/>
+      <Column Name="G_CLIENT_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="G_CONTRACT" ReferenceName="Data.G_CONTRACT" DataType="System.Int32" Enabled="true">
+      <Column Name="CURR_CONTRACT" DataType="System.String"/>
+      <Column Name="N_OF_CYCLE" DataType="System.String"/>
+      <Column Name="G_CONTRACT_Id" DataType="System.Int32"/>
+      <Column Name="LIST_G_MESSAGE_DATE" DataType="System.String"/>
+      <Column Name="MESSAGE_COUNTER" DataType="System.String"/>
+      <Column Name="LIST_G_CONTRACT_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="LIST_G_CURR_CONTRACT" ReferenceName="Data.LIST_G_CURR_CONTRACT" DataType="System.Int32" Enabled="true">
+      <Column Name="LIST_G_CURR_CONTRACT_Id" DataType="System.Int32"/>
+      <Column Name="G_CONTRACT_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="G_CURR_CONTRACT" ReferenceName="Data.G_CURR_CONTRACT" DataType="System.Int32" Enabled="true">
+      <Column Name="BEG_BAL_CURR" DataType="System.String"/>
+      <Column Name="PAYM_IMM_AMNT" DataType="System.String"/>
+      <Column Name="PAYM_DUE_AMNT" DataType="System.String"/>
+      <Column Name="PAYM_DUE_DATE" DataType="System.String"/>
+      <Column Name="ACC_CURR_CODE" DataType="System.String"/>
+      <Column Name="ACC_CURR" DataType="System.String"/>
+      <Column Name="G_CURR_CONTRACT_Id" DataType="System.Int32"/>
+      <Column Name="S_PLUS" DataType="System.String"/>
+      <Column Name="S_MINUS" DataType="System.String"/>
+      <Column Name="S_FEE" DataType="System.String"/>
+      <Column Name="END_BALLANCE" DataType="System.String"/>
+      <Column Name="PAYM_DUE" DataType="System.String"/>
+      <Column Name="N_PLUS_CURR" DataType="System.String"/>
+      <Column Name="N_MINUS_CURR" DataType="System.String"/>
+      <Column Name="S_ACCOUNT_PLUS" DataType="System.String"/>
+      <Column Name="S_ACCOUNT_MINUS" DataType="System.String"/>
+      <Column Name="S_MAIN_PLUS_CURR" DataType="System.String"/>
+      <Column Name="NET_SPC" DataType="System.String"/>
+      <Column Name="LIST_G_CURR_CONTRACT_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="LIST_G_TRANS_CARD" ReferenceName="Data.LIST_G_TRANS_CARD" DataType="System.Int32" Enabled="true">
+      <Column Name="LIST_G_TRANS_CARD_Id" DataType="System.Int32"/>
+      <Column Name="G_CURR_CONTRACT_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="G_TRANS_CARD" ReferenceName="Data.G_TRANS_CARD" DataType="System.Int32" Enabled="true">
+      <Column Name="TRANS_CONTRACT_ORDER" DataType="System.String"/>
+      <Column Name="TR_CON_CAT" DataType="System.String"/>
+      <Column Name="TRANS_CARD" DataType="System.String"/>
+      <Column Name="TRANS_CON_CAT" DataType="System.String"/>
+      <Column Name="CONTRACT_FOR" DataType="System.String"/>
+      <Column Name="TR_CARD_AV" DataType="System.String"/>
+      <Column Name="TRANS_CARD_CLIENT_ADD_INFO" DataType="System.String"/>
+      <Column Name="G_TRANS_CARD_Id" DataType="System.Int32"/>
+      <Column Name="S_PLUS_CARD" DataType="System.String"/>
+      <Column Name="S_MINUS_CARD" DataType="System.String"/>
+      <Column Name="S_FEE_CARD" DataType="System.String"/>
+      <Column Name="S_TOTAL_CARD" DataType="System.String"/>
+      <Column Name="N_PLUS_TC" DataType="System.String"/>
+      <Column Name="N_MINUS_TC" DataType="System.String"/>
+      <Column Name="TRANS_CARD_CLIENT" DataType="System.String"/>
+      <Column Name="S_ACCOUNT_PLUS_TC" DataType="System.String"/>
+      <Column Name="S_ACCOUNT_MINUS_TC" DataType="System.String"/>
+      <Column Name="LIST_G_TRANS_CARD_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="LIST_G_POSTING_DATE" ReferenceName="Data.LIST_G_POSTING_DATE" DataType="System.Int32" Enabled="true">
+      <Column Name="LIST_G_POSTING_DATE_Id" DataType="System.Int32"/>
+      <Column Name="G_TRANS_CARD_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="G_POSTING_DATE" ReferenceName="Data.G_POSTING_DATE" DataType="System.Int32" Enabled="true">
+      <Column Name="POSTING_DATE" DataType="System.String"/>
+      <Column Name="G_POSTING_DATE_Id" DataType="System.Int32"/>
+      <Column Name="LIST_G_POSTING_DATE_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="LIST_G_TRANS_DATE" ReferenceName="Data.LIST_G_TRANS_DATE" DataType="System.Int32" Enabled="true">
+      <Column Name="LIST_G_TRANS_DATE_Id" DataType="System.Int32"/>
+      <Column Name="G_POSTING_DATE_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="G_TRANS_DATE" ReferenceName="Data.G_TRANS_DATE" DataType="System.Int32" Enabled="true">
+      <Column Name="TRANS_DATE" DataType="System.String"/>
+      <Column Name="M_TRANSACTION_ID" DataType="System.String"/>
+      <Column Name="G_TRANS_DATE_Id" DataType="System.Int32"/>
+      <Column Name="LIST_G_TRANS_DATE_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="LIST_G_TRANS_DETAILS" ReferenceName="Data.LIST_G_TRANS_DETAILS" DataType="System.Int32" Enabled="true">
+      <Column Name="LIST_G_TRANS_DETAILS_Id" DataType="System.Int32"/>
+      <Column Name="G_TRANS_DATE_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="G_TRANS_DETAILS" ReferenceName="Data.G_TRANS_DETAILS" DataType="System.Int32" Enabled="true">
+      <Column Name="DR_CR" DataType="System.String"/>
+      <Column Name="PARENT_SERV" DataType="System.String"/>
+      <Column Name="TRANSACTION_ADD_INFO" DataType="System.String"/>
+      <Column Name="DOC_ID" DataType="System.String"/>
+      <Column Name="TRANS_DETAILS" DataType="System.String"/>
+      <Column Name="TRANS_CURR" DataType="System.String"/>
+      <Column Name="AMOUNT" DataType="System.String"/>
+      <Column Name="FEE_AMOUNT" DataType="System.String"/>
+      <Column Name="ACC_AMOUNT" DataType="System.String"/>
+      <Column Name="ACCOUNT_AMOUNT" DataType="System.String"/>
+      <Column Name="PARENT_SERVICE" DataType="System.String"/>
+      <Column Name="LIST_G_INVOICE_DOC" DataType="System.String"/>
+      <Column Name="LIST_G_T_E_DOC" DataType="System.String"/>
+      <Column Name="PLUS" DataType="System.String"/>
+      <Column Name="MINUS" DataType="System.String"/>
+      <Column Name="N_PLUS" DataType="System.String"/>
+      <Column Name="N_MINUS" DataType="System.String"/>
+      <Column Name="ACCOUNT_PLUS" DataType="System.String"/>
+      <Column Name="ACCOUNT_MINUS" DataType="System.String"/>
+      <Column Name="LIST_G_TRANS_DETAILS_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="LIST_G_A_ACNT_CONTRACT" ReferenceName="Data.LIST_G_A_ACNT_CONTRACT" DataType="System.Int32" Enabled="true">
+      <Column Name="LIST_G_A_ACNT_CONTRACT_Id" DataType="System.Int32"/>
+      <Column Name="G_CONTRACT_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="G_A_ACNT_CONTRACT" ReferenceName="Data.G_A_ACNT_CONTRACT" DataType="System.Int32" Enabled="true">
+      <Column Name="A_ACNT_CONTRACT" DataType="System.String"/>
+      <Column Name="A_CREDIT_HISTORY_CURR" DataType="System.String"/>
+      <Column Name="G_A_ACNT_CONTRACT_Id" DataType="System.Int32"/>
+      <Column Name="LIST_G_A_ACNT_CONTRACT_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="LIST_G_A_ID" ReferenceName="Data.LIST_G_A_ID" DataType="System.Int32" Enabled="true">
+      <Column Name="LIST_G_A_ID_Id" DataType="System.Int32"/>
+      <Column Name="G_A_ACNT_CONTRACT_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <TableDataSource Name="G_A_ID" ReferenceName="Data.G_A_ID" DataType="System.Int32" Enabled="true">
+      <Column Name="A_ID" DataType="System.String"/>
+      <Column Name="A_POSTING_DATE" DataType="System.String"/>
+      <Column Name="A_AMOUNT" DataType="System.String"/>
+      <Column Name="A_TRANS_AMOUNT" DataType="System.String"/>
+      <Column Name="A_TRANS_CURR" DataType="System.String"/>
+      <Column Name="A_TRANS_DETAILS" DataType="System.String"/>
+      <Column Name="A_TRANS_DATE" DataType="System.String"/>
+      <Column Name="LIST_G_A_ID_Id" DataType="System.Int32"/>
+    </TableDataSource>
+    <Relation Name="G_TRANS_DATE_LIST_G_TRANS_DETAILS" ReferenceName="Data.G_TRANS_DATE_LIST_G_TRANS_DETAILS" ParentDataSource="G_TRANS_DATE" ChildDataSource="LIST_G_TRANS_DETAILS" ParentColumns="G_TRANS_DATE_Id" ChildColumns="G_TRANS_DATE_Id" Enabled="true"/>
+    <Relation Name="LIST_G_TRANS_DATE_G_TRANS_DATE" ReferenceName="Data.LIST_G_TRANS_DATE_G_TRANS_DATE" ParentDataSource="LIST_G_TRANS_DATE" ChildDataSource="G_TRANS_DATE" ParentColumns="LIST_G_TRANS_DATE_Id" ChildColumns="LIST_G_TRANS_DATE_Id" Enabled="true"/>
+    <Relation Name="G_POSTING_DATE_LIST_G_TRANS_DATE" ReferenceName="Data.G_POSTING_DATE_LIST_G_TRANS_DATE" ParentDataSource="G_POSTING_DATE" ChildDataSource="LIST_G_TRANS_DATE" ParentColumns="G_POSTING_DATE_Id" ChildColumns="G_POSTING_DATE_Id" Enabled="true"/>
+    <Relation Name="LIST_G_POSTING_DATE_G_POSTING_DATE" ReferenceName="Data.LIST_G_POSTING_DATE_G_POSTING_DATE" ParentDataSource="LIST_G_POSTING_DATE" ChildDataSource="G_POSTING_DATE" ParentColumns="LIST_G_POSTING_DATE_Id" ChildColumns="LIST_G_POSTING_DATE_Id" Enabled="true"/>
+    <Relation Name="G_TRANS_CARD_LIST_G_POSTING_DATE" ReferenceName="Data.G_TRANS_CARD_LIST_G_POSTING_DATE" ParentDataSource="G_TRANS_CARD" ChildDataSource="LIST_G_POSTING_DATE" ParentColumns="G_TRANS_CARD_Id" ChildColumns="G_TRANS_CARD_Id" Enabled="true"/>
+    <Relation Name="G_CURR_CONTRACT_LIST_G_TRANS_CARD" ReferenceName="Data.G_CURR_CONTRACT_LIST_G_TRANS_CARD" ParentDataSource="G_CURR_CONTRACT" ChildDataSource="LIST_G_TRANS_CARD" ParentColumns="G_CURR_CONTRACT_Id" ChildColumns="G_CURR_CONTRACT_Id" Enabled="true"/>
+    <Relation Name="LIST_G_CURR_CONTRACT_G_CURR_CONTRACT" ReferenceName="Data.LIST_G_CURR_CONTRACT_G_CURR_CONTRACT" ParentDataSource="LIST_G_CURR_CONTRACT" ChildDataSource="G_CURR_CONTRACT" ParentColumns="LIST_G_CURR_CONTRACT_Id" ChildColumns="LIST_G_CURR_CONTRACT_Id" Enabled="true"/>
+    <Relation Name="LIST_G_A_ID_G_A_ID" ReferenceName="Data.LIST_G_A_ID_G_A_ID" ParentDataSource="LIST_G_A_ID" ChildDataSource="G_A_ID" ParentColumns="LIST_G_A_ID_Id" ChildColumns="LIST_G_A_ID_Id" Enabled="true"/>
+    <Relation Name="G_A_ACNT_CONTRACT_LIST_G_A_ID" ReferenceName="Data.G_A_ACNT_CONTRACT_LIST_G_A_ID" ParentDataSource="G_A_ACNT_CONTRACT" ChildDataSource="LIST_G_A_ID" ParentColumns="G_A_ACNT_CONTRACT_Id" ChildColumns="G_A_ACNT_CONTRACT_Id" Enabled="true"/>
+    <Relation Name="LIST_G_A_ACNT_CONTRACT_G_A_ACNT_CONTRACT" ReferenceName="Data.LIST_G_A_ACNT_CONTRACT_G_A_ACNT_CONTRACT" ParentDataSource="LIST_G_A_ACNT_CONTRACT" ChildDataSource="G_A_ACNT_CONTRACT" ParentColumns="LIST_G_A_ACNT_CONTRACT_Id" ChildColumns="LIST_G_A_ACNT_CONTRACT_Id" Enabled="true"/>
+    <Relation Name="G_CONTRACT_LIST_G_CURR_CONTRACT" ReferenceName="Data.G_CONTRACT_LIST_G_CURR_CONTRACT" ParentDataSource="G_CONTRACT" ChildDataSource="LIST_G_CURR_CONTRACT" ParentColumns="G_CONTRACT_Id" ChildColumns="G_CONTRACT_Id" Enabled="true"/>
+    <Relation Name="G_CONTRACT_LIST_G_A_ACNT_CONTRACT" ReferenceName="Data.G_CONTRACT_LIST_G_A_ACNT_CONTRACT" ParentDataSource="G_CONTRACT" ChildDataSource="LIST_G_A_ACNT_CONTRACT" ParentColumns="G_CONTRACT_Id" ChildColumns="G_CONTRACT_Id" Enabled="true"/>
+    <Relation Name="LIST_G_CONTRACT_G_CONTRACT" ReferenceName="Data.LIST_G_CONTRACT_G_CONTRACT" ParentDataSource="LIST_G_CONTRACT" ChildDataSource="G_CONTRACT" ParentColumns="LIST_G_CONTRACT_Id" ChildColumns="LIST_G_CONTRACT_Id" Enabled="true"/>
+    <Relation Name="G_CLIENT_LIST_G_CONTRACT" ReferenceName="Data.G_CLIENT_LIST_G_CONTRACT" ParentDataSource="G_CLIENT" ChildDataSource="LIST_G_CONTRACT" ParentColumns="G_CLIENT_Id" ChildColumns="G_CLIENT_Id" Enabled="true"/>
+    <Relation Name="CARDHOLDER_CONTRACT_STATEMENT2_LIST_G_CLIENT" ReferenceName="Data.CARDHOLDER_CONTRACT_STATEMENT2_LIST_G_CLIENT" ParentDataSource="CARDHOLDER_CONTRACT_STATEMENT2" ChildDataSource="LIST_G_CLIENT" ParentColumns="CARDHOLDER_CONTRACT_STATEMENT2_Id" ChildColumns="CARDHOLDER_CONTRACT_STATEMENT2_Id" Enabled="true"/>
+    <Relation Name="LIST_G_FP_MESSAGE_G_FP_MESSAGE" ReferenceName="Data.LIST_G_FP_MESSAGE_G_FP_MESSAGE" ParentDataSource="LIST_G_FP_MESSAGE" ChildDataSource="G_FP_MESSAGE" ParentColumns="LIST_G_FP_MESSAGE_Id" ChildColumns="LIST_G_FP_MESSAGE_Id" Enabled="true"/>
+    <Relation Name="LIST_G_FINMESSAGE_G_FINMESSAGE" ReferenceName="Data.LIST_G_FINMESSAGE_G_FINMESSAGE" ParentDataSource="LIST_G_FINMESSAGE" ChildDataSource="G_FINMESSAGE" ParentColumns="LIST_G_FINMESSAGE_Id" ChildColumns="LIST_G_FINMESSAGE_Id" Enabled="true"/>
+    <Relation Name="LIST_G_TRANS_DETAILS_G_TRANS_DETAILS" ReferenceName="Data.LIST_G_TRANS_DETAILS_G_TRANS_DETAILS" ParentDataSource="LIST_G_TRANS_DETAILS" ChildDataSource="G_TRANS_DETAILS" ParentColumns="LIST_G_TRANS_DETAILS_Id" ChildColumns="LIST_G_TRANS_DETAILS_Id" Enabled="true"/>
+    <Relation Name="LIST_G_TRANS_CARD_G_TRANS_CARD" ReferenceName="Data.LIST_G_TRANS_CARD_G_TRANS_CARD" ParentDataSource="LIST_G_TRANS_CARD" ChildDataSource="G_TRANS_CARD" ParentColumns="LIST_G_TRANS_CARD_Id" ChildColumns="LIST_G_TRANS_CARD_Id" Enabled="true"/>
+    <Relation Name="G_CLIENT_LIST_G_FP_MESSAGE" ReferenceName="Data.G_CLIENT_LIST_G_FP_MESSAGE" ParentDataSource="G_CLIENT" ChildDataSource="LIST_G_FP_MESSAGE" ParentColumns="G_CLIENT_Id" ChildColumns="G_CLIENT_Id" Enabled="true"/>
+    <Relation Name="G_CLIENT_LIST_G_FINMESSAGE" ReferenceName="Data.G_CLIENT_LIST_G_FINMESSAGE" ParentDataSource="G_CLIENT" ChildDataSource="LIST_G_FINMESSAGE" ParentColumns="G_CLIENT_Id" ChildColumns="G_CLIENT_Id" Enabled="true"/>
+    <Relation Name="LIST_G_CLIENT_G_CLIENT" ReferenceName="Data.LIST_G_CLIENT_G_CLIENT" ParentDataSource="LIST_G_CLIENT" ChildDataSource="G_CLIENT" ParentColumns="LIST_G_CLIENT_Id" ChildColumns="LIST_G_CLIENT_Id" Enabled="true"/>
+    <Parameter Name="prm_ACC_BLOCKED" DataType="System.Boolean" Expression="false" Description="Признак заблокированнного счета"/>
+    <Parameter Name="RecPayDateQ" DataType="System.String" Description="Рекомендуемая дата платежа"/>
+    <Parameter Name="ADDR_A" DataType="System.String" Expression="UpperCase(Trim(Substring([G_CLIENT.ADDR_LINE_A],7+Length([ZIP_CODE]))))"/>
+    <Parameter Name="ZIP_CODE" DataType="System.String" Expression="IIF(IsNumeric(SubString([G_CLIENT.ADDR_LINE_A]+&quot;      &quot;,6,6)), SubString([G_CLIENT.ADDR_LINE_A]+&quot;      &quot;,6,6), &quot;&quot;)"/>
+    <Parameter Name="prm_ACC_NUM" DataType="System.Decimal"/>
+    <Parameter Name="prm_MIN_PAYM" DataType="System.Decimal"/>
+    <Parameter Name="prm_FIO" DataType="System.String" Expression="[G_CLIENT.ADDR_LINE_E].Replace(&quot;Кому:&quot;, &quot;&quot;).Trim"/>
+    <Parameter Name="prm_ReportBuildDate" DataType="System.String"/>
+    <Parameter Name="prm_DataSourceFileName" DataType="System.String"/>
+    <Parameter Name="prm_ADDRESS" DataType="System.String" Expression="UpperCase([G_CLIENT.ADDR_LINE_B] &amp; &quot; &quot; &amp; [G_CLIENT.ADDR_LINE_C] &amp; &quot; &quot; &amp; [G_CLIENT.ADDR_LINE_D] &amp; &quot; &quot; &amp; IIf([ADDR_A]=&quot;&quot;,&quot;&quot;,vbCrLf + [ADDR_A])).Trim"/>
+    <Parameter Name="prm_BEG_BAL_CURR" DataType="System.String" Description="prm_BEG_BAL_CURR"/>
+    <Parameter Name="prm_END_BALLANCE" DataType="System.String"/>
+    <Parameter Name="prm_N_ENTRIES" DataType="System.String"/>
+    <Parameter Name="prm_OWN_FUNDS" DataType="System.String"/>
+  </Dictionary>
+  <ReportPage Name="Page1" RawPaperSize="9" RightMargin="7.5" BottomMargin="0" FirstPageSource="260" OtherPagesSource="262" Guides="355.32">
+    <ReportTitleBand Name="ReportTitle1" Top="20" Width="727.65" Height="75.6"/>
+    <PageHeaderBand Name="PageHeader1" Top="115.6" Width="727.65"/>
+    <DataBand Name="Data7" Top="135.6" Width="727.65" Height="393.12" CanGrow="true" CanShrink="true" BeforePrintEvent="Data7_BeforePrint" StartNewPage="true" Guides="62.37" DataSource="G_CLIENT">
+      <SubreportObject Name="subInfo" Top="71.82" Width="355.32" Height="321.3" ShiftMode="Never" ReportPage="pgSubAccInfo" PrintOnParent="true"/>
+      <TextObject Name="Text2" Top="56.7" Width="355.32" Height="15.12" CanGrow="true" CanShrink="true" Text="Отчет подготовлен по состоянию на [prm_ReportBuildDate]" Padding="0, 0, 0, 0" Font="Arial, 9pt"/>
+      <TextObject Name="Text4" Top="41.58" Width="355.32" Height="15.12" CanGrow="true" CanShrink="true" Text="№ кредитного договора: [G_CLIENT.ADDR_LINE_F]" Padding="0, 0, 0, 0" Font="Arial, 9pt"/>
+      <RichObject Name="txtRegular" Left="376.11" Top="217.35" Width="351.54" Height="175.77" CanGrow="true" ShiftMode="Never" Text="{\rtf1\ansi\ansicpg1251\deff0\deflang1049{\fonttbl{\f0\fswiss\fprq2\fcharset204{\*\fname Arial;}Arial CYR;}{\f1\fnil\fcharset204 Tahoma;}}&#13;&#10;{\colortbl ;\red0\green0\blue255;}&#13;&#10;{\*\generator Msftedit 5.41.15.1515;}\viewkind4\uc1\pard\sl288\slmult1\b\f0\fs19\'cc\'e3\'ed\'ee\'e2\'e5\'ed\'ed\'ee \'e8 \'e1\'e5\'e7 \'ea\'ee\'ec\'e8\'f1\'f1\'e8\'e8\b0  \'ef\'ee\'ef\'ee\'eb\'ed\'ff\'e9\'f2\'e5 \'e1\'e0\'eb\'e0\'ed\'f1 \'c2\'e0\'f8\'e5\'e3\'ee \par&#13;&#10;\'ec\'ee\'e1\'e8\'eb\'fc\'ed\'ee\'e3\'ee \'f2\'e5\'eb\'e5\'f4\'ee\'ed\'e0 \'f1\'ee \'f1\'f7\'e5\'f2\'e0 \'ea\'e0\'f0\'f2\'fb:\par&#13;&#10;\'c4\'eb\'ff \'ee\'ef\'eb\'e0\'f2\'fb \'ee\'f2\'ef\'f0\'e0\'e2\'fc\'f2\'e5 \'ed\'e0 \'ed\'ee\'ec\'e5\'f0 9944 \'f2\'e5\'ea\'f1\'f2 TEL xxx,\par&#13;&#10;\'e3\'e4\'e5 xxx \endash  \'f1\'f3\'ec\'ec\'e0 \'e2 \'f0\'f3\'e1\'eb\'ff\'f5. \'cf\'f0\'e8\'ec\'e5\'f0 \'f1\'ee\'ee\'e1\'f9\'e5\'ed\'e8\'ff: \b TEL 300\b0\par&#13;&#10;\pard\'cf\'ee\'e4\'f0\'ee\'e1\'ed\'e5\'e5 \'ee\'e1 \'f3\'f1\'eb\'f3\'e3\'e5 \'ed\'e0 {\field{\*\fldinst{HYPERLINK &quot;http://www.rencredit.ru&quot; }}{\fldrslt{\cf1\ul www.rencredit.ru}}}\cf0\ulnone\f1\fs17\par&#13;&#10;}&#13;&#10;" Padding="4, 4, 4, 4" AllowExpressions="false"/>
+      <TextObject Name="Text52" Left="376.11" Top="187.11" Width="351.54" Height="30.24" Border.Lines="Bottom" ShiftMode="Never" Text="Новости и информация" VertAlign="Bottom" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="Text48" Width="355.32" Height="41.58" Text="Отчет об операциях по карте" Padding="0, 0, 0, 0" VertAlign="Center" Font="Arial, 14pt, style=Bold"/>
+      <ShapeObject Name="Shape1" Left="355.32" Width="374.22" Height="204.12" Visible="false" Border.Color="Gainsboro" Border.Width="0.25" Fill.Color="FloralWhite" ShiftMode="Never" Shape="RoundRectangle"/>
+      <TableObject Name="Table3" Left="408.24" Top="62.37" Width="275.94" Height="51.03" ShiftMode="Never">
+        <TableColumn Name="Column8" Width="275.94"/>
+        <TableRow Name="Row14" Height="17.01" AutoSize="true">
+          <TableCell Name="Cell41" Text="[prm_FIO]" Padding="0, 0, 0, 0" Font="Arial, 9pt"/>
+        </TableRow>
+        <TableRow Name="Row15" Height="15.12" AutoSize="true">
+          <TableCell Name="Cell42" Text="[prm_ADDRESS]" Padding="0, 0, 0, 0" Font="Arial, 9pt"/>
+        </TableRow>
+        <TableRow Name="Row16" AutoSize="true">
+          <TableCell Name="Cell43" Text="[ZIP_CODE]" Padding="0, 0, 0, 0" Font="Arial, 10pt, style=Bold"/>
+        </TableRow>
+      </TableObject>
+      <BarcodeObject Name="Barcode1" Left="587.79" Top="37.8" Width="92" Height="13.23" Anchor="Top, Right" ShiftMode="Never" DataColumn="G_CLIENT.ADDR_LINE_F" Text="41750003333" ShowText="false" Zoom="0.8" Barcode="2/5 Interleaved"/>
+      <TextObject Name="Text1" Left="587.79" Top="51.03" Width="92.61" Height="11.34" Text="[G_CLIENT.ADDR_LINE_F]" HorzAlign="Center" Font="Arial, 6pt"/>
+      <TextObject Name="Text7" Left="493.29" Top="37.8" Width="94.5" Height="24.57" Text="Вес: [[TotalPages]*5+5] гр." HorzAlign="Center" VertAlign="Center" Font="Arial, 7pt"/>
+      <RichObject Name="txtBlocked" Left="376.11" Top="217.35" Width="351.54" Height="175.77" Visible="false" CanGrow="true" ShiftMode="Never" Text="{\rtf1\ansi\ansicpg1251\deff0\deflang1049{\fonttbl{\f0\fswiss\fprq2\fcharset204{\*\fname Arial;}Arial CYR;}{\f1\fnil\fcharset204 Tahoma;}}&#13;&#10;{\*\generator Msftedit 5.41.15.1515;}\viewkind4\uc1\pard\f0\fs18\'c2\'c0\'d8 \'d1\'d7\'c5\'d2 \'c7\'c0\'c1\'cb\'ce\'ca\'c8\'d0\'ce\'c2\'c0\'cd \'c4\'ce \'cf\'ce\'cb\'cd\'ce\'c3\'ce \'cf\'ce\'c3\'c0\'d8\'c5\'cd\'c8\'df \'cc\'c8\'cd\'c8\'cc\'c0\'cb\'dc\'cd\'ce\'c3\'ce \'cf\'cb\'c0\'d2\'c5\'c6\'c0.\par&#13;&#10;\'c2\'ce \'c8\'c7\'c1\'c5\'c6\'c0\'cd\'c8\'c5 \'c4\'c0\'cb\'dc\'cd\'c5\'c9\'d8\'c5\'c3\'ce \'cd\'c0\'d7\'c8\'d1\'cb\'c5\'cd\'c8\'df \'d8\'d2\'d0\'c0\'d4\'cd\'db\'d5 \'d1\'c0\'cd\'ca\'d6\'c8\'c9 \'c8 \'cf\'c5\'d0\'c5\'c4\'c0\'d7\'c8 \'cc\'c0\'d2\'c5\'d0\'c8\'c0\'cb\'ce\'c2 \'c2 \'d1\'d3\'c4, \'cf\'d0\'ce\'d1\'c8\'cc \'c2\'c0\'d1 \b\'cd\'c5\'c7\'c0\'cc\'c5\'c4\'cb\'c8\'d2\'c5\'cb\'dc\'cd\'ce \'cf\'c5\'d0\'c5\'d7\'c8\'d1\'cb\'c8\'d2\'dc\b0  \'d1\'d3\'cc\'cc\'d3 \'cc\'c8\'cd\'c8\'cc\'c0\'cb\'dc\'cd\'ce\'c3\'ce \'cf\'cb\'c0\'d2\'c5\'c6\'c0 \'cd\'c0 \'c2\'c0\'d8 \'d1\'d7\'c5\'d2.\par&#13;&#10;\pard\'cf\'ce\'c4\'d0\'ce\'c1\'cd\'ce\'d1\'d2\'c8 \'cf\'ce \'d2\'c5\'cb\'c5\'d4\'ce\'cd\'d3 (495) 783-46-61\f1\fs17\par&#13;&#10;}&#13;&#10;"/>
+      <DataBand Name="band_LIST_G_FINMESSAGE" Top="548.72" Width="727.65" AfterDataEvent="band_LIST_G_FINMESSAGE_AfterData" DataSource="LIST_G_FINMESSAGE">
+        <DataBand Name="band_G_FINMESSAGE" Top="568.72" Width="727.65" DataSource="G_FINMESSAGE" Filter="[G_FINMESSAGE.LABEL1] like &quot;Дата формирования отчета*&quot;"/>
+      </DataBand>
+      <DataBand Name="Data8" Top="588.72" Width="727.65" DataSource="LIST_G_FP_MESSAGE">
+        <DataBand Name="bandIsBlocked" Top="608.72" Width="727.65" AfterDataEvent="bandIsBlocked_AfterData" DataSource="G_FP_MESSAGE" Filter="[G_FP_MESSAGE.FP_LABEL2ATTR]=&quot;5&quot;"/>
+        <DataBand Name="Data9" Top="628.72" Width="727.65" Height="41.58" CanGrow="true" CanShrink="true" DataSource="G_FP_MESSAGE" Filter="[G_FP_MESSAGE.FP_LABEL2ATTR]=&quot;8&quot;">
+          <TextObject Name="Text51" Left="-1.89" Width="720.09" Height="41.58" CanGrow="true" GrowToBottom="true" CanBreak="false" Text="Мы рекомендуем осуществить платеж не позднее &lt;b&gt;[FormatDateTime(ToDateTime(GetVDate([G_FP_MESSAGE.FP_VALUE2])),&quot;Short Date&quot;)]&lt;/b&gt; во избежание несвоевременного поступления денежных средств на Ваш счет по карте в КБ «Ренессанс Кредит» (ООО)[IIf([prm_ACC_BLOCKED],&quot; и прекращения дальнейшего начисления штрафных санкций&quot;,&quot;&quot;)]." VertAlign="Bottom" Font="Arial, 9pt" HtmlTags="true"/>
+        </DataBand>
+      </DataBand>
+      <DataBand Name="Data1" Top="690.3" Width="727.65" DataSource="LIST_G_CONTRACT">
+        <DataBand Name="Data16" Top="710.3" Width="727.65" DataSource="G_CONTRACT">
+          <DataBand Name="Data17" Top="730.3" Width="727.65" DataSource="LIST_G_CURR_CONTRACT">
+            <DataBand Name="Data18" Top="750.3" Width="727.65" DataSource="G_CURR_CONTRACT">
+              <DataBand Name="Data19" Top="770.3" Width="727.65" DataSource="LIST_G_TRANS_CARD">
+                <DataBand Name="Data20" Top="790.3" Width="727.65" DataSource="G_TRANS_CARD">
+                  <DataBand Name="Data21" Top="890.78" Width="727.65" DataSource="LIST_G_POSTING_DATE">
+                    <DataHeaderBand Name="DataHeader6" Top="810.3" Width="727.65" Height="60.48" KeepWithData="true" RepeatOnEveryPage="true">
+                      <TextObject Name="txtOperationsHeader" Width="727.65" Height="34.02" CanGrow="true" BeforePrintEvent="txtOperationsHeader_BeforePrint" CanBreak="false" Text="Операции по [[G_TRANS_CARD.TRANS_CON_CAT].replace(&quot;счету&quot;, &quot;договору&quot;)] №[IIF([G_TRANS_CARD.TRANS_CON_CAT]=&quot;счету&quot;,[G_CLIENT.ADDR_LINE_F],[G_TRANS_CARD.TRANS_CARD])] за период с [FormatDateTime(ToDateTime(GetVDate([G_CLIENT.STMT_DATE_FROM])),&quot;Short Date&quot;)] по [FormatDateTime(ToDateTime(GetVDate([G_CLIENT.STMT_DATE_TO])),&quot;Short Date&quot;)]" Padding="2, 0, 2, 2" VertAlign="Bottom" Font="Arial, 9pt, style=Bold" HtmlTags="true"/>
+                      <TextObject Name="Text72" Top="34.02" Width="54.81" Height="26.46" Border.Lines="All" Border.LeftLine.Color="White" Border.LeftLine.Width="6" Border.RightLine.Color="White" Border.RightLine.Width="6" Text="Дата операции" Padding="0, 0, 0, 0" HorzAlign="Center" VertAlign="Center" Font="Arial, 7.5pt, style=Bold"/>
+                      <TextObject Name="Text73" Left="54.81" Top="34.02" Width="54.81" Height="26.46" Border.Lines="All" Border.LeftLine.Color="White" Border.LeftLine.Width="6" Border.RightLine.Color="White" Border.RightLine.Width="6" Text="Дата списания" Padding="0, 0, 0, 0" HorzAlign="Center" VertAlign="Center" Font="Arial, 7.5pt, style=Bold"/>
+                      <TextObject Name="Text74" Left="109.62" Top="34.02" Width="357.21" Height="26.46" Border.Lines="All" Border.LeftLine.Color="White" Border.LeftLine.Width="6" Border.RightLine.Color="White" Border.RightLine.Width="6" Text="Описание" Padding="0, 0, 0, 0" HorzAlign="Center" VertAlign="Center" Font="Arial, 7.5pt, style=Bold"/>
+                      <TextObject Name="Text75" Left="466.83" Top="34.02" Width="75.6" Height="26.46" Border.Lines="All" Border.LeftLine.Color="White" Border.LeftLine.Width="6" Border.RightLine.Color="White" Border.RightLine.Width="6" Text="Сумма" Padding="0, 0, 0, 0" HorzAlign="Center" VertAlign="Center" Font="Arial, 7.5pt, style=Bold"/>
+                      <TextObject Name="Text76" Left="542.43" Top="34.02" Width="45.36" Height="26.46" Border.Lines="All" Border.LeftLine.Color="White" Border.LeftLine.Width="6" Border.RightLine.Color="White" Border.RightLine.Width="6" Text="Валюта" Padding="0, 0, 0, 0" HorzAlign="Center" VertAlign="Center" Font="Arial, 7.5pt, style=Bold"/>
+                      <TextObject Name="Text77" Left="587.79" Top="34.02" Width="64.26" Height="26.46" Border.Lines="All" Border.LeftLine.Color="White" Border.LeftLine.Width="6" Border.RightLine.Color="White" Border.RightLine.Width="6" Text="Комиссия" Padding="0, 0, 0, 0" HorzAlign="Center" VertAlign="Center" Font="Arial, 7.5pt, style=Bold"/>
+                      <TextObject Name="Text78" Left="652.05" Top="34.02" Width="75.6" Height="26.46" Border.Lines="All" Border.LeftLine.Color="White" Border.LeftLine.Width="6" Border.RightLine.Color="White" Border.RightLine.Width="6" Text="Всего" Padding="0, 0, 0, 0" HorzAlign="Center" VertAlign="Center" Font="Arial, 7.5pt, style=Bold"/>
+                    </DataHeaderBand>
+                    <DataBand Name="Data22" Top="910.78" Width="727.65" DataSource="G_POSTING_DATE">
+                      <DataBand Name="Data23" Top="930.78" Width="727.65" DataSource="LIST_G_TRANS_DATE">
+                        <DataBand Name="Data24" Top="950.78" Width="727.65" DataSource="G_TRANS_DATE">
+                          <DataBand Name="Data25" Top="970.78" Width="727.65" DataSource="LIST_G_TRANS_DETAILS">
+                            <DataBand Name="Data26" Top="990.78" Width="727.65" Height="15.12" CanGrow="true" CanShrink="true" DataSource="G_TRANS_DETAILS">
+                              <TextObject Name="Text65" Width="54.81" Height="15.12" Border.Lines="Bottom" Border.Color="Silver" Border.Width="0.25" CanGrow="true" CanShrink="true" GrowToBottom="true" CanBreak="false" Text="[ToDateTime(GetVDate([G_TRANS_DATE.TRANS_DATE]))]" Format="Date" Format.Format="dd.MM.yy" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
+                              <TextObject Name="Text66" Left="54.81" Width="54.81" Height="15.12" Border.Lines="Bottom" Border.Color="Silver" Border.Width="0.25" CanGrow="true" CanShrink="true" GrowToBottom="true" CanBreak="false" Text="[ToDateTime(GetVDate([G_POSTING_DATE.POSTING_DATE]))]" Format="Date" Format.Format="dd.MM.yy" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
+                              <TextObject Name="Text67" Left="109.62" Width="357.21" Height="15.12" Border.Lines="Bottom" Border.Color="Silver" Border.Width="0.25" CanGrow="true" CanShrink="true" GrowToBottom="true" CanBreak="false" Text="[UpdateTransDetails([G_TRANS_DETAILS.TRANS_DETAILS])]" VertAlign="Center" Font="Arial, 8pt"/>
+                              <TextObject Name="Text68" Left="466.83" Width="75.6" Height="15.12" Border.Lines="Bottom" Border.Color="Silver" Border.Width="0.25" CanGrow="true" CanShrink="true" GrowToBottom="true" CanBreak="false" Text="[GetVDecimal([G_TRANS_DETAILS.AMOUNT])]" Format="Number" Format.UseLocale="false" Format.DecimalDigits="2" Format.DecimalSeparator="." Format.GroupSeparator=" " Format.NegativePattern="1" HorzAlign="Right" VertAlign="Center" Font="Arial, 8pt"/>
+                              <TextObject Name="Text69" Left="542.43" Width="45.36" Height="15.12" Border.Lines="Bottom" Border.Color="Silver" Border.Width="0.25" CanGrow="true" CanShrink="true" GrowToBottom="true" CanBreak="false" Text="[G_TRANS_DETAILS.TRANS_CURR]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
+                              <TextObject Name="Text70" Left="587.79" Width="64.26" Height="15.12" Border.Lines="Bottom" Border.Color="Silver" Border.Width="0.25" CanGrow="true" CanShrink="true" GrowToBottom="true" CanBreak="false" Text="[GetVDecimal([G_TRANS_DETAILS.FEE_AMOUNT])]" Format="Number" Format.UseLocale="false" Format.DecimalDigits="2" Format.DecimalSeparator="." Format.GroupSeparator=" " Format.NegativePattern="1" HorzAlign="Right" VertAlign="Center" Font="Arial, 8pt"/>
+                              <TextObject Name="Text71" Left="652.05" Width="75.6" Height="15.12" Border.Lines="Bottom" Border.Color="Silver" Border.Width="0.25" CanGrow="true" CanShrink="true" GrowToBottom="true" CanBreak="false" Text="[GetVDecimal([G_TRANS_DETAILS.ACCOUNT_AMOUNT])]" Format="Number" Format.UseLocale="false" Format.DecimalDigits="2" Format.DecimalSeparator="." Format.GroupSeparator=" " Format.NegativePattern="1" HorzAlign="Right" VertAlign="Center" Font="Arial, 8pt"/>
+                              <Sort>
+                                <Sort Expression="[G_TRANS_DETAILS.LIST_G_TRANS_DETAILS.G_TRANS_DATE.M_TRANSACTION_ID]"/>
+                              </Sort>
+                            </DataBand>
+                          </DataBand>
+                        </DataBand>
+                      </DataBand>
+                    </DataBand>
+                    <DataFooterBand Name="DataFooter2" Top="1025.9" Width="727.65">
+                      <LineObject Name="Line1" Width="727.65"/>
+                    </DataFooterBand>
+                  </DataBand>
+                </DataBand>
+              </DataBand>
+            </DataBand>
+          </DataBand>
+        </DataBand>
+      </DataBand>
+      <DataBand Name="Data4" Top="1045.9" Width="727.65" DataSource="LIST_G_FP_MESSAGE">
+        <DataBand Name="band_G_FP_MESSAGE" Top="1065.9" Width="727.65" Height="79.38" AfterDataEvent="band_G_FP_MESSAGE_AfterData" DataSource="G_FP_MESSAGE" Filter="[G_FP_MESSAGE.FP_LABEL2ATTR]=&quot;61&quot;">
+          <TextObject Name="Text59" Top="54.81" Width="727.65" Height="24.57" CanGrow="true" Text="Если у Вас возникли вопросы по Отчету, пожалуйста, позвоните по телефону: (495) 981-0-981" VertAlign="Bottom" Font="Arial, 9pt"/>
+          <TextObject Name="Text58" Top="30.24" Width="727.65" Height="24.57" Border.Lines="All" Text="[G_FP_MESSAGE.FP_VALUE1]" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
+          <TextObject Name="Text20" Width="727.65" Height="30.24" Text="Номер Вашего счета" HorzAlign="Center" VertAlign="Bottom" Font="Arial, 9pt, style=Bold"/>
+        </DataBand>
+      </DataBand>
+    </DataBand>
+    <PageFooterBand Name="PageFooter1" Top="1165.28" Width="727.65" Height="143.64" PrintOn="FirstPage">
+      <RichObject Name="Rich5" Top="1.89" Width="727.65" Height="141.75" CanGrow="true" Text="{\rtf1\ansi\ansicpg1251\deff0\deflang1049{\fonttbl{\f0\fswiss\fprq2\fcharset204{\*\fname Arial;}Arial CYR;}{\f1\fnil\fcharset204 Tahoma;}}&#13;&#10;{\colortbl ;\red0\green0\blue255;}&#13;&#10;{\*\generator Msftedit 5.41.15.1515;}\viewkind4\uc1\pard\nowidctlpar\b\f0\fs16\'c2 \'f6\'e5\'eb\'ff\'f5 \'ef\'ee\'e2\'fb\'f8\'e5\'ed\'e8\'ff \'e1\'e5\'e7\'ee\'ef\'e0\'f1\'ed\'ee\'f1\'f2\'e8, \'e8\'ed\'f4\'ee\'f0\'ec\'e8\'f0\'f3\'e5\'ec \'c2\'e0\'f1 \'ee \'ed\'e5\'ee\'e1\'f5\'ee\'e4\'e8\'ec\'fb\'f5 \'e4\'e5\'e9\'f1\'f2\'e2\'e8\'ff\'f5 \'e8 \'ef\'f0\'e0\'e2\'e8\'eb\'e0\'f5 \'e8\'f1\'ef\'ee\'eb\'fc\'e7\'ee\'e2\'e0\'ed\'e8\'ff \'ea\'e0\'f0\'f2\'fb:\par&#13;&#10;\b0\fs6\par&#13;&#10;\f1\fs17{\pict\wmetafile8\picwgoal90\pichgoal87 &#13;&#10;010009000003fd01000004005e01000000005e01000026060f00b202574d464301000000000001&#13;&#10;00f023000000000100000090020000000000009002000001000000e80000000000000000000000&#13;&#10;57020000450200000000000000000000983a0000ce38000020454d460000010090020000160000&#13;&#10;00020000003d0000006c0000000000000000050000000400004001000000010000000000000000&#13;&#10;00000000000000e2040000e8030049006e006b0073006300610070006500200030002e00340038&#13;&#10;002e00320020007200390038003100390020002800410075006700200031003400200032003000&#13;&#10;31003100290000002004bb00200451042104030421041a2020045504200454045f007200750062&#13;&#10;0069006e0065002e0065006d006600000000000000110000000c00000008000000090000001000&#13;&#10;0000983a0000ce3800000b000000100000005702000045020000460000002c0000001d00000053&#13;&#10;637265656e3d31323830783130323470782c20333230783235366d6d000000460000002c000000&#13;&#10;1e00000044726177696e673d302c30782d312c3870782c202d302c3078302c306d6d0000270000&#13;&#10;00180000000100000000000000de006d0000000000250000000c00000001000000130000000c00&#13;&#10;0000020000003b000000080000001b00000010000000983a0000ce3800003600000010000000ae&#13;&#10;1f0000ce38000058000000280000000000000000000000ffffffffffffffff03000000410ece38&#13;&#10;00005d2a00006e1736000000100000000000000001000000360000001000000006260000010000&#13;&#10;0058000000280000000000000000000000ffffffffffffffff030000001b310100983a0409983a&#13;&#10;ba143600000010000000983a0000ce3800003c000000080000003e000000180000000000000000&#13;&#10;0000005702000045020000250000000c00000000000080280000000c000000010000000e000000&#13;&#10;140000000000000010000000140000000400000003010800050000000b0200000000050000000c&#13;&#10;024602580207000000fc020000de006d000000040000002d010000040000000601020008000000&#13;&#10;fa02050000000000ffffff00040000002d0101004f000000380501002500570245024401450223&#13;&#10;01430203013e02e4003602c6002b02aa001d028f000c027600f9015f00e3014a00cb013800b101&#13;&#10;270095011a0077010f00570107003601020013010000f00000000000850100009a010100ae0104&#13;&#10;00c2010900d5011000e8011900f90124000902300018023d0026024c0032025c003d026e004602&#13;&#10;80004d0294005302a8005602be005702d4005702450208000000fa020000000000000000000004&#13;&#10;0000002d01020007000000fc020000ffffff000000040000002d01030004000000f00100000300&#13;&#10;00000000&#13;&#10;}\f0\fs16  \'cd\'c8\'ca\'ce\'c3\'c4\'c0 \'ed\'e5 \'ef\'f0\'e5\'e4\'ee\'f1\'f2\'e0\'e2\'eb\'ff\'e9\'f2\'e5 \'e8\'ed\'f4\'ee\'f0\'ec\'e0\'f6\'e8\'fe \'e2 \'ee\'f2\'e2\'e5\'f2 \'ed\'e0 \'ef\'ee\'f1\'f2\'f3\'ef\'e0\'fe\'f9\'e8\'e5 \'f2\'e5\'eb\'e5\'f4\'ee\'ed\'ed\'fb\'e5 \'e7\'e2\'ee\'ed\'ea\'e8 \'e8/\'e8\'eb\'e8 \'e2\'f5\'ee\'e4\'ff\'f9\'e8\'e5 SMS-\'f1\'ee\'ee\'e1\'f9\'e5\'ed\'e8\'ff, \'e2 \'ea\'ee\'f2\'ee\'f0\'fb\'f5 \'ee\'f2 \'e8\'ec\'e5\'ed\'e8 \'ca\'c1 \'ab\'d0\'e5\'ed\'e5\'f1\'f1\'e0\'ed\'f1 \'ca\'f0\'e5\'e4\'e8\'f2\'bb (\'ce\'ce\'ce) \'e8\'eb\'e8 \'eb\'fe\'e1\'ee\'e9 \'e4\'f0\'f3\'e3\'ee\'e9 \'ee\'f0\'e3\'e0\'ed\'e8\'e7\'e0\'f6\'e8\'e8 \'ef\'f0\'e5\'e4\'eb\'e0\'e3\'e0\'e5\'f2\'f1\'ff \'f1\'ee\'ee\'e1\'f9\'e8\'f2\'fc \'f0\'e5\'ea\'e2\'e8\'e7\'e8\'f2\'fb \'ea\'e0\'f0\'f2\'fb (\'ed\'ee\'ec\'e5\'f0, \'f1\'f0\'ee\'ea \'e4\'e5\'e9\'f1\'f2\'e2\'e8\'ff, \'f2\'f0\'b8\'f5\'e7\'ed\'e0\'f7\'ed\'fb\'e9 \'ea\'ee\'e4 \'e7\'e0\'f9\'e8\'f2\'fb CVC2/ CVV2 \'ed\'e0 \'ee\'e1\'ee\'f0\'ee\'f2\'ed\'ee\'e9 \'f1\'f2\'ee\'f0\'ee\'ed\'e5, \'cf\'c8\'cd-\'ea\'ee\'e4 \'ea\'e0\'f0\'f2\'fb), \'ef\'e5\'f0\'f1\'ee\'ed\'e0\'eb\'fc\'ed\'fb\'e5 \'e4\'e0\'ed\'ed\'fb\'e5 (\'ea\'ee\'e4\'ee\'e2\'ee\'e5 \'f1\'eb\'ee\'e2\'ee, \'ef\'e0\'f1\'ef\'ee\'f0\'f2\'ed\'fb\'e5 \'e4\'e0\'ed\'ed\'fb\'e5) \'e8\'eb\'e8 \'f1\'ee\'e2\'e5\'f0\'f8\'e8\'f2\'fc \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'fe \'e2 \'e1\'e0\'ed\'ea\'ee\'ec\'e0\'f2\'e5.\par&#13;&#10;\fs6\par&#13;&#10;\f1\fs17{\pict\wmetafile8\picwgoal90\pichgoal87 &#13;&#10;010009000003fd01000004005e01000000005e01000026060f00b202574d464301000000000001&#13;&#10;00f023000000000100000090020000000000009002000001000000e80000000000000000000000&#13;&#10;57020000450200000000000000000000983a0000ce38000020454d460000010090020000160000&#13;&#10;00020000003d0000006c0000000000000000050000000400004001000000010000000000000000&#13;&#10;00000000000000e2040000e8030049006e006b0073006300610070006500200030002e00340038&#13;&#10;002e00320020007200390038003100390020002800410075006700200031003400200032003000&#13;&#10;31003100290000002004bb00200451042104030421041a2020045504200454045f007200750062&#13;&#10;0069006e0065002e0065006d006600000000000000110000000c00000008000000090000001000&#13;&#10;0000983a0000ce3800000b000000100000005702000045020000460000002c0000001d00000053&#13;&#10;637265656e3d31323830783130323470782c20333230783235366d6d000000460000002c000000&#13;&#10;1e00000044726177696e673d302c30782d312c3870782c202d302c3078302c306d6d0000270000&#13;&#10;00180000000100000000000000de006d0000000000250000000c00000001000000130000000c00&#13;&#10;0000020000003b000000080000001b00000010000000983a0000ce3800003600000010000000ae&#13;&#10;1f0000ce38000058000000280000000000000000000000ffffffffffffffff03000000410ece38&#13;&#10;00005d2a00006e1736000000100000000000000001000000360000001000000006260000010000&#13;&#10;0058000000280000000000000000000000ffffffffffffffff030000001b310100983a0409983a&#13;&#10;ba143600000010000000983a0000ce3800003c000000080000003e000000180000000000000000&#13;&#10;0000005702000045020000250000000c00000000000080280000000c000000010000000e000000&#13;&#10;140000000000000010000000140000000400000003010800050000000b0200000000050000000c&#13;&#10;024602580207000000fc020000de006d000000040000002d010000040000000601020008000000&#13;&#10;fa02050000000000ffffff00040000002d0101004f000000380501002500570245024401450223&#13;&#10;01430203013e02e4003602c6002b02aa001d028f000c027600f9015f00e3014a00cb013800b101&#13;&#10;270095011a0077010f00570107003601020013010000f00000000000850100009a010100ae0104&#13;&#10;00c2010900d5011000e8011900f90124000902300018023d0026024c0032025c003d026e004602&#13;&#10;80004d0294005302a8005602be005702d4005702450208000000fa020000000000000000000004&#13;&#10;0000002d01020007000000fc020000ffffff000000040000002d01030004000000f00100000300&#13;&#10;00000000&#13;&#10;}\f0\fs16  \'c5\'f1\'eb\'e8 \'f3 \'c2\'e0\'f1 \'e2\'ee\'e7\'ed\'e8\'ea\'eb\'e8 \'ef\'ee\'e4\'ee\'e7\'f0\'e5\'ed\'e8\'ff, \'f7\'f2\'ee \'ea \'c2\'e0\'ec \'ee\'e1\'f0\'e0\'f2\'e8\'eb\'e8\'f1\'fc \'ec\'ee\'f8\'e5\'ed\'ed\'e8\'ea\'e8, \'e7\'e0\'ef\'e8\'f8\'e8\'f2\'e5 \'e4\'ee\'eb\'e6\'ed\'ee\'f1\'f2\'fc, \'ed\'e0\'e8\'ec\'e5\'ed\'ee\'e2\'e0\'ed\'e8\'e5 \'ee\'f2\'e4\'e5\'eb\'e0 \'e8 \'d4\'c8\'ce \'e7\'e2\'ee\'ed\'ff\'f9\'e5\'e3\'ee, \'e4\'e0\'eb\'e5\'e5 \'ef\'e5\'f0\'e5\'e7\'e2\'ee\'ed\'e8\'f2\'e5 \'e2 \'ab\'d0\'e5\'ed\'e5\'f1\'f1\'e0\'ed\'f1 \'ca\'f0\'e5\'e4\'e8\'f2\'bb \'ef\'ee \'f2\'e5\'eb\'e5\'f4\'ee\'ed\'f3, \'f3\'ea\'e0\'e7\'e0\'ed\'ed\'ee\'ec\'f3 \'ed\'e0 \'ee\'e1\'ee\'f0\'ee\'f2\'ed\'ee\'e9 \'f1\'f2\'ee\'f0\'ee\'ed\'e5 \'ea\'e0\'f0\'f2\'fb, \'e8 \'ef\'f0\'ee\'e2\'e5\'f0\'fc\'f2\'e5 \'e8\'ed\'f4\'ee\'f0\'ec\'e0\'f6\'e8\'fe.\par&#13;&#10;\fs6\par&#13;&#10;\pard\f1\fs17{\pict\wmetafile8\picwgoal90\pichgoal87 &#13;&#10;010009000003fd01000004005e01000000005e01000026060f00b202574d464301000000000001&#13;&#10;00f023000000000100000090020000000000009002000001000000e80000000000000000000000&#13;&#10;57020000450200000000000000000000983a0000ce38000020454d460000010090020000160000&#13;&#10;00020000003d0000006c0000000000000000050000000400004001000000010000000000000000&#13;&#10;00000000000000e2040000e8030049006e006b0073006300610070006500200030002e00340038&#13;&#10;002e00320020007200390038003100390020002800410075006700200031003400200032003000&#13;&#10;31003100290000002004bb00200451042104030421041a2020045504200454045f007200750062&#13;&#10;0069006e0065002e0065006d006600000000000000110000000c00000008000000090000001000&#13;&#10;0000983a0000ce3800000b000000100000005702000045020000460000002c0000001d00000053&#13;&#10;637265656e3d31323830783130323470782c20333230783235366d6d000000460000002c000000&#13;&#10;1e00000044726177696e673d302c30782d312c3870782c202d302c3078302c306d6d0000270000&#13;&#10;00180000000100000000000000de006d0000000000250000000c00000001000000130000000c00&#13;&#10;0000020000003b000000080000001b00000010000000983a0000ce3800003600000010000000ae&#13;&#10;1f0000ce38000058000000280000000000000000000000ffffffffffffffff03000000410ece38&#13;&#10;00005d2a00006e1736000000100000000000000001000000360000001000000006260000010000&#13;&#10;0058000000280000000000000000000000ffffffffffffffff030000001b310100983a0409983a&#13;&#10;ba143600000010000000983a0000ce3800003c000000080000003e000000180000000000000000&#13;&#10;0000005702000045020000250000000c00000000000080280000000c000000010000000e000000&#13;&#10;140000000000000010000000140000000400000003010800050000000b0200000000050000000c&#13;&#10;024602580207000000fc020000de006d000000040000002d010000040000000601020008000000&#13;&#10;fa02050000000000ffffff00040000002d0101004f000000380501002500570245024401450223&#13;&#10;01430203013e02e4003602c6002b02aa001d028f000c027600f9015f00e3014a00cb013800b101&#13;&#10;270095011a0077010f00570107003601020013010000f00000000000850100009a010100ae0104&#13;&#10;00c2010900d5011000e8011900f90124000902300018023d0026024c0032025c003d026e004602&#13;&#10;80004d0294005302a8005602be005702d4005702450208000000fa020000000000000000000004&#13;&#10;0000002d01020007000000fc020000ffffff000000040000002d01030004000000f00100000300&#13;&#10;00000000&#13;&#10;}\f0\fs16  \'d1\'f2\'e0\'ed\'e4\'e0\'f0\'f2\'ed\'fb\'e5 \'f8\'e0\'e1\'eb\'ee\'ed\'fb SMS-\'f1\'ee\'ee\'e1\'f9\'e5\'ed\'e8\'e9 \'f0\'e0\'e7\'ec\'e5\'f9\'e5\'ed\'fb \'ed\'e0 \'ee\'f4\'e8\'f6\'e8\'e0\'eb\'fc\'ed\'ee\'ec \'f1\'e0\'e9\'f2\'e5 \'c1\'e0\'ed\'ea\'e0: {\field{\*\fldinst{HYPERLINK &quot;http://www.rencredit.ru&quot; }}{\fldrslt{\cf1\ul www.rencredit.ru}}}\cf0\ulnone\f0\fs16 , \u8594? \line\'ee\'e1\'eb\'e0\'f1\'f2\'fc \'ab\'cf\'ee\'e4\'e4\'e5\'f0\'e6\'ea\'e0 \'ea\'eb\'e8\'e5\'ed\'f2\'ee\'e2\'bb \u8594? \'ab\'c4\'e8\'f1\'f2\'e0\'ed\'f6\'e8\'ee\'ed\'ed\'ee\'e5 \'ee\'e1\'f1\'eb\'f3\'e6\'e8\'e2\'e0\'ed\'e8\'e5\'bb \u8594? \'e4\'e0\'eb\'e5\'e5 \'abSMS-\'ee\'ef\'ee\'e2\'e5\'f9\'e5\'ed\'e8\'e5 \'ef\'ee \'ea\'e0\'f0\'f2\'e5\'bb.\par&#13;&#10;\fs6\par&#13;&#10;\f1\fs17{\pict\wmetafile8\picwgoal90\pichgoal87 &#13;&#10;010009000003fd01000004005e01000000005e01000026060f00b202574d464301000000000001&#13;&#10;00f023000000000100000090020000000000009002000001000000e80000000000000000000000&#13;&#10;57020000450200000000000000000000983a0000ce38000020454d460000010090020000160000&#13;&#10;00020000003d0000006c0000000000000000050000000400004001000000010000000000000000&#13;&#10;00000000000000e2040000e8030049006e006b0073006300610070006500200030002e00340038&#13;&#10;002e00320020007200390038003100390020002800410075006700200031003400200032003000&#13;&#10;31003100290000002004bb00200451042104030421041a2020045504200454045f007200750062&#13;&#10;0069006e0065002e0065006d006600000000000000110000000c00000008000000090000001000&#13;&#10;0000983a0000ce3800000b000000100000005702000045020000460000002c0000001d00000053&#13;&#10;637265656e3d31323830783130323470782c20333230783235366d6d000000460000002c000000&#13;&#10;1e00000044726177696e673d302c30782d312c3870782c202d302c3078302c306d6d0000270000&#13;&#10;00180000000100000000000000de006d0000000000250000000c00000001000000130000000c00&#13;&#10;0000020000003b000000080000001b00000010000000983a0000ce3800003600000010000000ae&#13;&#10;1f0000ce38000058000000280000000000000000000000ffffffffffffffff03000000410ece38&#13;&#10;00005d2a00006e1736000000100000000000000001000000360000001000000006260000010000&#13;&#10;0058000000280000000000000000000000ffffffffffffffff030000001b310100983a0409983a&#13;&#10;ba143600000010000000983a0000ce3800003c000000080000003e000000180000000000000000&#13;&#10;0000005702000045020000250000000c00000000000080280000000c000000010000000e000000&#13;&#10;140000000000000010000000140000000400000003010800050000000b0200000000050000000c&#13;&#10;024602580207000000fc020000de006d000000040000002d010000040000000601020008000000&#13;&#10;fa02050000000000ffffff00040000002d0101004f000000380501002500570245024401450223&#13;&#10;01430203013e02e4003602c6002b02aa001d028f000c027600f9015f00e3014a00cb013800b101&#13;&#10;270095011a0077010f00570107003601020013010000f00000000000850100009a010100ae0104&#13;&#10;00c2010900d5011000e8011900f90124000902300018023d0026024c0032025c003d026e004602&#13;&#10;80004d0294005302a8005602be005702d4005702450208000000fa020000000000000000000004&#13;&#10;0000002d01020007000000fc020000ffffff000000040000002d01030004000000f00100000300&#13;&#10;00000000&#13;&#10;}\f0\fs16  \'ce\'e1\'ee \'e2\'f1\'e5\'f5 \'f1\'eb\'f3\'f7\'e0\'ff\'f5 \'ec\'ee\'f8\'e5\'ed\'ed\'e8\'f7\'e5\'f1\'f2\'e2\'e0 \'f1\'ee\'ee\'e1\'f9\'e0\'e9\'f2\'e5 \'e2 \'ea\'f0\'f3\'e3\'eb\'ee\'f1\'f3\'f2\'ee\'f7\'ed\'f3\'fe \'d1\'eb\'f3\'e6\'e1\'f3 \'ef\'ee\'e4\'e4\'e5\'f0\'e6\'ea\'e8 \'ea\'eb\'e8\'e5\'ed\'f2\'ee\'e2 \'ef\'ee \'f2\'e5\'eb\'e5\'f4\'ee\'ed\'f3 \b 8(495) 981-0-981.\b0\f1\fs17\par&#13;&#10;}&#13;&#10;" AllowExpressions="false"/>
+      <ChildBand Name="Child2" Top="1328.92" Width="727.65" Height="113.4" PrintIfDatabandEmpty="true">
+        <TextObject Name="Text108" Top="75.6" Width="727.65" Height="37.8" Dock="Bottom" Text="[IO.Path.GetFileName(IO.Path.GetDirectoryName([prm_DataSourceFileName]))]\[IO.Path.GetFileNameWithoutExtension([prm_DataSourceFileName])]" HorzAlign="Right" Font="Arial, 5pt"/>
+        <TextObject Name="Text3" Top="37.8" Width="727.65" Height="37.8" Dock="Bottom" Text="страница [Page] из [TotalPages]" HorzAlign="Right" Font="Arial, 8pt"/>
+      </ChildBand>
+    </PageFooterBand>
+  </ReportPage>
+  <ReportPage Name="pgSubAccInfo" Guides="240.03,355.32">
+    <DataBand Name="Data2" Top="20" Width="718.2" CanGrow="true" CanShrink="true" AfterDataEvent="Data2_AfterData">
+      <DataBand Name="Data3" Top="90.24" Width="718.2" Height="88.83" CanGrow="true" CanShrink="true" DataSource="G_FP_MESSAGE" Filter="[G_FP_MESSAGE.FP_LABEL1ATTR]=&quot;4&quot;">
+        <TableObject Name="Table2" Top="-1.89" Width="355.32" Height="90.72">
+          <TableColumn Name="Column6" Width="240.03"/>
+          <TableColumn Name="Column7" Width="115.29"/>
+          <TableRow Name="Row7" Height="15.12" AutoSize="true">
+            <TableCell Name="Cell28" Text="[G_FP_MESSAGE.FP_LABEL1]" Padding="0, 1, 0, 0" Font="Arial, 9pt"/>
+            <TableCell Name="cell_OWN_FUNDS" AfterDataEvent="cell_OWN_FUNDS_AfterData" Text="[G_FP_MESSAGE.FP_VALUE1]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt"/>
+          </TableRow>
+          <TableRow Name="Row8" Height="15.12" AutoSize="true">
+            <TableCell Name="Cell30" Text="[G_FP_MESSAGE.FP_LABEL2]" Padding="0, 1, 0, 0" Font="Arial, 9pt"/>
+            <TableCell Name="Cell31" Text="[G_FP_MESSAGE.FP_VALUE2]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt"/>
+          </TableRow>
+          <TableRow Name="Row9" Height="15.12" AutoSize="true">
+            <TableCell Name="Cell32" Text="[G_FP_MESSAGE.FP_LABEL3]" Padding="0, 1, 0, 0" Font="Arial, 9pt"/>
+            <TableCell Name="Cell33" Text="[G_FP_MESSAGE.FP_VALUE3]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt"/>
+          </TableRow>
+          <TableRow Name="Row10" Height="15.12" AutoSize="true">
+            <TableCell Name="Cell34" Text="[G_FP_MESSAGE.FP_LABEL4]" Padding="0, 1, 0, 0" Font="Arial, 9pt"/>
+            <TableCell Name="Cell35" Text="[G_FP_MESSAGE.FP_VALUE4]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt"/>
+          </TableRow>
+          <TableRow Name="Row11" Height="15.12" AutoSize="true">
+            <TableCell Name="Cell36" Text="[G_FP_MESSAGE.FP_LABEL5]" Padding="0, 1, 0, 0" Font="Arial, 9pt"/>
+            <TableCell Name="Cell37" Text="[G_FP_MESSAGE.FP_VALUE5]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt"/>
+          </TableRow>
+          <TableRow Name="Row12" Height="15.12" AutoSize="true">
+            <TableCell Name="Cell38" Text="[G_FP_MESSAGE.FP_LABEL6]" Padding="0, 1, 0, 0" Font="Arial, 9pt"/>
+            <TableCell Name="Cell39" Text="[G_FP_MESSAGE.FP_VALUE6]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt"/>
+          </TableRow>
+        </TableObject>
+        <DataHeaderBand Name="DataHeader1" Top="40" Width="718.2" Height="30.24">
+          <TextObject Name="Text79" Width="355.32" Height="30.24" Border.Lines="Bottom" Text="Информация о кредитном лимите" Padding="0, 0, 2, 0" VertAlign="Bottom" Font="Arial, 9pt, style=Bold"/>
+        </DataHeaderBand>
+        <DataFooterBand Name="DataFooter1" Top="199.07" Width="718.2"/>
+      </DataBand>
+      <DataBand Name="Data6" Top="269.31" Width="718.2" Height="90.72" CanGrow="true" CanShrink="true" DataSource="G_FP_MESSAGE" Filter="(Left([G_FP_MESSAGE.FP_LABEL1ATTR],2)=&quot;60&quot; or Left([G_FP_MESSAGE.FP_LABEL1ATTR],2)=&quot;61&quot; or [G_FP_MESSAGE.FP_LABEL2ATTR]=&quot;6&quot;) and [G_FP_MESSAGE.FP_LABEL2ATTR]&lt;&gt;&quot;61&quot;">
+        <TextObject Name="Text35" Width="355.32" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL1]" Font="Arial, 9pt">
+          <Highlight>
+            <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL1],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL1],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+          </Highlight>
+        </TextObject>
+        <TextObject Name="Text36" Width="355.32" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[IIF([G_FP_MESSAGE.FP_VALUE1]=&quot;0.00 руб&quot;, [G_FP_MESSAGE.FP_VALUE1], IIF([G_FP_MESSAGE.FP_VALUE1]=&quot;&quot;,&quot;&quot;,&quot;-&quot; &amp; [G_FP_MESSAGE.FP_VALUE1]))]" HorzAlign="Right" Font="Arial, 9pt">
+          <Highlight>
+            <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL1],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL1],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+          </Highlight>
+        </TextObject>
+        <TextObject Name="Text37" Top="15.12" Width="355.32" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL2]" Font="Arial, 9pt"/>
+        <TextObject Name="Text38" Left="-1.89" Top="15.12" Width="357.21" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[IIF([G_FP_MESSAGE.FP_VALUE2]=&quot;0.00 руб&quot;, [G_FP_MESSAGE.FP_VALUE2], IIF([G_FP_MESSAGE.FP_VALUE2]=&quot;&quot;,&quot;&quot;,&quot;+&quot; &amp; [G_FP_MESSAGE.FP_VALUE2]))]" HorzAlign="Right" Font="Arial, 9pt"/>
+        <TextObject Name="Text39" Top="30.24" Width="355.32" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL3]" Font="Arial, 9pt"/>
+        <TextObject Name="Text40" Left="-1.89" Top="30.24" Width="357.21" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[IIF([G_FP_MESSAGE.FP_VALUE3]=&quot;0.00 руб&quot;, [G_FP_MESSAGE.FP_VALUE3], IIF([G_FP_MESSAGE.FP_VALUE3]=&quot;&quot;,&quot;&quot;,&quot;-&quot; &amp; [G_FP_MESSAGE.FP_VALUE3]))]" HorzAlign="Right" Font="Arial, 9pt"/>
+        <TextObject Name="Text41" Top="45.36" Width="355.32" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL4]" Font="Arial, 9pt"/>
+        <TextObject Name="Text42" Left="-1.89" Top="45.36" Width="357.21" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[IIF([G_FP_MESSAGE.FP_VALUE4]=&quot;0.00 руб&quot;, [G_FP_MESSAGE.FP_VALUE4], IIF([G_FP_MESSAGE.FP_VALUE4]=&quot;&quot;,&quot;&quot;,&quot;-&quot; &amp; [G_FP_MESSAGE.FP_VALUE4]))]" HorzAlign="Right" Font="Arial, 9pt"/>
+        <TextObject Name="Text43" Top="60.48" Width="355.32" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL5]" Font="Arial, 9pt"/>
+        <TextObject Name="Text44" Left="-1.89" Top="60.48" Width="357.21" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[IIF([G_FP_MESSAGE.FP_VALUE5]=&quot;0.00 руб&quot;, [G_FP_MESSAGE.FP_VALUE5], IIF([G_FP_MESSAGE.FP_VALUE5]=&quot;&quot;,&quot;&quot;,&quot;-&quot; &amp; [G_FP_MESSAGE.FP_VALUE5]))]" HorzAlign="Right" Font="Arial, 9pt"/>
+        <TextObject Name="Text45" Top="75.6" Width="355.32" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL6]" Font="Arial, 9pt"/>
+        <TextObject Name="Text46" Left="-1.89" Top="75.6" Width="357.21" Height="15.12" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[IIF([G_FP_MESSAGE.FP_VALUE6]=&quot;0.00 руб&quot;, [G_FP_MESSAGE.FP_VALUE6], IIF([G_FP_MESSAGE.FP_VALUE6]=&quot;&quot;,&quot;&quot;,&quot;-&quot; &amp; [G_FP_MESSAGE.FP_VALUE6]))]" HorzAlign="Right" Font="Arial, 9pt"/>
+        <ChildBand Name="Child1" Top="380.03" Width="718.2" Height="102.06" Visible="false">
+          <TextObject Name="Text16" Left="355.32" Top="85.05" Width="240.03" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL6]" Font="Arial, 9pt"/>
+          <TextObject Name="Text17" Left="595.35" Top="85.05" Width="115.29" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_VALUE6]" HorzAlign="Right" Font="Arial, 9pt"/>
+          <TextObject Name="Text14" Left="355.32" Top="68.04" Width="240.03" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL5]" Font="Arial, 9pt"/>
+          <TextObject Name="Text15" Left="595.35" Top="68.04" Width="115.29" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_VALUE5]" HorzAlign="Right" Font="Arial, 9pt"/>
+          <TextObject Name="Text12" Left="355.32" Top="51.03" Width="240.03" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL4]" Font="Arial, 9pt"/>
+          <TextObject Name="Text13" Left="595.35" Top="51.03" Width="115.29" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_VALUE4]" HorzAlign="Right" Font="Arial, 9pt"/>
+          <TextObject Name="Text10" Left="355.32" Top="34.02" Width="240.03" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL3]" Font="Arial, 9pt"/>
+          <TextObject Name="Text11" Left="595.35" Top="34.02" Width="115.29" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_VALUE3]" HorzAlign="Right" Font="Arial, 9pt"/>
+          <TextObject Name="Text8" Left="355.32" Top="17.01" Width="240.03" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL2]" Font="Arial, 9pt"/>
+          <TextObject Name="Text9" Left="595.35" Top="17.01" Width="115.29" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_VALUE2]" HorzAlign="Right" Font="Arial, 9pt"/>
+          <TextObject Name="Text5" Left="355.32" Width="240.03" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_LABEL1]" Font="Arial, 9pt"/>
+          <TextObject Name="Text6" Left="595.35" Width="115.29" Height="17.01" CanGrow="true" CanShrink="true" ShiftMode="WhenOverlapped" CanBreak="false" Text="[G_FP_MESSAGE.FP_VALUE1]" HorzAlign="Right" Font="Arial, 9pt"/>
+          <TableObject Name="Table1" Width="355.32" Height="90.72">
+            <TableColumn Name="Column1" Width="240.03"/>
+            <TableColumn Name="Column5" Width="115.29"/>
+            <TableRow Name="Row1" Height="15.12" AutoSize="true">
+              <TableCell Name="Cell1" Text="[G_FP_MESSAGE.FP_LABEL1]" Padding="0, 1, 0, 0" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL1],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL1],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+              <TableCell Name="Cell5" Text="[G_FP_MESSAGE.FP_VALUE1]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL1],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL1],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+            </TableRow>
+            <TableRow Name="Row6" Height="15.12" AutoSize="true">
+              <TableCell Name="Cell26" Text="[G_FP_MESSAGE.FP_LABEL2]" Padding="0, 1, 0, 0" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL2],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL2],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+              <TableCell Name="Cell27" Text="[G_FP_MESSAGE.FP_VALUE2]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL2],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL2],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+            </TableRow>
+            <TableRow Name="Row2" Height="15.12" AutoSize="true">
+              <TableCell Name="Cell6" Text="[G_FP_MESSAGE.FP_LABEL3]" Padding="0, 1, 0, 0" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL3],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL3],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+              <TableCell Name="Cell10" Text="[G_FP_MESSAGE.FP_VALUE3]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL3],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL3],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+            </TableRow>
+            <TableRow Name="Row3" Height="15.12" AutoSize="true">
+              <TableCell Name="Cell11" Text="[G_FP_MESSAGE.FP_LABEL4]" Padding="0, 1, 0, 0" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL4],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL4],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+              <TableCell Name="Cell15" Text="[G_FP_MESSAGE.FP_VALUE4]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL4],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL4],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+            </TableRow>
+            <TableRow Name="Row4" Height="15.12" AutoSize="true">
+              <TableCell Name="Cell16" Text="[G_FP_MESSAGE.FP_LABEL5]" Padding="0, 1, 0, 0" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL5],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL5],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+              <TableCell Name="Cell20" Text="[G_FP_MESSAGE.FP_VALUE5]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL5],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL5],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+            </TableRow>
+            <TableRow Name="Row5" Height="15.12" AutoSize="true">
+              <TableCell Name="Cell21" Text="[G_FP_MESSAGE.FP_LABEL6]" Padding="0, 1, 0, 0" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL5],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL5],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+              <TableCell Name="Cell25" Text="[G_FP_MESSAGE.FP_VALUE6]" Padding="0, 1, 0, 0" HorzAlign="Right" Font="Arial, 9pt">
+                <Highlight>
+                  <Condition Expression="(Left([G_FP_MESSAGE.FP_LABEL5],13)=&quot;     В т. ч. &quot;) and (Left([G_FP_MESSAGE.FP_LABEL5],17)&lt;&gt;&quot;Задолженность на &quot;)" Font="Arial Narrow, 8.25pt" ApplyTextFill="false" ApplyFont="true"/>
+                </Highlight>
+              </TableCell>
+            </TableRow>
+          </TableObject>
+        </ChildBand>
+        <DataHeaderBand Name="DataHeader3" Top="219.07" Width="718.2" Height="30.24">
+          <TextObject Name="Text80" Width="355.32" Height="30.24" Border.Lines="Bottom" Text="Информация о состоянии счета" Padding="0, 0, 2, 0" VertAlign="Bottom" Font="Arial, 9pt, style=Bold"/>
+        </DataHeaderBand>
+        <DataFooterBand Name="DataFooter3" Top="502.09" Width="718.2"/>
+      </DataBand>
+      <DataBand Name="Data10" Top="522.09" Width="718.2" Height="37.8" AfterDataEvent="Data10_AfterData" DataSource="G_FP_MESSAGE" Filter="[G_FP_MESSAGE.FP_LABEL2ATTR]=&quot;61&quot;">
+        <TextObject Name="Text60" Top="13.23" Width="213.57" Height="24.57" Border.Lines="Left, Top" Text="МИНИМАЛЬНЫЙ ПЛАТЕЖ" Padding="2, 5, 2, 5" Font="Arial, 9pt, style=Bold"/>
+        <TextObject Name="Text61" Left="213.57" Top="13.23" Width="141.75" Height="24.57" Border.Lines="Right, Top" Text="[G_FP_MESSAGE.FP_VALUE2]" Padding="2, 5, 2, 5" HorzAlign="Right" Font="Arial, 9pt, style=Bold"/>
+      </DataBand>
+      <DataBand Name="Data11" Top="579.89" Width="718.2" Height="37.8" DataSource="G_FP_MESSAGE" Filter="[G_FP_MESSAGE.FP_LABEL1ATTR]=&quot;8&quot;">
+        <TextObject Name="Text62" Width="213.57" Height="37.8" Border.Lines="Left, Bottom" Text="ДЕНЬГИ ДОЛЖНЫ ПОСТУПИТЬ НА ВАШ СЧЕТ НЕ ПОЗДНЕЕ" Padding="2, 5, 2, 5" VertAlign="Bottom" Font="Arial, 9pt, style=Bold"/>
+        <TextObject Name="Text63" Left="213.57" Width="141.75" Height="37.8" Border.Lines="Right, Bottom" Text="[FormatDateTime(ToDateTime([G_FP_MESSAGE.FP_VALUE1]),&quot;Short Date&quot;)]" Padding="2, 5, 2, 5" Format="Date" Format.Format="d" HorzAlign="Right" VertAlign="Bottom" Font="Arial, 9pt, style=Bold"/>
+      </DataBand>
+      <DataBand Name="band_IsBlocked" Top="637.69" Width="718.2" AfterDataEvent="band_IsBlocked_AfterData" DataSource="G_FP_MESSAGE" Filter="[G_FP_MESSAGE.FP_LABEL1ATTR]=&quot;5&quot;"/>
+    </DataBand>
+  </ReportPage>
+  <ReportPage Name="pgPayment" RawPaperSize="9" LeftMargin="0" TopMargin="0" RightMargin="0" FirstPageSource="262" OtherPagesSource="262" Guides="9.45,765.45">
+    <ReportTitleBand Name="ReportTitle2" Top="20" Width="793.8"/>
+    <PageHeaderBand Name="PageHeader2" Top="40" Width="793.8"/>
+    <DataBand Name="Data5" Top="60" Width="793.8" Height="1022.49" BeforePrintEvent="Data5_BeforePrint" Guides="531.09,1022.49,519.75,28.35" DataSource="G_CLIENT">
+      <TextObject Name="Memo20" Left="442.26" Top="171.99" Width="151.2" Height="18.9" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Назначение платежа" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Memo21" Left="593.46" Top="171.99" Width="171.99" Height="18.9" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Сумма платежа" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Memo26" Left="442.26" Top="190.89" Width="151.2" Height="49.14" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Очередной платеж&#13;&#10;по договору&#13;&#10;№ [G_CLIENT.ADDR_LINE_F]" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Memo28" Left="593.46" Top="190.89" Width="171.99" Height="49.14" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="[IIF([prm_MIN_PAYM]&lt;&gt;0, string.Format(&quot;{0:# ##0 руб. 00} коп.&quot;, [prm_MIN_PAYM]),&quot;&quot;)]" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Memo31" Left="442.26" Top="240.03" Width="323.19" Height="34.02" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Плательщик:" Padding="2, 3, 2, 3" Font="Arial, 9pt"/>
+      <TextObject Name="Memo32" Left="224.91" Top="28.35" Width="217.35" Height="245.7" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="ИЗВЕЩЕНИЕ" Padding="2, 23, 2, 23" HorzAlign="Center" Font="Arial, 11pt, style=Bold"/>
+      <TextObject Name="Memo36" Left="442.26" Top="417.69" Width="151.2" Height="18.9" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Назначение платежа" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Memo37" Left="593.46" Top="417.69" Width="171.99" Height="18.9" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Сумма платежа" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Memo41" Left="442.26" Top="436.59" Width="151.2" Height="49.14" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Очередной платеж&#13;&#10;по договору&#13;&#10;№ [G_CLIENT.ADDR_LINE_F]" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Memo42" Left="593.46" Top="436.59" Width="171.99" Height="49.14" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="[string.Format(&quot;{0:# ##0}&quot;, Truncate([prm_MIN_PAYM]))] руб. [string.Format(&quot;{0:00}&quot;, (Round([prm_MIN_PAYM],2) - Truncate([prm_MIN_PAYM]))*100)] коп." Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Memo43" Left="442.26" Top="485.73" Width="323.19" Height="34.02" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Плательщик:" Padding="2, 3, 2, 3" Font="Arial, 9pt"/>
+      <TextObject Name="Memo44" Left="224.91" Top="274.05" Width="217.35" Height="245.7" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="КВИТАНЦИЯ" Padding="2, 23, 2, 23" HorzAlign="Center" Font="Arial, 11pt, style=Bold"/>
+      <TextObject Name="Memo77" Top="28.35" Width="153.09" Height="994.14" Text="КВИТАНЦИИ ПО ОПЛАТЕ ЗАДОЛЖЕННОСТИ ПО КАРТЕ" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Angle="270" Font="Arial, 17pt"/>
+      <SubreportObject Name="subRepPaym1" Left="442.26" Top="28.35" Width="323.19" Height="143.64" ReportPage="pgSubPaym" PrintOnParent="true"/>
+      <SubreportObject Name="subRepPaym2" Left="442.26" Top="274.05" Width="323.19" Height="143.64" ReportPage="pgSubPaym" PrintOnParent="true"/>
+      <TextObject Name="Text94" Left="442.26" Top="674.73" Width="151.2" Height="18.9" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Назначение платежа" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Text95" Left="593.46" Top="674.73" Width="171.99" Height="18.9" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Сумма платежа" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Text96" Left="442.26" Top="693.63" Width="151.2" Height="49.14" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Очередной платеж&#13;&#10;по договору&#13;&#10;№ [G_CLIENT.ADDR_LINE_F]" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Text97" Left="593.46" Top="693.63" Width="171.99" Height="49.14" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Text98" Left="442.26" Top="742.77" Width="323.19" Height="34.02" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Плательщик:" Padding="2, 3, 2, 3" Font="Arial, 9pt"/>
+      <TextObject Name="Text99" Left="224.91" Top="531.09" Width="217.35" Height="245.7" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="ИЗВЕЩЕНИЕ" Padding="2, 23, 2, 23" HorzAlign="Center" Font="Arial, 11pt, style=Bold"/>
+      <TextObject Name="Text100" Left="442.26" Top="920.43" Width="151.2" Height="18.9" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Назначение платежа" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Text101" Left="593.46" Top="920.43" Width="171.99" Height="18.9" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Сумма платежа" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Text102" Left="442.26" Top="939.33" Width="151.2" Height="49.14" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Очередной платеж&#13;&#10;по договору&#13;&#10;№ [G_CLIENT.ADDR_LINE_F]" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Text103" Left="593.46" Top="939.33" Width="171.99" Height="49.14" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Padding="2, 1, 2, 1" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="Text104" Left="442.26" Top="988.47" Width="323.19" Height="34.02" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="Плательщик:" Padding="2, 3, 2, 3" Font="Arial, 9pt"/>
+      <TextObject Name="Text105" Left="224.91" Top="776.79" Width="217.35" Height="245.7" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="КВИТАНЦИЯ" Padding="2, 23, 2, 23" HorzAlign="Center" Font="Arial, 11pt, style=Bold"/>
+      <SubreportObject Name="subRepPaym3" Left="442.26" Top="531.09" Width="323.19" Height="143.64" ReportPage="pgSubPaym" PrintOnParent="true"/>
+      <SubreportObject Name="subRepPaym4" Left="442.26" Top="776.79" Width="323.19" Height="143.64" ReportPage="pgSubPaym" PrintOnParent="true"/>
+    </DataBand>
+    <PageFooterBand Name="PageFooter2" Top="1102.49" Width="793.8" Height="39.69">
+      <TextObject Name="Text107" Width="765.45" Height="39.69" Text="страница [Page] из [TotalPages]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </PageFooterBand>
+  </ReportPage>
+  <ReportPage Name="pgSubPaym" Visible="false" PaperWidth="110" LeftMargin="0" TopMargin="0" RightMargin="0" BottomMargin="0">
+    <DataBand Name="Data12" Top="20" Width="415.8" Height="143.64" Filter="[G_FP_MESSAGE.FP_LABEL1ATTR]=&quot;&quot;">
+      <TextObject Name="Memo45" Width="323.19" Height="143.64" Border.Lines="All" Border.Width="0.25" ShiftMode="Never" Text="&lt;b&gt;&lt;u&gt;Получатель:&lt;/u&gt;&lt;/b&gt;&#13;&#10;[prm_FIO]&#13;&#10;№ счета: [prm_ACC_NUM]&#13;&#10;в КБ «Ренессанс Кредит» (ООО), Москва&#13;&#10;к/с 30101810900000000409 в отделении №3&#13;&#10;МГТУ ЦБ РФ   ИНН 7744000126    БИК 044599409&#13;&#10;&#13;&#10;&lt;b&gt;&lt;u&gt;Плательщик:&lt;/u&gt;&lt;/b&gt;" Padding="2, 1, 2, 1" HtmlTags="true"/>
+    </DataBand>
+  </ReportPage>
+</Report>

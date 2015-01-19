@@ -1,0 +1,419 @@
+<!ELEMENT CARDHOLDER_CONTRACT_STATEMENT2 (LIST_G_CLIENT, OFFICE, REPORTTYPE, FININST, GLOB_LANG, CONTRACT_LIST, ITEM_CONDITION, ENTRY_CONDITION, N_G_CLIENT, CYCLE_DATE_TO, CONNECT_BY)>
+<!ELEMENT OFFICE (#PCDATA)>
+<!-- Institution Branch Name. String, 1..32 characters -->
+<!ELEMENT REPORTTYPE (#PCDATA)>
+<!-- Report Type Name. String, 1..32 characters -->
+<!ELEMENT FININST (#PCDATA)>
+<!-- Financial Institution Name. String, 1..32 characters -->
+<!ELEMENT GLOB_LANG (#PCDATA)>
+<!-- Report Language ID. -->
+<!ELEMENT CYCLE_DATE_TO (#PCDATA)>
+<!-- Billing cycle closing date. Date, 1..10 characters (dd Month yyyy format) -->
+<!ELEMENT CONTRACT_LIST (#PCDATA)>
+<!-- Auxilary field -->
+<!ELEMENT ITEM_CONDITION (#PCDATA)>
+<!-- Auxilary field -->
+<!ELEMENT ENTRY_CONDITION (#PCDATA)>
+<!-- Auxilary field -->
+<!ELEMENT N_G_CLIENT (#PCDATA)>
+<!-- Number of concerned contracts -->
+<!ELEMENT CONNECT_BY (#PCDATA)>
+<!ELEMENT LIST_G_CLIENT (G_CLIENT)*>
+<!-- Statements container -->
+<!ELEMENT G_CLIENT (ACNT_CONTRACT_ID, MAIN_CONTRACT, PARAMETER_A, PARAMETER_B, PARAMETER_C, PARAMETER_D, PARAMETER_E, PARAMETER_F, PARAMETER_G, PARAMETER_H, PAYM_IMM_AMNT_ALL, PAYM_DUE_AMNT_ALL, PAYM_DUE_DATE_ALL, ACNT_CONTRACT_CURR, ACNT_CONTRACT_CURR_CODE, CREDIT_LIMIT, TOTAL_BLOCKED, AMOUNT_AVAILABLE, CHECK_AVAILABLE, ADDR_LINE_A, ADDR_LINE_B, ADDR_LINE_C, ADDR_LINE_D, ADDR_LINE_E, ADDR_LINE_F, MESSAGE_ACC, MESSAGE_SP, ADD_INFO, LIST_G_FP_MESSAGE, LIST_G_FINMESSAGE, LIST_G_CONTRACT, LIST_G_LIMITERS, N_ENTRIES, STMT_DATE_FROM, STMT_DATE_TO, N_G_S_CLIENT)>
+<!-- Statement header data (client and contract information) -->
+<!ELEMENT ACNT_CONTRACT_ID (#PCDATA)>
+<!ELEMENT MAIN_CONTRACT (#PCDATA)>
+<!ELEMENT PARAMETER_A (#PCDATA)>
+<!-- Customizable field. String, 1..2048 characters -->
+<!ELEMENT PARAMETER_B (#PCDATA)>
+<!-- Customizable field. String, 1..2048 characters -->
+<!ELEMENT PARAMETER_C (#PCDATA)>
+<!-- Customizable field. String, 1..2048 characters -->
+<!ELEMENT PARAMETER_D (#PCDATA)>
+<!-- Customizable field. String, 1..2048 characters -->
+<!ELEMENT PARAMETER_E (#PCDATA)>
+<!-- Customizable field. String, 1..2048 characters -->
+<!ELEMENT PARAMETER_F (#PCDATA)>
+<!-- Customizable field. String, 1..2048 characters -->
+<!ELEMENT PARAMETER_G (#PCDATA)>
+<!-- Customizable field. String, 1..2048 characters -->
+<!ELEMENT PARAMETER_H (#PCDATA)>
+<!-- Customizable field. String, 1..2048 characters -->
+<!ELEMENT PAYM_IMM_AMNT_ALL (#PCDATA)>
+<!-- Amount to pay "now". Decimal, 1..20 Characters format 18.2. -->
+<!ELEMENT PAYM_DUE_AMNT_ALL (#PCDATA)>
+<!-- Amount to pay by the due date. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT PAYM_DUE_DATE_ALL (#PCDATA)>
+<!-- Due date for payment. Date, 1..10 characters (dd Month yyyy format) -->
+<!ELEMENT CYCLE_DATE_FROM (#PCDATA)>
+<!-- Billing cycle start date. Date, 1..10 characters (dd Month yyyy format) -->
+<!ELEMENT ACNT_CONTRACT_CURR (#PCDATA)>
+<!-- Currency of the Cardholder contract (ISO Alpha code). String, 1..3 characters -->
+<!ELEMENT ACNT_CONTRACT_CURR_CODE (#PCDATA)>
+<!-- Currency of the Cardholder contract (ISO Numeric code). String, 1..3 characters -->
+<!ELEMENT CREDIT_LIMIT (#PCDATA)>
+<!-- Contract's credit limit amount in Contract Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT TOTAL_BLOCKED (#PCDATA)>
+<!-- Total amount of funds blocked on the cardholder contract in Contract Currency at the moment of statement generation. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT AMOUNT_AVAILABLE (#PCDATA)>
+<!-- Cardholder contract's available amount in Contract Currency at the moment of statement generation. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT CHECK_AVAILABLE (#PCDATA)>
+<!ELEMENT ADDR_LINE_A (#PCDATA)>
+<!-- Mailing Address Line 1. String, 1..48 characters -->
+<!ELEMENT ADDR_LINE_B (#PCDATA)>
+<!-- Mailing Address Line 2. String, 1..48 characters -->
+<!ELEMENT ADDR_LINE_C (#PCDATA)>
+<!-- Mailing Address Line 3. String, 1..48 characters -->
+<!ELEMENT ADDR_LINE_D (#PCDATA)>
+<!-- Mailing Address Line 4. String, 1..48 characters -->
+<!ELEMENT ADDR_LINE_E (#PCDATA)>
+<!-- Mailing Address Line 5. String, 1..48 characters -->
+<!ELEMENT ADDR_LINE_F (#PCDATA)>
+<!-- Mailing Address Line 6. String, 1..48 characters -->
+<!ELEMENT MESSAGE_ACC (#PCDATA)>
+<!-- Product-level Message 1 (Accounting Scheme level). String, 1..2048 characters -->
+<!ELEMENT MESSAGE_SP (#PCDATA)>
+<!-- Product-level Message 2 (Service Package level). String, 1..2048 characters -->
+<!ELEMENT N_ENTRIES (#PCDATA)>
+<!-- Number of transactions for current contract. -->
+<!ELEMENT STMT_DATE_FROM (#PCDATA)>
+<!-- Statement period start date. Date, 1..10 characters (dd Month yyyy format) -->
+<!ELEMENT STMT_DATE_TO (#PCDATA)>
+<!-- Statement period end date. Date, 1..10 characters (dd Month yyyy format) -->
+<!ELEMENT N_G_S_CLIENT (#PCDATA)>
+<!-- Number of concerned contracts -->
+<!ELEMENT ADD_INFO (#PCDATA)>
+<!-- Customizable field. String, 1..2048 characters -->
+<!ELEMENT LIST_G_FINMESSAGE (G_FINMESSAGE)*>
+<!ELEMENT LIST_G_FP_MESSAGE (G_FP_MESSAGE)*>
+<!ELEMENT LIST_G_CONTRACT (G_CONTRACT)*>
+<!ELEMENT LIST_G_LIMITERS (G_LIMITERS)*>
+<!ELEMENT G_CONTRACT (CURR_CONTRACT, N_OF_CYCLE, LIST_G_CURR_CONTRACT, LIST_G_A_ACNT_CONTRACT, LIST_G_MESSAGE_DATE, MESSAGE_COUNTER)>
+<!-- Internal contract information and payment details -->
+<!ELEMENT CURR_CONTRACT (#PCDATA)>
+<!ELEMENT N_OF_CYCLE (#PCDATA)>
+<!-- Statement Number -->
+<!ELEMENT MESSAGE_COUNTER (#PCDATA)>
+<!ELEMENT G_FINMESSAGE (FRAME_ATTR?, LABEL1?, LABEL1ATTR?, VALUE1?, VALUE1ATTR?, LABEL2?, LABEL2ATTR?, VALUE2?, VALUE2ATTR?, LABEL3?, LABEL3ATTR?, VALUE3?, VALUE3ATTR?, LABEL4?, LABEL4ATTR?, VALUE4?, VALUE4ATTR?, LABEL5?, LABEL5ATTR?, VALUE5?, VALUE5ATTR?, LABEL6?, LABEL6ATTR?, VALUE6?, VALUE6ATTR?)>
+<!-- "Last page" "Financial" message -->
+<!ELEMENT FRAME_ATTR (#PCDATA)>
+<!-- Attribute for 6 followed rows -->
+<!ELEMENT LABEL1 (#PCDATA)>
+<!-- 1st message label -->
+<!ELEMENT LABEL1ATTR (#PCDATA)>
+<!-- 1st message label attribute -->
+<!ELEMENT VALUE1 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT VALUE1ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT LABEL2 (#PCDATA)>
+<!-- 2nd message label -->
+<!ELEMENT LABEL2ATTR (#PCDATA)>
+<!-- 6th message label attribute -->
+<!ELEMENT VALUE2 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT VALUE2ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT LABEL3 (#PCDATA)>
+<!-- 3rd message label -->
+<!ELEMENT LABEL3ATTR (#PCDATA)>
+<!-- 6th message label attribute -->
+<!ELEMENT VALUE3 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT VALUE3ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT LABEL4 (#PCDATA)>
+<!-- 4th message label -->
+<!ELEMENT LABEL4ATTR (#PCDATA)>
+<!-- 6th message label attribute -->
+<!ELEMENT VALUE4 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT VALUE4ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT LABEL5 (#PCDATA)>
+<!-- 5th message label -->
+<!ELEMENT LABEL5ATTR (#PCDATA)>
+<!-- 6th message label attribute -->
+<!ELEMENT VALUE5 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT VALUE5ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT LABEL6 (#PCDATA)>
+<!-- 6th message label -->
+<!ELEMENT LABEL6ATTR (#PCDATA)>
+<!-- 6th message label attribute -->
+<!ELEMENT VALUE6 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT VALUE6ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT G_FP_MESSAGE (FP_FRAME_ATTR+, FP_LABEL1+, FP_LABEL1ATTR+, FP_VALUE1+, FP_VALUE1ATTR+, FP_LABEL2+, FP_LABEL2ATTR+, FP_VALUE2+, FP_VALUE2ATTR+, FP_LABEL3+, FP_LABEL3ATTR+, FP_VALUE3+, FP_VALUE3ATTR+, FP_LABEL4+, FP_LABEL4ATTR+, FP_VALUE4+, FP_VALUE4ATTR+, FP_LABEL5+, FP_LABEL5ATTR+, FP_VALUE5+, FP_VALUE5ATTR+, FP_LABEL6+, FP_LABEL6ATTR+, FP_VALUE6+, FP_VALUE6ATTR+)>
+<!-- "Front page" "Financial" message -->
+<!ELEMENT FP_FRAME_ATTR (#PCDATA)>
+<!-- Attribute for 6 followed rows -->
+<!ELEMENT FP_LABEL1 (#PCDATA)>
+<!-- 1st message label -->
+<!ELEMENT FP_LABEL1ATTR (#PCDATA)>
+<!-- 1st message label attribute -->
+<!ELEMENT FP_VALUE1 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT FP_VALUE1ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT FP_LABEL2 (#PCDATA)>
+<!-- 2nd message label -->
+<!ELEMENT FP_LABEL2ATTR (#PCDATA)>
+<!-- 6th message label attribute -->
+<!ELEMENT FP_VALUE2 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT FP_VALUE2ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT FP_LABEL3 (#PCDATA)>
+<!-- 3rd message label -->
+<!ELEMENT FP_LABEL3ATTR (#PCDATA)>
+<!-- 6th message label attribute -->
+<!ELEMENT FP_VALUE3 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT FP_VALUE3ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT FP_LABEL4 (#PCDATA)>
+<!-- 4th message label -->
+<!ELEMENT FP_LABEL4ATTR (#PCDATA)>
+<!-- 6th message label attribute -->
+<!ELEMENT FP_VALUE4 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT FP_VALUE4ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT FP_LABEL5 (#PCDATA)>
+<!-- 5th message label -->
+<!ELEMENT FP_LABEL5ATTR (#PCDATA)>
+<!-- 6th message label attribute -->
+<!ELEMENT FP_VALUE5 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT FP_VALUE5ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT FP_LABEL6 (#PCDATA)>
+<!-- 6th message label -->
+<!ELEMENT FP_LABEL6ATTR (#PCDATA)>
+<!-- 6th message label attribute -->
+<!ELEMENT FP_VALUE6 (#PCDATA)>
+<!-- 6th message value -->
+<!ELEMENT FP_VALUE6ATTR (#PCDATA)>
+<!-- 6th message value attribute -->
+<!ELEMENT LIST_G_CURR_CONTRACT (G_CURR_CONTRACT)*>
+<!-- Currency groups -->
+<!ELEMENT LIST_G_A_ACNT_CONTRACT (G_A_ACNT_CONTRACT)*>
+<!-- Contract's authorizations -->
+<!ELEMENT LIST_G_MESSAGE_DATE (G_MESSAGE_DATE)*>
+<!-- Contract's event-based Messages -->
+<!ELEMENT G_CURR_CONTRACT (BEG_BAL_CURR, PAYM_IMM_AMNT, PAYM_DUE_AMNT, PAYM_DUE_DATE, ACC_CURR_CODE, ACC_CURR, LIST_G_TRANS_CARD, S_PLUS, S_MINUS, S_FEE, END_BALLANCE, PAYM_DUE, N_PLUS_CURR, N_MINUS_CURR, S_ACCOUNT_PLUS, S_ACCOUNT_MINUS, S_MAIN_PLUS_CURR, NET_SPC)>
+<!ELEMENT BEG_BAL_CURR (#PCDATA)>
+<!-- Total financial balance for the group of accounts in Account Currency at the start of statement's billing cycle. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT PAYM_IMM_AMNT (#PCDATA)>
+<!-- Payment amount due now in Account Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT PAYM_DUE_AMNT (#PCDATA)>
+<!-- Due date for payment in Account Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT PAYM_DUE_DATE (#PCDATA)>
+<!-- Due date for payment in Account Currency. Date, 1..10 characters (dd Month yyyy format) -->
+<!ELEMENT ACC_CURR_CODE (#PCDATA)>
+<!-- Currency of the Cardholder analytical accounts group (ISO Numeric code). String, 1..3 characters -->
+<!ELEMENT ACC_CURR (#PCDATA)>
+<!-- Currency of the Cardholder analytical accounts group (ISO Alpha code). String, 1..3 characters -->
+<!ELEMENT S_PLUS (#PCDATA)>
+<!-- Total gross credits amount in Account Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT S_MINUS (#PCDATA)>
+<!-- Total gross debits amount in Account Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT S_FEE (#PCDATA)>
+<!-- Total fees amount in Account Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT END_BALLANCE (#PCDATA)>
+<!-- Group of accounts financial balance in Account Currency at the end of statement's billing cycle. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT PAYM_DUE (#PCDATA)>
+<!-- Payment amount due now in Account Currency (Special). Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT N_PLUS_CURR (#PCDATA)>
+<!-- Total number of gross credits. Integer, 1..9 Characters -->
+<!ELEMENT N_MINUS_CURR (#PCDATA)>
+<!-- Total number of gross debits. Integer, 1..9 Characters -->
+<!ELEMENT S_ACCOUNT_PLUS (#PCDATA)>
+<!-- Total amount of net credits in Account Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT S_ACCOUNT_MINUS (#PCDATA)>
+<!-- Total amount of net debits in Account Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT S_MAIN_PLUS_CURR (#PCDATA)>
+<!-- Total amount of credits of main contract in Account Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT NET_SPC (#PCDATA)>
+<!-- Total net amount except S_MAIN_PLUS_CURR in Account Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT G_A_ACNT_CONTRACT (A_ACNT_CONTRACT, A_CREDIT_HISTORY_CURR, LIST_G_A_ID)>
+<!ELEMENT A_ACNT_CONTRACT (#PCDATA)>
+<!ELEMENT A_CREDIT_HISTORY_CURR (#PCDATA)>
+<!ELEMENT LIST_G_A_ID (G_A_ID)*>
+<!ELEMENT G_A_ID (A_ID, A_POSTING_DATE, A_AMOUNT, A_TRANS_AMOUNT, A_TRANS_CURR, A_TRANS_DETAILS, A_TRANS_DATE)>
+<!ELEMENT A_ID (#PCDATA)>
+<!-- Authorization's ID. -->
+<!ELEMENT A_POSTING_DATE (#PCDATA)>
+<!-- Authorization's receiving date. -->
+<!ELEMENT A_AMOUNT (#PCDATA)>
+<!-- Authorization's Amount. -->
+<!ELEMENT A_TRANS_AMOUNT (#PCDATA)>
+<!-- Authorization's transaction Amount. -->
+<!ELEMENT A_TRANS_CURR (#PCDATA)>
+<!-- Authorization's transaction currency. -->
+<!ELEMENT A_TRANS_DETAILS (#PCDATA)>
+<!-- Authorization's transaction's details. -->
+<!ELEMENT A_TRANS_DATE (#PCDATA)>
+<!-- Authorization's transaction's date. -->
+<!ELEMENT G_MESSAGE_DATE (MESSAGE_DATE, LIST_G_MESSAGE_STRING)>
+<!ELEMENT MESSAGE_DATE (#PCDATA)>
+<!-- Message date. Date, 1..10 characters (dd Month yyyy format) -->
+<!ELEMENT LIST_G_MESSAGE_STRING (G_MESSAGE_STRING)*>
+<!ELEMENT G_MESSAGE_STRING (DATE_FROM, MESSAGE_STRING, MESSAGE_CONTRACT, EVNT_MESSAGE_CODE)>
+<!ELEMENT DATE_FROM (#PCDATA)>
+<!-- Date, on which the message became effective. Date, 1..10 characters (dd Month yyyy format) -->
+<!ELEMENT MESSAGE_STRING (#PCDATA)>
+<!-- Message text. String, 1..2048 characters -->
+<!ELEMENT MESSAGE_CONTRACT (#PCDATA)>
+<!-- Contract's ID. -->
+<!ELEMENT EVNT_MESSAGE_CODE (#PCDATA)>
+<!-- Message code. -->
+<!ELEMENT LIST_G_TRANS_CARD (G_TRANS_CARD)*>
+<!ELEMENT G_TRANS_CARD (TRANS_CONTRACT_ORDER, TR_CON_CAT, TRANS_CARD, TRANS_CON_CAT, CONTRACT_FOR, TR_CARD_AV, TRANS_CARD_CLIENT_ADD_INFO, LIST_G_POSTING_DATE, S_PLUS_CARD, S_MINUS_CARD, S_FEE_CARD, S_TOTAL_CARD, N_PLUS_TC, N_MINUS_TC, TRANS_CARD_CLIENT, S_ACCOUNT_PLUS_TC, S_ACCOUNT_MINUS_TC)>
+<!-- Transaction card details and totals -->
+<!ELEMENT TRANS_CONTRACT_ORDER (#PCDATA)>
+<!-- Transaction contract order. String, 1..127 characters -->
+<!ELEMENT TR_CON_CAT (#PCDATA)>
+<!-- Transaction contract category code. String, 1..127 characters -->
+<!ELEMENT TRANS_CON_CAT (#PCDATA)>
+<!-- Transaction contract category. String, 1..127 characters -->
+<!ELEMENT TRANS_CARD (#PCDATA)>
+<!-- Card (or accounting contract) number of the transaction sub-contract. String, 1.24 Characters  -->
+<!ELEMENT CONTRACT_FOR (#PCDATA)>
+<!-- Transaction (sub-)contract ID. Decimal, 1..9 characters -->
+<!ELEMENT TR_CARD_AV (#PCDATA)>
+<!-- Current available amount for this transaction sub-contract.. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT S_PLUS_CARD (#PCDATA)>
+<!-- Credit gross summary amount for this transaction sub-contract. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT S_MINUS_CARD (#PCDATA)>
+<!-- Debit gross summary amount for this transaction sub-contract. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT S_FEE_CARD (#PCDATA)>
+<!-- Fee's summary amount for this transaction sub-contract. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT S_TOTAL_CARD (#PCDATA)>
+<!-- Total amount for this transaction sub-contract. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT N_PLUS_TC (#PCDATA)>
+<!-- Debit summary number for this transaction sub-contract. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT N_MINUS_TC (#PCDATA)>
+<!-- Total number of credits for this transaction sub-contract. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT TRANS_CARD_CLIENT (#PCDATA)>
+<!-- Transaction card's parameters. Customizable field. -->
+<!ELEMENT S_ACCOUNT_PLUS_TC (#PCDATA)>
+<!-- Total amount of net credits in Account Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT S_ACCOUNT_MINUS_TC (#PCDATA)>
+<!-- Total amount of net debits in Account Currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT TRANS_CARD_CLIENT_ADD_INFO (#PCDATA)>
+<!-- Customizable field. String, 1..2048 characters -->
+<!ELEMENT LIST_G_POSTING_DATE (G_POSTING_DATE)*>
+<!ELEMENT G_POSTING_DATE (POSTING_DATE, LIST_G_TRANS_DATE)>
+<!ELEMENT POSTING_DATE (#PCDATA)>
+<!-- Transaction posting date. Date, 1..10 characters (dd Month yyyy format) -->
+<!ELEMENT LIST_G_TRANS_DATE (G_TRANS_DATE)*>
+<!ELEMENT G_TRANS_DATE (TRANS_DATE, M_TRANSACTION_ID, LIST_G_TRANS_DETAILS)>
+<!ELEMENT TRANS_DATE (#PCDATA)>
+<!-- Date when the original transaction took place. Date, 1..10 characters (dd Month yyyy format) -->
+<!ELEMENT M_TRANSACTION_ID (#PCDATA)>
+<!-- Unique macro-transaction ID. Decimal, 1..9 characters -->
+<!ELEMENT LIST_G_TRANS_DETAILS (G_TRANS_DETAILS)*>
+<!ELEMENT G_TRANS_DETAILS (DR_CR, PARENT_SERV, TRANSACTION_ADD_INFO, DOC_ID, TRANS_DETAILS, TRANS_CURR, AMOUNT, FEE_AMOUNT, ACC_AMOUNT, ACCOUNT_AMOUNT, PARENT_SERVICE, LIST_G_INVOICE_DOC, LIST_G_T_E_DOC, PLUS, MINUS, N_PLUS, N_MINUS, ACCOUNT_PLUS, ACCOUNT_MINUS)>
+<!ELEMENT DR_CR (#PCDATA)>
+<!-- Technical field -->
+<!ELEMENT PARENT_SERV (#PCDATA)>
+<!-- Technical field -->
+<!ELEMENT DOC_ID (#PCDATA)>
+<!-- Unique document ID. Decimal, 1..9 characters -->
+<!ELEMENT TRANS_DETAILS (#PCDATA)>
+<!-- Transaction details. String, 1..256 characters -->
+<!ELEMENT TRANS_CURR (#PCDATA)>
+<!-- Original Transaction currency (ISO Alpha code). String, 1..3 Characters -->
+<!ELEMENT AMOUNT (#PCDATA)>
+<!-- Original Transaction amount in original transaction currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT FEE_AMOUNT (#PCDATA)>
+<!-- Fee amount of the movement in account currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT ACC_AMOUNT (#PCDATA)>
+<!-- Amount of the movement excluding the fee amount in account currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT ACCOUNT_AMOUNT (#PCDATA)>
+<!-- Amount of the movement including fee amount in account currency. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT PARENT_SERVICE (#PCDATA)>
+<!-- Technical field -->
+<!ELEMENT PLUS (#PCDATA)>
+<!-- Analytical account credit amount in account currency (in case of a debit, equals 0).-->
+<!ELEMENT MINUS (#PCDATA)>
+<!-- Analytical account debit amount in account currency (in case of a credit, equals 0). Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT N_PLUS (#PCDATA)>
+<!-- Technical field -->
+<!ELEMENT N_MINUS (#PCDATA)>
+<!-- Technical field -->
+<!ELEMENT ACCOUNT_PLUS (#PCDATA)>
+<!-- Technical field -->
+<!ELEMENT ACCOUNT_MINUS (#PCDATA)>
+<!-- Technical field -->
+<!ELEMENT TRANSACTION_ADD_INFO (#PCDATA)>
+<!-- Customizable field. String, 1..2048 characters -->
+<!ELEMENT LIST_G_INVOICE_DOC (G_INVOICE_DOC)*>
+<!ELEMENT G_INVOICE_DOC (INVOICE_DOC_ID, DOC_OID, MERCHANT_REF_NUM, CUSTOMER_CODE, FREIGHT_AMOUNT, DISCOUNT_AMOUNT, LIST_G_LINE_ITEM_DOC, LID_COUNT)>
+<!-- Invoices -->
+<!ELEMENT INVOICE_DOC_ID (#PCDATA)>
+<!ELEMENT DOC_OID (#PCDATA)>
+<!ELEMENT MERCHANT_REF_NUM (#PCDATA)>
+<!-- Invoice number. String, 1..32 Characters -->
+<!ELEMENT CUSTOMER_CODE (#PCDATA)>
+<!-- Invoice Customer code. String, 1..32 Characters -->
+<!ELEMENT DISCOUNT_AMOUNT (#PCDATA)>
+<!-- Invoice-level Discount amount. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT FREIGHT_AMOUNT (#PCDATA)>
+<!-- Invoice-level Freight amount. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT LID_COUNT (#PCDATA)>
+<!-- Number of Line item details within invoice. Decimal, 1..9 Characters  -->
+<!ELEMENT LIST_G_LINE_ITEM_DOC (G_LINE_ITEM_DOC)*>
+<!ELEMENT G_LINE_ITEM_DOC (INVOICE_DOC_OID, LID_DESCRIPTION, LID_QUANTITY, LID_UNIT_OF_MEASURE, LID_UNIT_COST, LID_DISCOUNT_AMOUNT, LID_TOTAL_AMOUNT, LID_LINE_ITEM_TYPE)>
+<!-- Line item details -->
+<!ELEMENT INVOICE_DOC_OID (#PCDATA)>
+<!ELEMENT LID_DESCRIPTION (#PCDATA)>
+<!-- Line Item description. String, 1..255 Characters -->
+<!ELEMENT LID_QUANTITY (#PCDATA)>
+<!-- Quantity per Line Item. Decimal, 1..9 Characters -->
+<!ELEMENT LID_UNIT_OF_MEASURE (#PCDATA)>
+<!-- Line Item Unit of measure. String, 1..32 Characters -->
+<!ELEMENT LID_UNIT_COST (#PCDATA)>
+<!-- Unit price per Line Item. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT LID_DISCOUNT_AMOUNT (#PCDATA)>
+<!-- Discount amount per Line Item. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT LID_TOTAL_AMOUNT (#PCDATA)>
+<!-- Total amount per Line Item. Decimal, 1..20 Characters format 18.2 -->
+<!ELEMENT LID_LINE_ITEM_TYPE (#PCDATA)>
+<!-- Line Item Type. Character. 'N' - normal, 'T' - tax -->
+<!ELEMENT LIST_G_T_E_DOC (G_T_E_DOC)*>
+<!ELEMENT G_T_E_DOC (T_E_DOC_OID, T_E_TICKET, T_E_INVOICE, T_E_PASSENGER_NAME, T_E_DEPART_DATE, T_E_ARRIVAL_DATE, T_E_ORIGINAL_LOCATION, T_E_ID, LIST_G_TRIP_LEG)>
+<!-- Travel & Entertainment Documents -->
+<!ELEMENT T_E_DOC_OID (#PCDATA)>
+<!ELEMENT T_E_TICKET (#PCDATA)>
+<!-- Ticket Number  -->
+<!ELEMENT T_E_INVOICE (#PCDATA)>
+<!-- T&E Invoice Number -->
+<!ELEMENT T_E_PASSENGER_NAME (#PCDATA)>
+<!-- Passenger Name -->
+<!ELEMENT T_E_DEPART_DATE (#PCDATA)>
+<!-- Departure Date -->
+<!ELEMENT T_E_ARRIVAL_DATE (#PCDATA)>
+<!-- Arrival Date -->
+<!ELEMENT T_E_CUSTOMER_REF (#PCDATA)>
+<!-- Customer Reference -->
+<!ELEMENT T_E_ORIGINAL_LOCATION (#PCDATA)>
+<!-- Original Location -->
+<!ELEMENT T_E_ID (#PCDATA)>
+<!ELEMENT LIST_G_TRIP_LEG (G_TRIP_LEG)*>
+<!ELEMENT G_TRIP_LEG (TL_T_E_ID, CARRIER_CODE, ORIGINATION_CITY, DESTINATION_CITY, LEG_SERV_CLASS)>
+<!-- Trip Legs -->
+<!ELEMENT TL_T_E_ID (#PCDATA)>
+<!ELEMENT CARRIER_CODE (#PCDATA)>
+<!-- Carrier Code -->
+<!ELEMENT ORIGINATION_CITY (#PCDATA)>
+<!-- Origination City -->
+<!ELEMENT DESTINATION_CITY (#PCDATA)>
+<!-- Destination City -->
+<!ELEMENT LEG_SERV_CLASS (#PCDATA)>
+<!-- Service Class -->
